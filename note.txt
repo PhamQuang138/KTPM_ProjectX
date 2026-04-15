@@ -1,0 +1,24 @@
+carhub-garage/
+├── backend/                # Server-side (Flask/Node.js)
+│   ├── app/
+│   │   ├── models/         # Định nghĩa các Class (User, Car, Blog, Comment)
+│   │   ├── controllers/    # Xử lý logic nghiệp vụ (Business Logic)
+│   │   ├── routes/         # Định nghĩa các endpoint API
+│   │   ├── middleware/     # Kiểm tra quyền (Admin/User), Token Auth
+│   │   └── utils/          # Các hàm bổ trợ (upload ảnh lên Cloudinary, format giá)
+│   ├── tests/              # File kiểm thử (Unit test/Integration test)
+│   ├── config.py / .env    # Cấu hình môi trường & Database
+│   └── main.js / run.py    # Entry point của ứng dụng
+├── frontend/               # Client-side (React hoặc HTML/CSS)
+│   ├── public/             # Assets tĩnh
+│   ├── src/
+│   │   ├── components/     # Các thành phần tái sử dụng (Navbar, CarCard, Footer)
+│   │   ├── pages/          # Các trang chính (Home, Login, CarDetail, AdminDash)
+│   │   ├── services/       # Quản lý gọi API từ Backend (Axios/Fetch)
+│   │   └── assets/         # CSS/SASS, Images nội bộ
+│   └── package.json
+├── docs/                   # Tài liệu Kỹ thuật phần mềm (Cực quan trọng để nộp bài)
+│   ├── SRS_Document.pdf
+│   ├── UML_Diagrams/       # Lưu các file .drawio hoặc .png sơ đồ
+│   └── Database_Schema.png
+└── README.md               # Hướng dẫn cài đặt và mô tả dự án
