@@ -45,16 +45,23 @@ interface DbVehicle {
   id: string;
   image: string;
   images: string[];
-  price: string;
   title: string;
-  location: string;
+  description?: string;
   condition: string;
   status: string;
   specs: string[];
-  seller: {
-    name: string;
-    avatar?: string | null;
-  };
+  listings?: DbListing[];
+}
+
+interface DbListing {
+  id: string;
+  title: string;
+  description?: string;
+  price: string;
+  location: string;
+  category: string;
+  status: string;
+  vehicle?: DbVehicle | null;
 }
 
 const userArticles = [
@@ -72,8 +79,14 @@ export default function Garage() {
   const [isAddingVehicle, setIsAddingVehicle] = useState(false);
   const [myPosts, setMyPosts] = useState<DbPost[]>([]);
   const [myVehicles, setMyVehicles] = useState<DbVehicle[]>([]);
+  const [myListings, setMyListings] = useState<DbListing[]>([]);
+  const [publishToMarketplace, setPublishToMarketplace] = useState(true);
+  const [vehicleFormError, setVehicleFormError] = useState('');
+  const [isSavingVehicle, setIsSavingVehicle] = useState(false);
   const [vehicleForm, setVehicleForm] = useState({
     title: '',
+    description: '',
+    listingDescription: '',
     price: '',
     location: '',
     image: '',
@@ -112,8 +125,12 @@ export default function Garage() {
       .then(setMyPosts)
       .catch(() => undefined);
 
-    apiRequest<DbVehicle[]>(`/vehicles?sellerId=${user.id}`)
+    apiRequest<DbVehicle[]>(`/garage/vehicles?ownerId=${user.id}`)
       .then(setMyVehicles)
+      .catch(() => undefined);
+
+    apiRequest<DbListing[]>(`/vehicles?sellerId=${user.id}`)
+      .then(setMyListings)
       .catch(() => undefined);
   }, [user]);
 
@@ -121,36 +138,105 @@ export default function Garage() {
     event.preventDefault();
     if (!user) return;
 
-    const createdVehicle = await apiRequest<DbVehicle>('/vehicles', {
+    setVehicleFormError('');
+
+    if (publishToMarketplace && (!vehicleForm.price.trim() || !vehicleForm.location.trim())) {
+      setVehicleFormError('Price and location are required when publishing to marketplace.');
+      return;
+    }
+
+    setIsSavingVehicle(true);
+    try {
+      const createdVehicle = await apiRequest<DbVehicle>('/garage/vehicles', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: vehicleForm.title,
+          description: vehicleForm.description,
+          image: vehicleForm.image,
+          images: [vehicleForm.image],
+          condition: vehicleForm.condition,
+          specs: vehicleForm.specs
+            .split(',')
+            .map((spec) => spec.trim())
+            .filter(Boolean),
+          ownerId: user.id,
+        }),
+      });
+
+      setMyVehicles((vehicles) => [createdVehicle, ...vehicles]);
+
+      if (publishToMarketplace) {
+        const createdListing = await apiRequest<DbListing>('/vehicles', {
+          method: 'POST',
+          body: JSON.stringify({
+            title: vehicleForm.title,
+            description: vehicleForm.listingDescription || vehicleForm.description,
+            price: vehicleForm.price,
+            location: vehicleForm.location,
+            category: vehicleForm.category,
+            sellerId: user.id,
+            vehicleId: createdVehicle.id,
+          }),
+        });
+        setMyListings((listings) => [createdListing, ...listings]);
+      }
+
+      setVehicleForm({
+        title: '',
+        description: '',
+        listingDescription: '',
+        price: '',
+        location: '',
+        image: '',
+        condition: 'Used',
+        category: 'Daily',
+        specs: '',
+      });
+      setIsAddingVehicle(false);
+      setActiveTab(publishToMarketplace ? 'marketplace' : 'garage');
+    } catch (error) {
+      setVehicleFormError(error instanceof Error ? error.message : 'Unable to save vehicle listing.');
+    } finally {
+      setIsSavingVehicle(false);
+    }
+  };
+
+  const handleCreateListingFromGarage = async (vehicle: DbVehicle) => {
+    if (!user) return;
+    const price = window.prompt('Sale price, e.g. $65,000');
+    const location = window.prompt('Listing location');
+    const description = window.prompt('Marketplace description') ?? vehicle.description ?? '';
+    if (!price || !location) return;
+
+    const createdListing = await apiRequest<DbListing>('/vehicles', {
       method: 'POST',
       body: JSON.stringify({
-        title: vehicleForm.title,
-        price: vehicleForm.price,
-        location: vehicleForm.location,
-        image: vehicleForm.image,
-        images: [vehicleForm.image],
-        condition: vehicleForm.condition,
-        category: vehicleForm.category,
-        specs: vehicleForm.specs
-          .split(',')
-          .map((spec) => spec.trim())
-          .filter(Boolean),
+        title: vehicle.title,
+        description,
+        price,
+        location,
+        category: 'Daily',
         sellerId: user.id,
+        vehicleId: vehicle.id,
       }),
     });
-
-    setMyVehicles((vehicles) => [createdVehicle, ...vehicles]);
-    setVehicleForm({
-      title: '',
-      price: '',
-      location: '',
-      image: '',
-      condition: 'Used',
-      category: 'Daily',
-      specs: '',
-    });
-    setIsAddingVehicle(false);
+    setMyListings((listings) => [createdListing, ...listings]);
     setActiveTab('marketplace');
+  };
+
+  const handleToggleListingStatus = async (listing: DbListing) => {
+    const nextStatus = listing.status === 'Sold' ? 'Active Listing' : 'Sold';
+    const updatedListing = await apiRequest<DbListing>(`/vehicles/${listing.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({status: nextStatus}),
+    });
+
+    setMyListings((listings) => listings.map((item) => (item.id === listing.id ? updatedListing : item)));
+  };
+
+  const handleDeleteListing = async (listingId: string) => {
+    await apiRequest(`/vehicles/${listingId}`, {method: 'DELETE'});
+    setMyListings((listings) => listings.filter((listing) => listing.id !== listingId));
   };
 
   return (
@@ -328,12 +414,19 @@ export default function Garage() {
                     exit={{ opacity: 0, y: -10 }}
                     className="grid grid-cols-1 md:grid-cols-2 gap-6"
                   >
-                    {[...myVehicles.map((vehicle) => ({
-                      image: vehicle.image,
-                      title: vehicle.title,
-                      role: vehicle.price,
-                      status: vehicle.status,
-                    })), ...garageVehicles].map((v, i) => (
+                    {myVehicles.map((vehicle) => (
+                      <div key={vehicle.id} className="group relative rounded-[2rem] overflow-hidden border border-white/5 cursor-pointer">
+                        <img src={vehicle.image} className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-700" alt={vehicle.title} />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
+                          <p className="text-[10px] font-mono text-primary uppercase font-bold mb-1">{vehicle.condition}</p>
+                          <h4 className="text-xl font-bold text-white mb-1">{vehicle.title}</h4>
+                          {vehicle.description && <p className="text-xs text-white/70 line-clamp-2 mb-2">{vehicle.description}</p>}
+                          <span className="text-[10px] text-white/60 font-mono uppercase">{vehicle.status}</span>
+                          <button onClick={() => handleCreateListingFromGarage(vehicle)} className="mt-4 btn-primary px-4 py-2 text-[10px] w-fit">List for Sale</button>
+                        </div>
+                      </div>
+                    ))}
+                    {garageVehicles.map((v, i) => (
                       <div key={i} className="group relative rounded-[2rem] overflow-hidden border border-white/5 cursor-pointer">
                         <img src={v.image} className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-700" alt={v.title} />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
@@ -391,16 +484,26 @@ export default function Garage() {
                     exit={{ opacity: 0, y: -10 }}
                     className="space-y-4"
                   >
-                     {myVehicles.length > 0 ? (
+                     {myListings.length > 0 ? (
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                         {myVehicles.map((vehicle) => (
-                           <div key={vehicle.id} className="rounded-[2rem] border border-white/5 bg-white/[0.03] overflow-hidden">
-                             <img src={vehicle.image} alt={vehicle.title} className="aspect-[4/3] w-full object-cover" />
+                         {myListings.map((listing) => (
+                           <div key={listing.id} className="rounded-[2rem] border border-white/5 bg-white/[0.03] overflow-hidden">
+                             <img src={listing.vehicle?.image ?? 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200'} alt={listing.title} className="aspect-[4/3] w-full object-cover" />
                              <div className="p-6">
-                               <p className="text-[10px] font-mono uppercase text-primary font-bold mb-2">{vehicle.status}</p>
-                               <h3 className="font-display text-xl font-bold">{vehicle.title}</h3>
-                               <p className="font-mono text-primary mt-2">{vehicle.price}</p>
-                               <p className="text-xs text-on-surface-variant mt-2">{vehicle.location}</p>
+                               <p className="text-[10px] font-mono uppercase text-primary font-bold mb-2">{listing.status}</p>
+                               <h3 className="font-display text-xl font-bold">{listing.title}</h3>
+                               <p className="font-mono text-primary mt-2">{listing.price}</p>
+                               <p className="text-xs text-on-surface-variant mt-2">{listing.location}</p>
+                               {listing.description && <p className="text-xs text-on-surface-variant mt-3 line-clamp-2">{listing.description}</p>}
+                               <div className="flex flex-wrap gap-2 mt-5">
+                                 <Link to={`/market/${listing.id}`} className="btn-secondary px-4 py-2 text-[10px]">View</Link>
+                                 <button onClick={() => handleToggleListingStatus(listing)} className="btn-secondary px-4 py-2 text-[10px]">
+                                   {listing.status === 'Sold' ? 'Relist' : 'Mark Sold'}
+                                 </button>
+                                 <button onClick={() => handleDeleteListing(listing.id)} className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-red-300 border border-red-500/20 hover:bg-red-500/10">
+                                   Delete
+                                 </button>
+                               </div>
                              </div>
                            </div>
                          ))}
@@ -410,7 +513,7 @@ export default function Garage() {
                         <List className="w-8 h-8 mx-auto mb-4" />
                         <p className="font-display text-lg font-bold">No Active Listings</p>
                         <p className="text-xs text-on-surface-variant font-mono uppercase tracking-widest mt-2">Check back soon for upcoming auctions</p>
-                        <button className="mt-8 btn-secondary px-8">Browse Marketplace</button>
+                        <button onClick={() => setIsAddingVehicle(true)} className="mt-8 btn-secondary px-8">Add Listing</button>
                      </div>
                      )}
                   </motion.div>
@@ -426,33 +529,60 @@ export default function Garage() {
           <form onSubmit={handleCreateVehicle} className="w-full max-w-2xl bg-surface-container border border-white/10 rounded-[2rem] p-8 shadow-2xl space-y-5">
             <div className="flex items-start justify-between gap-6">
               <div>
-                <h2 className="font-display text-2xl font-bold">Add Vehicle Listing</h2>
-                <p className="text-sm text-on-surface-variant mt-1">This listing is saved to PostgreSQL and shown in your garage.</p>
+                <h2 className="font-display text-2xl font-bold">Add Vehicle</h2>
+                <p className="text-sm text-on-surface-variant mt-1">Save the vehicle to Garage, then optionally publish it to Marketplace.</p>
               </div>
               <button type="button" onClick={() => setIsAddingVehicle(false)} className="text-on-surface-variant hover:text-on-surface">Cancel</button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input required placeholder="Vehicle title" value={vehicleForm.title} onChange={(event) => setVehicleForm({...vehicleForm, title: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
-              <input required placeholder="Price, e.g. $65,000" value={vehicleForm.price} onChange={(event) => setVehicleForm({...vehicleForm, price: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
-              <input required placeholder="Location" value={vehicleForm.location} onChange={(event) => setVehicleForm({...vehicleForm, location: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
               <select value={vehicleForm.condition} onChange={(event) => setVehicleForm({...vehicleForm, condition: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
                 <option>New</option>
                 <option>Used</option>
                 <option>Project</option>
               </select>
-              <select value={vehicleForm.category} onChange={(event) => setVehicleForm({...vehicleForm, category: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
-                <option>Daily</option>
-                <option>Classics</option>
-                <option>Exotics</option>
-                <option>Projects</option>
-              </select>
               <input placeholder="Specs, comma separated" value={vehicleForm.specs} onChange={(event) => setVehicleForm({...vehicleForm, specs: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
             </div>
 
+            <textarea required placeholder="Garage description" value={vehicleForm.description} onChange={(event) => setVehicleForm({...vehicleForm, description: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 min-h-24" />
             <input required type="url" placeholder="Image URL" value={vehicleForm.image} onChange={(event) => setVehicleForm({...vehicleForm, image: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3" />
 
-            <button type="submit" className="btn-primary w-full py-4 rounded-xl">Save Listing</button>
+            <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-background px-4 py-3">
+              <input
+                type="checkbox"
+                checked={publishToMarketplace}
+                onChange={(event) => setPublishToMarketplace(event.target.checked)}
+                className="w-4 h-4"
+              />
+              <span className="text-sm font-bold">Publish to Marketplace</span>
+            </label>
+
+            {publishToMarketplace && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <input required placeholder="Sale price, e.g. $65,000" value={vehicleForm.price} onChange={(event) => setVehicleForm({...vehicleForm, price: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
+                  <input required placeholder="Marketplace location" value={vehicleForm.location} onChange={(event) => setVehicleForm({...vehicleForm, location: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
+                  <select value={vehicleForm.category} onChange={(event) => setVehicleForm({...vehicleForm, category: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
+                    <option>Daily</option>
+                    <option>Classics</option>
+                    <option>Exotics</option>
+                    <option>Projects</option>
+                  </select>
+                </div>
+                <textarea placeholder="Marketplace description, optional" value={vehicleForm.listingDescription} onChange={(event) => setVehicleForm({...vehicleForm, listingDescription: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 min-h-24" />
+              </div>
+            )}
+
+            {vehicleFormError && (
+              <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                {vehicleFormError}
+              </div>
+            )}
+
+            <button disabled={isSavingVehicle} type="submit" className="btn-primary w-full py-4 rounded-xl disabled:opacity-60 disabled:cursor-not-allowed">
+              {isSavingVehicle ? 'Saving...' : publishToMarketplace ? 'Save and Publish Listing' : 'Save to Garage'}
+            </button>
           </form>
         </div>
       )}

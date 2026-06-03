@@ -2,7 +2,8 @@ import { Heart, MessageCircle, Share2, MapPin, CheckCircle2 } from 'lucide-react
 import { motion } from 'motion/react';
 import { useState } from 'react';
 
-interface VehicleCardProps {
+export interface VehicleCardProps {
+  id?: string;
   key?: any;
   image: string;
   price: string;
@@ -10,7 +11,7 @@ interface VehicleCardProps {
   location: string;
   seller: {
     name: string;
-    avatar: string;
+    avatar?: string | null;
     isVerified?: boolean;
   };
   condition: string;
@@ -98,7 +99,7 @@ export default function VehicleCard({
         <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 relative">
-              <img src={seller.avatar} alt={seller.name} className="w-full h-full object-cover" />
+              <img src={seller.avatar ?? 'https://i.pravatar.cc/100?u=seller'} alt={seller.name} className="w-full h-full object-cover" />
               {seller.isVerified && (
                 <div className="absolute -bottom-0.5 -right-0.5 bg-background p-0.5 rounded-full">
                   <CheckCircle2 className="w-2.5 h-2.5 text-blue-400 fill-current" />

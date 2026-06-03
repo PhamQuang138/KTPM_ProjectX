@@ -11,14 +11,22 @@ enum PostStatus {
   PUBLISHED
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password  String
   name      String
   avatar    String?
+  role      UserRole @default(USER)
   posts     Post[]
   vehicles  Vehicle[]
+  garageVehicles GarageVehicle[]
+  vehicleListings VehicleListing[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -75,4 +83,44 @@ model Vehicle {
   @@index([sellerId])
   @@index([category])
   @@map("vehicles")
+}
+
+model GarageVehicle {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  image       String
+  images      String[] @default([])
+  condition   String   @default("Used")
+  specs       String[] @default([])
+  status      String   @default("In Garage")
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  listings    VehicleListing[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ownerId])
+  @@map("garage_vehicles")
+}
+
+model VehicleListing {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  price       String
+  location    String
+  category    String   @default("Daily")
+  status      String   @default("Active Listing")
+  sellerId    String
+  seller      User     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  vehicleId   String?
+  vehicle     GarageVehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([sellerId])
+  @@index([vehicleId])
+  @@index([category])
+  @@map("vehicle_listings")
 }

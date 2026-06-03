@@ -17,7 +17,7 @@ export default function TopNav({ title }: { title?: string }) {
   const navigate = useNavigate();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const { isOpen, toggle } = useSidebarStore();
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, user, logout } = useAuthStore();
 
   const handleLogout = async () => {
     await logout();
@@ -69,6 +69,7 @@ export default function TopNav({ title }: { title?: string }) {
               { label: 'Community', path: '/feed' },
               { label: 'Market', path: '/market' },
               { label: 'Garage', path: '/garage' },
+              ...(user?.role === 'ADMIN' ? [{ label: 'Admin', path: '/admin' }] : []),
             ].map((item) => (
               <Link
                 key={item.label}

@@ -114,8 +114,8 @@ export default function Login() {
                 <input 
                   className="w-full bg-surface-container border-none border-b border-outline/20 focus:border-primary focus:ring-0 text-on-surface font-sans py-4 px-4 transition-all"
                   id="email"
-                  placeholder="EMAIL ADDRESS"
-                  type="email"
+                  placeholder={mode === 'login' ? 'EMAIL OR ADMIN USERNAME' : 'EMAIL ADDRESS'}
+                  type={mode === 'login' ? 'text' : 'email'}
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   required

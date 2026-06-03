@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import bcrypt from 'bcrypt';
-import {PostStatus, PrismaClient} from '@prisma/client';
+import {PostStatus, PrismaClient, UserRole} from '@prisma/client';
 import {PrismaPg} from '@prisma/adapter-pg';
 
 const prisma = new PrismaClient({
@@ -24,6 +24,24 @@ async function main() {
       password,
       name: 'Alex Rivera',
       avatar: 'https://i.pravatar.cc/200?u=alex-rivera',
+      role: UserRole.USER,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: {email: 'admin'},
+    update: {
+      password: await bcrypt.hash('12345', 10),
+      name: 'Administrator',
+      avatar: 'https://i.pravatar.cc/200?u=admin',
+      role: UserRole.ADMIN,
+    },
+    create: {
+      email: 'admin',
+      password: await bcrypt.hash('12345', 10),
+      name: 'Administrator',
+      avatar: 'https://i.pravatar.cc/200?u=admin',
+      role: UserRole.ADMIN,
     },
   });
 

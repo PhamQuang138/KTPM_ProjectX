@@ -12,6 +12,8 @@ async function main() {
   // Destructive reset for local development only.
   // This drops the app-owned tables and enum so the initial migration can recreate them cleanly.
   await prisma.$executeRawUnsafe('DROP TABLE IF EXISTS "images" CASCADE;');
+  await prisma.$executeRawUnsafe('DROP TABLE IF EXISTS "vehicle_listings" CASCADE;');
+  await prisma.$executeRawUnsafe('DROP TABLE IF EXISTS "garage_vehicles" CASCADE;');
   await prisma.$executeRawUnsafe('DROP TABLE IF EXISTS "vehicles" CASCADE;');
   await prisma.$executeRawUnsafe('DROP TABLE IF EXISTS "posts" CASCADE;');
   await prisma.$executeRawUnsafe('DROP TABLE IF EXISTS "users" CASCADE;');

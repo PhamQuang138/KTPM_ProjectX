@@ -11,6 +11,8 @@ const prisma = new PrismaClient({
 async function main() {
   // Clean all app data. Child tables are deleted first to satisfy FK constraints.
   await prisma.image.deleteMany();
+  await prisma.vehicleListing.deleteMany();
+  await prisma.garageVehicle.deleteMany();
   await prisma.vehicle.deleteMany();
   await prisma.post.deleteMany();
   await prisma.user.deleteMany();

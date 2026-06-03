@@ -13,6 +13,7 @@
     "db:migrate": "prisma migrate dev",
     "db:drop-schema": "ts-node-dev --transpile-only --exit-child scripts/drop-app-schema.ts",
     "db:reset-data": "ts-node-dev --transpile-only --exit-child scripts/reset-db.ts",
+    "db:ensure-admin": "ts-node-dev --transpile-only --exit-child scripts/ensure-admin.ts",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio"
   },

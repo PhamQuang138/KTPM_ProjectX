@@ -4,86 +4,70 @@ import VehicleCard from '../components/VehicleCard';
 import MobileNav from '../components/MobileNav';
 import { Search, Flame, Clock, TrendingUp, Filter, ArrowRight, Star, Users, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSidebarStore } from '../store/useSidebarStore';
+import { apiRequest } from '../lib/api';
+import { Link } from 'react-router-dom';
 
 interface VehicleData {
+  id: string;
+  description?: string;
   image: string;
+  images?: string[];
   price: string;
   title: string;
   location: string;
   seller: {
     name: string;
-    avatar: string;
+    avatar?: string | null;
+    email?: string;
     isVerified: boolean;
   };
   condition: string;
   timestamp: string;
   specs: string[];
+  status?: string;
+  category?: string;
+  vehicle?: {
+    image: string;
+    images: string[];
+    condition: string;
+    specs: string[];
+  } | null;
 }
-
-const vehicles: VehicleData[] = [
-  {
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDQcQwnFFiEl1uaEzWESRhLrrSmtUEXLk_aTY5GsfuNE2ZwHKMzO0ApXtv6ZwPkBCSYd_iQj3wiCSo9X97Y1dWXHF59FzI8n6gUllE2SVFuTQWAbZepD1t14ugConVJCdPvFt0yCLq7s3c_6O6zt2ufeNM4fRDemBJHX7kram1oxbzUZGRbQN5WZo5cWxgIhSByeJr-7mFte6R4OxB46WfNkHE8ZcGttyVRyHhixX3bz2XEWQJmlJzSDhQKqVvcN4rpxg8kPDDnZw",
-    price: "$145,000",
-    title: "1972 Porsche 911 Carrera RS",
-    location: "Los Angeles, CA",
-    seller: {
-      name: "Heritage Motors",
-      avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuALrnP11mR5J3hDSTFCrB33JVno9FYrLSrWAVteCwwmYOrgn7oE-8h1e8jpF9OiIIAHcF3KREZjBg0gvlwkcyM49Gl0Bb18tpAaVmeQ7FerPdly7woocsNCYOCkHpOR9s99Y2z3JsxWu_QXAWiuSZzTYXo3sPhvWdNryUr9v3F2Nbb0GVJ8hFZzi8YgufHq01ZfBRYraaYgFKE1eMKMeHJCoe3vUX3Mss_2bb23Dfkg2PFpgYPvRrWN01U_zCLdiVUAbG2H5IrA8g",
-      isVerified: true
-    },
-    condition: "Used",
-    timestamp: "2H AGO",
-    specs: ["Air-cooled", "Manual", "Matching Numbers"]
-  },
-  {
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCOe_0Ua-8kY2iXOnXoZk_sUP6vXfXy1u2-I-zXm_sX5_P6Xy_eI_3iI9I_s_P-1XOxyv7gixYd-PI7FL8vzNt9QJdHESe-6R17DJjTOH3H6R4DUmkIyOLVfr-D1KaRtep5gKSevh6YqL8PFXrzxvFmeQDVvB3q49BY2T7pMTCTXnD4zH54QDb1hXR_YDbzTThG98o6ghoboeH88JMb4ExF1nQDo54veUmUzxNPijdgb2lrdRqqN6oomi1XBOYEqEy5UXAy7K9MQ",
-    price: "$2,400,000",
-    title: "2024 Rimac Nevera",
-    location: "Miami, FL",
-    seller: {
-      name: "Luxury Curator",
-      avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDKEFr6NJ-L6vYiisXeAxxPqpYoha_LfgfIWlzkJqrl1Sd2t-Kc2uFJSf9pn73_IWE1EJzzt1qYeL5PepVF0LuT5tuW0Qb5yRCDStoCRUgGckzgmHYeIS8WmddnvjDtrjqhk5iMxLb7vexVix3_Ai5hYE2CnkRU3NOFFAdtJY8Z2tqRWGfagL55bsjFbdYq-poNirIoVEIaEx0qTmozEnLJg-Ter_Vus7uA5B0zlSewbU9WCl0bVKjbA_FLpoKMP0y_3TuH5pA1Hw",
-      isVerified: true
-    },
-    condition: "New",
-    timestamp: "5M AGO",
-    specs: ["Electric", "1914 HP", "Zero Emissions"]
-  },
-  {
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDzbGc79wRDwQ_momj-3sTjjTroOfr9NwRjTo8-ZNhrSD1vshBO2Ye6i90wVL0QxYHwQLZim9_2tSrvq-FNqmaTo4nIIoaauJ0VDvJj30QUd8kH_DtlxOSNsr2mrG1lYV9G67RNzLsBxUG4k7Uq9Qz63xcBgevyfywKM38Lqk2I6EwHbU4Ruj_yMLFj_y4l8vS4aA0R39eFAL8vvnfja4mKNhYuxM6YaBetUjwHi8P25e2auRCFXSzk6A8kcX3aZ6-arKa4vVnyvg",
-    price: "$48,500,000",
-    title: "1962 Ferrari 250 GTO",
-    location: "London, UK",
-    seller: {
-      name: "Sotheby's Sealed",
-      avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuBtTyfZN2GLtwxu_E2aO10ac9h6ArDesmlht3mSybvyzasL1neaNXZf5oeHIsoexnoS-CXcR9E7TqTUHZlY0bS7X8nfq9CkUSBl_6EzVL7RRUEitOkoVF6SGVwnhizDoMBNIYx3BI3VC0ZX8a95MzVEJTC-g8r769iHlOC2WUEv75rE5K4AqvOKZACZTU3XfRkLl7bBYy1Itdpopb_hArFIvF-U2T_vFgIni7Btr6yfindNlt5tv1dTwhOOl5IxNieFNEHPfdJPgw",
-      isVerified: true
-    },
-    condition: "Used",
-    timestamp: "1D AGO",
-    specs: ["V12", "Collector Grade", "Racing History"]
-  },
-  {
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuA3aPfyF_LB1tLXUvYqyAtBUp6enYudj5bH7Qe99C9wbCQPS90x7VqFZl55LOjWQzfDB5t7jlU-cYMnRD5GADDqCyC68-g-V-dS69PYiYbJcEx1Y_UHc8D0tw-O8EuEto_SWXp-k485IOGW3K-oV9ws4nJiHq9G88KXfRas3QqB-cv_3iAgvwVwygChjILt-0LrzozC3g4Gh3Tfn9WE7VjBKlokl9LeUnL1nB9yoFr1gQMx3MMgyXrMQ2SXWdoJtbFc4Jl6Gt6ctA",
-    price: "$95,000",
-    title: "BMW M3 (E30) Evolution II",
-    location: "Munich, Germany",
-    seller: {
-      name: "Bavarian Classics",
-      avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuBtTyfZN2GLtwxu_E2aO10ac9h6ArDesmlht3mSybvyzasL1neaNXZf5oeHIsoexnoS-CXcR9E7TqTUHZlY0bS7X8nfq9CkUSBl_6EzVL7RRUEitOkoVF6SGVwnhizDoMBNIYx3BI3VC0ZX8a95MzVEJTC-g8r769iHlOC2WUEv75rE5K4AqvOKZACZTU3XfRkLl7bBYy1Itdpopb_hArFIvF-U2T_vFgIni7Btr6yfindNlt5tv1dTwhOOl5IxNieFNEHPfdJPgw",
-      isVerified: true
-    },
-    condition: "Used",
-    timestamp: "4H AGO",
-    specs: ["S14 Engine", "Homologation Special", "Original Paint"]
-  }
-];
 
 export default function Marketplace() {
   const [filter, setFilter] = useState('All');
+  const [search, setSearch] = useState('');
+  const [vehicles, setVehicles] = useState<VehicleData[]>([]);
   const { isOpen } = useSidebarStore();
+
+  useEffect(() => {
+    const query = new URLSearchParams();
+    if (filter !== 'All') query.set('category', filter);
+    if (search.trim()) query.set('search', search.trim());
+
+    apiRequest<any[]>(`/vehicles${query.toString() ? `?${query.toString()}` : ''}`)
+      .then((data) => {
+        setVehicles(
+          data.map((vehicle) => ({
+            ...vehicle,
+            image: vehicle.vehicle?.image ?? 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200',
+            images: vehicle.vehicle?.images ?? [],
+            condition: vehicle.vehicle?.condition ?? 'Used',
+            specs: vehicle.vehicle?.specs ?? [],
+            timestamp: 'Listed',
+            seller: {
+              name: vehicle.seller.name,
+              avatar: vehicle.seller.avatar,
+              email: vehicle.seller.email,
+              isVerified: true,
+            },
+          })),
+        );
+      })
+      .catch(() => setVehicles([]));
+  }, [filter, search]);
 
   return (
     <div className="min-h-screen bg-background text-on-background">
@@ -132,11 +116,13 @@ export default function Marketplace() {
               <input 
                 type="text" 
                 placeholder="Find your next obsession..." 
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
                 className="w-full bg-surface-container h-14 pl-12 pr-4 rounded-2xl text-sm font-sans focus:outline-none focus:ring-1 focus:ring-primary/40 border border-white/5"
               />
             </div>
             <div className="flex gap-3 w-full md:w-auto">
-              {['Exotics', 'Classics', 'Projects', 'Daily'].map(cat => (
+              {['All', 'Exotics', 'Classics', 'Projects', 'Daily'].map(cat => (
                 <button 
                   key={cat}
                   onClick={() => setFilter(cat)}
@@ -169,16 +155,24 @@ export default function Marketplace() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-12">
                 {vehicles.map((v, i) => (
                   <motion.div
-                    key={i}
+                    key={v.id}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.1 }}
                   >
-                    <VehicleCard {...v} />
+                    <Link to={`/market/${v.id}`} className="block h-full">
+                      <VehicleCard {...v} />
+                    </Link>
                   </motion.div>
                 ))}
               </div>
+
+              {vehicles.length === 0 && (
+                <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-12 text-center text-on-surface-variant">
+                  No listings found. Add a vehicle from My Garage to publish it here.
+                </div>
+              )}
 
               {/* Pagination/Load more */}
               <div className="pt-12 border-t border-white/5 flex justify-center">

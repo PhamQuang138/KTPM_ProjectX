@@ -1,313 +1,207 @@
-# 🚗 CarHub Garage
+# CarHub Garage
 
-> Nền tảng mua bán xe và cộng đồng dành cho những người yêu xe.
+CarHub Garage is a full-stack web application for vehicle marketplace listings and automotive community posts.
 
-## 📖 Giới thiệu
+## Project Structure
 
-**CarHub Garage** là hệ thống web được xây dựng nhằm kết hợp giữa **sàn giao dịch mua bán xe** và **cộng đồng chia sẻ kiến thức về xe** trên cùng một nền tảng.
+- `frontend`: React + Vite + TypeScript
+- `backend`: Node.js + Express + TypeScript
+- Database: PostgreSQL + Prisma ORM
 
-Người dùng có thể đăng tin bán xe, tìm kiếm phương tiện phù hợp, tham gia cộng đồng, chia sẻ kinh nghiệm sử dụng xe và cập nhật các bài viết chuyên sâu về lĩnh vực ô tô.
+## Main Features
 
-Dự án được phát triển theo mô hình **Full-Stack Web Application** với kiến trúc tách biệt giữa Frontend và Backend, sử dụng PostgreSQL để lưu trữ dữ liệu.
+### User
 
----
+Account management:
 
-# 🎯 Mục tiêu dự án
+- Register account
+- Login
+- Logout
 
-* Xây dựng hệ thống web hoàn chỉnh theo quy trình phát triển phần mềm.
-* Áp dụng các kiến thức về:
+Community:
 
-  * Phân tích yêu cầu phần mềm (SRS)
-  * Thiết kế hệ thống bằng UML
-  * Thiết kế cơ sở dữ liệu
-  * Lập trình Web Full-Stack
-  * Kiểm thử và triển khai hệ thống
-* Tạo môi trường kết nối giữa người mua, người bán và cộng đồng yêu xe.
+- Create sharing posts
+- Upload/add images to posts
+- View community post feed
+- Read automotive editorial articles
 
----
+Marketplace:
 
-# ✨ Chức năng chính
+- Create vehicle sale listings
+- Manage vehicles in personal Garage
+- View vehicles currently for sale
+- Search and view vehicle information
 
-## 👤 Người dùng
+### Admin
 
-### Quản lý tài khoản
+- Manage users
+- Manage community posts
+- Manage vehicle listings
+- Moderate system content
 
-* Đăng ký tài khoản
-* Đăng nhập
-* Đăng xuất
+Admin login:
 
-### Cộng đồng
-
-* Tạo bài viết chia sẻ
-* Đăng tải hình ảnh cho bài viết
-* Xem danh sách bài viết cộng đồng
-* Đọc các bài viết chuyên đề về ô tô
-
-### Mua bán xe
-
-* Đăng tin bán xe
-* Quản lý xe trong Garage cá nhân
-* Xem danh sách xe đang bán
-* Tìm kiếm và xem thông tin xe
-
----
-
-## 🛠️ Quản trị viên
-
-* Quản lý người dùng
-* Quản lý bài viết cộng đồng
-* Quản lý tin đăng xe
-* Kiểm duyệt nội dung hệ thống
-
----
-
-# 🏗️ Kiến trúc hệ thống
-
-Dự án được tổ chức theo mô hình **Monorepo**:
-
-```text
-CarHub-Garage/
-│
-├── frontend/      # Giao diện người dùng
-├── backend/       # API và xử lý nghiệp vụ
-│
-└── README.md
+```txt
+username: admin
+password: 12345
 ```
 
-## Frontend
+Admin page:
 
-* React
-* TypeScript
-* Vite
+```txt
+http://localhost:3000/admin
+```
 
-## Backend
+## Requirements
 
-* Node.js
-* Express.js
-* TypeScript
-* JWT Authentication
+- Node.js
+- npm
+- PostgreSQL
 
-## Cơ sở dữ liệu
+## Install
 
-* PostgreSQL
-* Prisma ORM
-
----
-
-# 🛠️ Công nghệ sử dụng
-
-| Thành phần | Công nghệ               |
-| ---------- | ----------------------- |
-| Frontend   | React, Vite, TypeScript |
-| Backend    | Node.js, Express.js     |
-| Database   | PostgreSQL              |
-| ORM        | Prisma                  |
-| Xác thực   | JWT                     |
-| API        | RESTful API             |
-
----
-
-# 🚀 Hướng dẫn cài đặt
-
-## Yêu cầu hệ thống
-
-Trước khi chạy dự án cần cài đặt:
-
-* Node.js
-* PostgreSQL
-* npm
-
----
-
-## Cài đặt thư viện
-
-Tại thư mục gốc của dự án:
+From the repository root:
 
 ```bash
 npm install
 ```
 
----
+## Environment
 
-# ⚙️ Cấu hình môi trường
+Create:
 
-Tạo file:
-
-```bash
+```txt
 backend/.env
 ```
 
-Dựa trên file:
-
-```bash
-backend/.env.example
-```
-
-Ví dụ:
+Use `backend/.env.example` as a template:
 
 ```env
-DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@127.0.0.1:5432/carhub?schema=public"
-JWT_SECRET="your-secret-key"
+NODE_ENV=development
+PORT=4000
+CORS_ORIGIN=http://localhost:3000
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@127.0.0.1:5432/carhub?schema=public
+JWT_SECRET=change-me-in-production
+JWT_EXPIRES_IN=7d
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX=100
+LOG_LEVEL=info
 ```
 
----
+## Database
 
-# 🗄️ Thiết lập cơ sở dữ liệu
-
-## Tạo Prisma Client
+Generate Prisma client:
 
 ```bash
 npm run db:generate --workspace backend
 ```
 
-## Chạy Migration
+Run migrations:
 
 ```bash
 npm run db:migrate --workspace backend
 ```
 
-## Khởi tạo dữ liệu mẫu
+Create or update the admin account without deleting user data:
+
+```bash
+npm run db:ensure-admin --workspace backend
+```
+
+Seed demo data. This resets app data:
 
 ```bash
 npm run db:seed --workspace backend
 ```
 
-## Mở Prisma Studio
+Open Prisma Studio:
 
 ```bash
 npm run db:studio --workspace backend
 ```
 
----
+## Run
 
-# ▶️ Chạy hệ thống
-
-## Chạy Backend
+Backend:
 
 ```bash
 npm run dev:backend
 ```
 
-Địa chỉ:
-
-```text
-http://localhost:4000
-```
-
-Kiểm tra API:
-
-```text
-http://localhost:4000/api/health
-```
-
----
-
-## Chạy Frontend
-
-Mở terminal mới:
+Frontend:
 
 ```bash
 npm run dev:frontend
 ```
 
-Địa chỉ:
+Frontend URL:
 
-```text
+```txt
 http://localhost:3000
 ```
 
----
+Backend health check:
 
-# 🔐 Tài khoản thử nghiệm
-
-Sau khi chạy lệnh seed dữ liệu:
-
-```text
-Email: alex@example.com
-Mật khẩu: password123
+```txt
+http://localhost:4000/api/health
 ```
 
----
+## Demo User
 
-# 📡 API chính
+After seeding:
 
-## Xác thực người dùng
+```txt
+email: alex@example.com
+password: password123
+```
 
-| Phương thức | Endpoint         |
-| ----------- | ---------------- |
-| POST        | /api/auth/signup |
-| POST        | /api/auth/login  |
-| POST        | /api/auth/logout |
+## API Overview
 
----
+Authentication:
 
-## Quản lý bài viết
+- `POST /api/auth/signup`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
 
-| Phương thức | Endpoint             |
-| ----------- | -------------------- |
-| GET         | /api/posts           |
-| POST        | /api/posts           |
-| GET         | /api/posts/community |
-| POST        | /api/posts/community |
+Community posts:
 
----
+- `GET /api/posts`
+- `POST /api/posts`
+- `GET /api/posts/community`
+- `POST /api/posts/community`
 
-## Quản lý xe
+Vehicles:
 
-| Phương thức | Endpoint             |
-| ----------- | -------------------- |
-| GET         | /api/vehicles        |
-| POST        | /api/vehicles        |
-| GET         | /api/vehicles/images |
+- `GET /api/vehicles`
+- `POST /api/vehicles`
+- `GET /api/vehicles/images`
 
----
+Garage:
 
-## Garage cá nhân
+- `GET /api/garage/vehicles`
+- `POST /api/garage/vehicles`
 
-| Phương thức | Endpoint             |
-| ----------- | -------------------- |
-| GET         | /api/garage/vehicles |
-| POST        | /api/garage/vehicles |
+Articles:
 
----
+- `GET /api/articles`
 
-## Bài viết chuyên đề
+Admin:
 
-| Phương thức | Endpoint      |
-| ----------- | ------------- |
-| GET         | /api/articles |
+- `GET /api/admin/dashboard`
+- `GET /api/admin/users`
+- `DELETE /api/admin/users/:id`
+- `GET /api/admin/posts`
+- `PATCH /api/admin/posts/:id/status`
+- `DELETE /api/admin/posts/:id`
+- `GET /api/admin/vehicles`
+- `DELETE /api/admin/vehicles/:id`
 
----
+## Local Reset
 
-# 🔄 Khởi tạo lại dữ liệu
-
-⚠️ Lưu ý: Thao tác này sẽ xóa toàn bộ dữ liệu hiện có.
+This deletes app-owned tables and data:
 
 ```bash
 npm run db:drop-schema --workspace backend
 npm run db:migrate --workspace backend
 npm run db:seed --workspace backend
 ```
-
----
-
-# 🚀 Hướng phát triển
-
-Trong tương lai, hệ thống có thể được mở rộng với các chức năng:
-
-* Gợi ý xe thông minh bằng AI
-* So sánh xe tự động
-* Dự đoán giá xe theo thị trường
-* Phân tích hình ảnh xe bằng AI
-* Đánh giá và xếp hạng người bán
-* Danh sách yêu thích
-* Chat trực tiếp giữa người mua và người bán
-* Hệ thống khuyến nghị cá nhân hóa
-
----
-
-# 👨‍💻 Nhóm phát triển
-
-**Đề tài môn Kỹ thuật phần mềm**
-
-**CarHub Garage – Lái đam mê, Chia sẻ, Kết nối.**

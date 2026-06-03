@@ -5,6 +5,8 @@ import Garage from './pages/Garage';
 import Editorial from './pages/Editorial';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
+import Admin from './pages/Admin';
+import VehicleDetail from './pages/VehicleDetail';
 
 export default function App() {
   return (
@@ -13,7 +15,9 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/feed" element={<Editorial />} />
         <Route path="/market" element={<Marketplace />} />
+        <Route path="/market/:id" element={<VehicleDetail />} />
         <Route path="/garage" element={<ProtectedRoute><Garage /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -6,6 +6,7 @@ interface AuthUser {
   email: string;
   name: string;
   avatar?: string | null;
+  role: 'USER' | 'ADMIN';
 }
 
 interface LoginResponse {
