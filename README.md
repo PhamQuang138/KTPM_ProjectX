@@ -1,17 +1,26 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# CarHub Garage
 
-# CarHub Monorepo
+CarHub Garage la nen tang mua ban xe va cong dong danh cho nguoi yeu xe. Du an hien duoc to chuc theo monorepo:
 
-Project is split into:
+- `frontend`: React + Vite
+- `backend`: Node.js + Express + TypeScript
+- Database: PostgreSQL + Prisma ORM
 
-- `frontend`: React + Vite app
-- `backend`: Node.js + Express + TypeScript API
+## Chuc Nang Chinh
+
+- Dang ky, dang nhap, dang xuat
+- Dang bai viet cong dong co hinh anh
+- Luu bai viet vao PostgreSQL, refresh van con du lieu
+- Dang tin ban xe tu My Garage
+- Xem cac bai viet va listing xe cua user hien tai
+- Marketplace va community feed thong qua REST API
 
 ## Run Locally
 
-**Prerequisites:** Node.js
+Prerequisites:
+
+- Node.js
+- PostgreSQL
 
 Install dependencies from the repository root:
 
@@ -19,43 +28,28 @@ Install dependencies from the repository root:
 npm install
 ```
 
-Run frontend:
-
-```bash
-npm run dev:frontend
-```
-
-Run backend in another terminal:
+Run backend:
 
 ```bash
 npm run dev:backend
 ```
 
+Run frontend in another terminal:
+
+```bash
+npm run dev:frontend
+```
+
 Frontend: `http://localhost:3000`
+
 Backend health check: `http://localhost:4000/api/health`
 
-## API Overview
+## Database Setup
 
-- `GET /api/posts`: community feed posts
-- `POST /api/posts`: create a post with nested images
-- `POST /api/posts/community`: compatibility endpoint for community post creation
-- `GET /api/vehicles`: marketplace listings
-- `POST /api/vehicles`: create marketplace listing
-- `GET /api/vehicles/images`: seed vehicle image metadata for database import
-- `GET /api/garage/vehicles`: user garage vehicles
-- `POST /api/garage/vehicles`: create garage vehicle
-- `GET /api/articles`: editorial/blog articles
-- `POST /api/auth/login`: demo login with `alex@example.com` / `password123`
-
-## Database
-
-Backend uses PostgreSQL with Prisma.
-
-1. Copy `backend/.env.example` to `backend/.env`.
-2. Set `DATABASE_URL`, for example:
+Create `backend/.env` from `backend/.env.example`, then set:
 
 ```env
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/carhub?schema=public
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@127.0.0.1:5432/carhub?schema=public
 ```
 
 Generate Prisma client:
@@ -64,19 +58,50 @@ Generate Prisma client:
 npm run db:generate --workspace backend
 ```
 
-Create tables:
+Run migrations:
 
 ```bash
 npm run db:migrate --workspace backend
 ```
 
-Seed 1 user and 2 posts with images:
+Seed test data:
 
 ```bash
 npm run db:seed --workspace backend
 ```
 
-Create a post with images:
+Open Prisma Studio:
+
+```bash
+npm run db:studio --workspace backend
+```
+
+## Test Account
+
+After seeding:
+
+```txt
+email: alex@example.com
+password: password123
+```
+
+## API Overview
+
+- `POST /api/auth/signup`: create user and return JWT
+- `POST /api/auth/login`: login and return JWT
+- `POST /api/auth/logout`: logout response for client-side token removal
+- `GET /api/posts`: get posts with author and images
+- `POST /api/posts`: create post with nested images
+- `GET /api/posts/community`: get posts in frontend community-card format
+- `POST /api/posts/community`: create community post
+- `GET /api/vehicles`: get vehicle listings
+- `POST /api/vehicles`: create vehicle listing
+- `GET /api/vehicles/images`: get seed vehicle image metadata
+- `GET /api/garage/vehicles`: get current user's garage vehicles by `sellerId`
+- `POST /api/garage/vehicles`: create garage vehicle/listing
+- `GET /api/articles`: get editorial articles
+
+## Example Create Post
 
 ```http
 POST http://localhost:4000/api/posts
@@ -89,7 +114,7 @@ Content-Type: application/json
   "summary": "Short intro for the post",
   "content": "Long post content goes here.",
   "status": "PUBLISHED",
-  "authorId": "USER_ID_FROM_SEED_OR_DATABASE",
+  "authorId": "USER_ID_FROM_DATABASE",
   "images": [
     {
       "url": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200",
@@ -100,11 +125,7 @@ Content-Type: application/json
 }
 ```
 
-Query posts with author and images:
-
-```bash
-curl http://localhost:4000/api/posts
-```
+## Local Reset
 
 For a destructive local reset of app-owned tables:
 
