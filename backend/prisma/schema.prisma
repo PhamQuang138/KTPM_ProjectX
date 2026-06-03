@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  avatar    String?
+  posts     Post[]
+  vehicles  Vehicle[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Post {
+  id        String     @id @default(uuid())
+  title     String
+  content   String     @db.Text
+  summary   String?
+  status    PostStatus @default(DRAFT)
+  authorId  String
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  images    Image[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([authorId])
+  @@index([status])
+  @@map("posts")
+}
+
+model Image {
+  id        String   @id @default(uuid())
+  url       String
+  publicId  String?
+  caption   String?
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+  @@map("images")
+}
+
+model Vehicle {
+  id        String   @id @default(uuid())
+  title     String
+  price     String
+  location  String
+  image     String
+  images    String[] @default([])
+  condition String   @default("Used")
+  category  String   @default("Daily")
+  specs     String[] @default([])
+  status    String   @default("Active Listing")
+  sellerId  String
+  seller    User     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sellerId])
+  @@index([category])
+  @@map("vehicles")
+}
