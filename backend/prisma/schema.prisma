@@ -16,6 +16,11 @@ enum UserRole {
   ADMIN
 }
 
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -222,4 +227,23 @@ model VehicleListing {
   @@index([vehicleId])
   @@index([category])
   @@map("vehicle_listings")
+}
+
+model Article {
+  id        String        @id @default(uuid())
+  title     String
+  excerpt   String        @db.Text
+  content   String?       @db.Text
+  author    String
+  readTime  String?
+  image     String?
+  category  String
+  status    ArticleStatus @default(PUBLISHED)
+  publishedAt DateTime?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([category])
+  @@index([status])
+  @@map("articles")
 }

@@ -1,7 +1,8 @@
 import 'dotenv/config';
 import bcrypt from 'bcrypt';
-import {PostStatus, PrismaClient, UserRole} from '@prisma/client';
+import {ArticleStatus, PostStatus, PrismaClient, UserRole} from '@prisma/client';
 import {PrismaPg} from '@prisma/adapter-pg';
+import {articlesSeed} from '../src/data/seeds';
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) throw new Error('DATABASE_URL is required');
@@ -24,9 +25,15 @@ async function main() {
   await prisma.passwordResetToken.deleteMany();
   await prisma.userFollow.deleteMany();
   await prisma.userRating.deleteMany();
+  await prisma.postLike.deleteMany();
+  await prisma.postComment.deleteMany();
+  await prisma.postShare.deleteMany();
   await prisma.image.deleteMany();
   await prisma.vehicle.deleteMany();
+  await prisma.vehicleListing.deleteMany();
+  await prisma.garageVehicle.deleteMany();
   await prisma.post.deleteMany();
+  await prisma.article.deleteMany();
   await prisma.user.deleteMany();
 
   const password = await bcrypt.hash('password123', 10);
@@ -119,6 +126,24 @@ async function main() {
         ],
       },
     },
+  });
+
+  await prisma.article.createMany({
+    data: articlesSeed.map((article) => ({
+      id: article.id,
+      title: article.title,
+      excerpt: article.excerpt,
+      content: article.excerpt,
+      author: article.author,
+      readTime: article.readTime,
+      image: article.image,
+      category: article.category,
+      status: ArticleStatus.PUBLISHED,
+      publishedAt: new Date(article.date),
+      createdAt: new Date(article.createdAt),
+      updatedAt: new Date(article.updatedAt),
+    })),
+    skipDuplicates: true,
   });
 }
 

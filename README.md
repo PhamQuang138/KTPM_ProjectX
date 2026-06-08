@@ -125,6 +125,29 @@ Open Prisma Studio:
 npm run db:studio --workspace backend
 ```
 
+## Cloud Database Setup
+
+Recommended provider: Neon PostgreSQL.
+
+1. Create a Neon project.
+2. Click `Connect` in the Neon dashboard.
+3. Copy the direct PostgreSQL connection string. It should look like:
+
+```txt
+postgresql://USER:PASSWORD@HOST.neon.tech/DB_NAME?sslmode=require
+```
+
+4. Paste that value into `backend/.env` as `DATABASE_URL`.
+5. Run:
+
+```bash
+npm run db:generate --workspace backend
+npm run db:migrate --workspace backend
+npm run db:ensure-admin --workspace backend
+```
+
+Use the same `DATABASE_URL` on every teammate's machine to share the same cloud data.
+
 ## Run
 
 Backend:

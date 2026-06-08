@@ -43,6 +43,12 @@ interface DbListing {
   vehicle?: DbVehicle | null;
 }
 
+interface ImageUploadResponse {
+  url: string;
+  path: string;
+  filename: string;
+}
+
 interface ListingFormState {
   description: string;
   price: string;
@@ -139,6 +145,7 @@ export default function Garage() {
   const [publishToMarketplace, setPublishToMarketplace] = useState(true);
   const [vehicleFormError, setVehicleFormError] = useState('');
   const [isSavingVehicle, setIsSavingVehicle] = useState(false);
+  const [isUploadingVehicleImage, setIsUploadingVehicleImage] = useState(false);
   const [vehicleForm, setVehicleForm] = useState({
     title: '',
     description: '',
@@ -312,11 +319,46 @@ export default function Garage() {
     }
   };
 
+  const handleVehicleImageUpload = async (file: File | undefined) => {
+    if (!file) return;
+
+    setVehicleFormError('');
+    if (!file.type.startsWith('image/')) {
+      setVehicleFormError('Please choose an image file.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setVehicleFormError('Vehicle image must be 5MB or smaller.');
+      return;
+    }
+
+    setIsUploadingVehicleImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const uploaded = await apiRequest<ImageUploadResponse>('/uploads/images', {
+        method: 'POST',
+        body: formData,
+      });
+
+      setVehicleForm((current) => ({...current, image: uploaded.url}));
+    } catch (error) {
+      setVehicleFormError(error instanceof Error ? error.message : 'Unable to upload vehicle image.');
+    } finally {
+      setIsUploadingVehicleImage(false);
+    }
+  };
+
   const handleCreateVehicle = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!user) return;
 
     setVehicleFormError('');
+
+    if (!vehicleForm.image) {
+      setVehicleFormError('Please upload a vehicle image before saving.');
+      return;
+    }
 
     if (publishToMarketplace && (!vehicleForm.price.trim() || !vehicleForm.location.trim())) {
       setVehicleFormError('Price and location are required when publishing to marketplace.');
@@ -808,8 +850,8 @@ export default function Garage() {
         </section>
       </motion.main>
       {isAddingVehicle && (
-        <div className="fixed inset-0 z-[80] bg-black/70 backdrop-blur-sm flex items-center justify-center p-6">
-          <form onSubmit={handleCreateVehicle} className="w-full max-w-2xl bg-surface-container border border-white/10 rounded-[2rem] p-8 shadow-2xl space-y-5">
+        <div className="fixed inset-0 z-[80] bg-black/70 backdrop-blur-sm overflow-y-auto px-4 py-6 md:p-8">
+          <form onSubmit={handleCreateVehicle} className="mx-auto my-0 md:my-6 w-full max-w-2xl bg-surface-container border border-white/10 rounded-[2rem] p-5 md:p-8 shadow-2xl space-y-5">
             <div className="flex items-start justify-between gap-6">
               <div>
                 <h2 className="font-display text-2xl font-bold">Add Vehicle</h2>
@@ -829,7 +871,31 @@ export default function Garage() {
             </div>
 
             <textarea required placeholder="Garage description" value={vehicleForm.description} onChange={(event) => setVehicleForm({...vehicleForm, description: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 min-h-24" />
-            <input required type="url" placeholder="Image URL" value={vehicleForm.image} onChange={(event) => setVehicleForm({...vehicleForm, image: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3" />
+            <div className="rounded-2xl border border-white/10 bg-background p-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="aspect-[4/3] md:w-48 rounded-xl overflow-hidden border border-white/10 bg-white/[0.03] flex items-center justify-center">
+                  {vehicleForm.image ? (
+                    <img src={vehicleForm.image} alt="Vehicle preview" className="h-full w-full object-cover" />
+                  ) : (
+                    <Camera className="w-8 h-8 text-on-surface-variant" />
+                  )}
+                </div>
+                <div className="flex-1 flex flex-col justify-center gap-3">
+                  <p className="text-sm font-bold">Vehicle image</p>
+                  <p className="text-xs text-on-surface-variant">Upload a JPG, PNG, or WebP image. Maximum size is 5MB.</p>
+                  <label className="btn-secondary w-fit px-5 py-3 text-[10px] cursor-pointer">
+                    {isUploadingVehicleImage ? 'Uploading...' : vehicleForm.image ? 'Replace Image' : 'Choose Image'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={isUploadingVehicleImage}
+                      className="hidden"
+                      onChange={(event) => handleVehicleImageUpload(event.target.files?.[0])}
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
 
             <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-background px-4 py-3">
               <input
@@ -863,15 +929,15 @@ export default function Garage() {
               </div>
             )}
 
-            <button disabled={isSavingVehicle} type="submit" className="btn-primary w-full py-4 rounded-xl disabled:opacity-60 disabled:cursor-not-allowed">
-              {isSavingVehicle ? 'Saving...' : publishToMarketplace ? 'Save and Publish Listing' : 'Save to Garage'}
+            <button disabled={isSavingVehicle || isUploadingVehicleImage} type="submit" className="btn-primary w-full py-4 rounded-xl disabled:opacity-60 disabled:cursor-not-allowed">
+              {isUploadingVehicleImage ? 'Uploading image...' : isSavingVehicle ? 'Saving...' : publishToMarketplace ? 'Save and Publish Listing' : 'Save to Garage'}
             </button>
           </form>
         </div>
       )}
       {(listingVehicle || editingListing) && (
-        <div className="fixed inset-0 z-[90] bg-black/70 backdrop-blur-sm flex items-center justify-center p-6">
-          <form onSubmit={handleSaveListing} className="w-full max-w-2xl bg-surface-container border border-white/10 rounded-[2rem] p-8 shadow-2xl space-y-5">
+        <div className="fixed inset-0 z-[90] bg-black/70 backdrop-blur-sm overflow-y-auto px-4 py-6 md:p-8">
+          <form onSubmit={handleSaveListing} className="mx-auto my-0 md:my-6 w-full max-w-2xl bg-surface-container border border-white/10 rounded-[2rem] p-5 md:p-8 shadow-2xl space-y-5">
             <div className="flex items-start justify-between gap-6">
               <div>
                 <h2 className="font-display text-2xl font-bold">
@@ -943,8 +1009,8 @@ export default function Garage() {
         </div>
       )}
       {isEditingProfile && (
-        <div className="fixed inset-0 z-[90] bg-black/70 backdrop-blur-sm flex items-center justify-center p-6">
-          <form onSubmit={handleSaveProfile} className="w-full max-w-2xl bg-surface-container border border-white/10 rounded-[2rem] p-8 shadow-2xl space-y-5">
+        <div className="fixed inset-0 z-[90] bg-black/70 backdrop-blur-sm overflow-y-auto px-4 py-6 md:p-8">
+          <form onSubmit={handleSaveProfile} className="mx-auto my-0 md:my-6 w-full max-w-2xl bg-surface-container border border-white/10 rounded-[2rem] p-5 md:p-8 shadow-2xl space-y-5">
             <div className="flex items-start justify-between gap-6">
               <div>
                 <h2 className="font-display text-2xl font-bold">Edit About Collector</h2>

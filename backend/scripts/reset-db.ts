@@ -24,6 +24,7 @@ async function main() {
   await prisma.garageVehicle.deleteMany();
   await prisma.vehicle.deleteMany();
   await prisma.post.deleteMany();
+  await prisma.article.deleteMany();
   await prisma.user.deleteMany();
 }
 

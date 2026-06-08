@@ -7,7 +7,7 @@
     "backend"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace frontend",
+    "dev": "concurrently -n backend,frontend -c green,cyan \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:frontend": "npm run dev --workspace frontend",
     "dev:backend": "npm run dev --workspace backend",
     "build": "npm run build --workspaces",
@@ -17,6 +17,6 @@
     "lint": "npm run lint --workspaces"
   },
   "devDependencies": {
-    "@types/nodemailer": "^8.0.0"
+    "concurrently": "^8.2.2"
   }
 }

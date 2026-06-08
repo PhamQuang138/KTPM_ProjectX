@@ -1,4 +1,4 @@
-import {PostStatus} from '@prisma/client';
+import {ArticleStatus, PostStatus} from '@prisma/client';
 import {Request, Response} from 'express';
 import {z} from 'zod';
 import {adminService} from '../services/admin.service';
@@ -10,6 +10,14 @@ export const updatePostStatusSchema = z.object({
 
 export const updateUserVerificationSchema = z.object({
   isVerifiedProfessional: z.boolean(),
+});
+
+export const updateResourceStatusSchema = z.object({
+  status: z.string().trim().min(1).max(80),
+});
+
+export const updateArticleStatusSchema = z.object({
+  status: z.enum(['DRAFT', 'PUBLISHED']),
 });
 
 export const adminController = {
@@ -60,11 +68,69 @@ export const adminController = {
   },
 
   async listVehicles(_req: Request, res: Response) {
-    return res.json({data: await adminService.listVehicles()});
+    return res.json({data: await adminService.listVehicleListings()});
+  },
+
+  async updateVehicleStatus(req: Request, res: Response) {
+    return res.json({data: await adminService.updateVehicleListingStatus(req.params.id, req.body.status)});
   },
 
   async deleteVehicle(req: Request, res: Response) {
     await adminService.deleteVehicle(req.params.id);
+    return res.json({data: {success: true}});
+  },
+
+  async listGarageVehicles(_req: Request, res: Response) {
+    return res.json({data: await adminService.listGarageVehicles()});
+  },
+
+  async updateGarageVehicleStatus(req: Request, res: Response) {
+    return res.json({data: await adminService.updateGarageVehicleStatus(req.params.id, req.body.status)});
+  },
+
+  async deleteGarageVehicle(req: Request, res: Response) {
+    await adminService.deleteGarageVehicle(req.params.id);
+    return res.json({data: {success: true}});
+  },
+
+  async listArticles(_req: Request, res: Response) {
+    return res.json({data: await adminService.listArticles()});
+  },
+
+  async updateArticleStatus(req: Request, res: Response) {
+    const article = await adminService.updateArticleStatus(req.params.id, req.body.status as ArticleStatus);
+    return res.json({data: article});
+  },
+
+  async deleteArticle(req: Request, res: Response) {
+    await adminService.deleteArticle(req.params.id);
+    return res.json({data: {success: true}});
+  },
+
+  async listComments(_req: Request, res: Response) {
+    return res.json({data: await adminService.listComments()});
+  },
+
+  async deleteComment(req: Request, res: Response) {
+    await adminService.deleteComment(req.params.id);
+    return res.json({data: {success: true}});
+  },
+
+  async listRatings(_req: Request, res: Response) {
+    return res.json({data: await adminService.listRatings()});
+  },
+
+  async deleteRating(req: Request, res: Response) {
+    await adminService.deleteRating(req.params.id);
+    return res.json({data: {success: true}});
+  },
+
+  async listFollows(_req: Request, res: Response) {
+    return res.json({data: await adminService.listFollows()});
+  },
+
+  async deleteFollow(req: Request, res: Response) {
+    await adminService.deleteFollow(req.params.id);
     return res.json({data: {success: true}});
   },
 };

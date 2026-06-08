@@ -1,13 +1,23 @@
-import {articlesSeed} from '../data/seeds';
-
-const articles = [...articlesSeed];
+import {ArticleStatus} from '@prisma/client';
+import {prisma} from '../config/prisma';
 
 export const articleService = {
   list(category?: string) {
-    return category ? articles.filter((article) => article.category.toLowerCase() === category.toLowerCase()) : articles;
+    return prisma.article.findMany({
+      where: {
+        status: ArticleStatus.PUBLISHED,
+        ...(category ? {category: {equals: category, mode: 'insensitive' as const}} : {}),
+      },
+      orderBy: [{publishedAt: 'desc'}, {createdAt: 'desc'}],
+    });
   },
 
   getById(id: string) {
-    return articles.find((article) => article.id === id);
+    return prisma.article.findFirst({
+      where: {
+        id,
+        status: ArticleStatus.PUBLISHED,
+      },
+    });
   },
 };

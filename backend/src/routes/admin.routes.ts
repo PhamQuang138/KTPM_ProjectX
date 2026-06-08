@@ -1,5 +1,11 @@
 import {Router} from 'express';
-import {adminController, updatePostStatusSchema, updateUserVerificationSchema} from '../controllers/admin.controller';
+import {
+  adminController,
+  updateArticleStatusSchema,
+  updatePostStatusSchema,
+  updateResourceStatusSchema,
+  updateUserVerificationSchema,
+} from '../controllers/admin.controller';
 import {requireAdmin, requireAuth} from '../middlewares/auth';
 import {validateBody} from '../middlewares/validateRequest';
 
@@ -17,4 +23,22 @@ adminRouter.patch('/posts/:id/status', validateBody(updatePostStatusSchema), adm
 adminRouter.delete('/posts/:id', adminController.deletePost);
 
 adminRouter.get('/vehicles', adminController.listVehicles);
+adminRouter.patch('/vehicles/:id/status', validateBody(updateResourceStatusSchema), adminController.updateVehicleStatus);
 adminRouter.delete('/vehicles/:id', adminController.deleteVehicle);
+
+adminRouter.get('/garage-vehicles', adminController.listGarageVehicles);
+adminRouter.patch('/garage-vehicles/:id/status', validateBody(updateResourceStatusSchema), adminController.updateGarageVehicleStatus);
+adminRouter.delete('/garage-vehicles/:id', adminController.deleteGarageVehicle);
+
+adminRouter.get('/articles', adminController.listArticles);
+adminRouter.patch('/articles/:id/status', validateBody(updateArticleStatusSchema), adminController.updateArticleStatus);
+adminRouter.delete('/articles/:id', adminController.deleteArticle);
+
+adminRouter.get('/comments', adminController.listComments);
+adminRouter.delete('/comments/:id', adminController.deleteComment);
+
+adminRouter.get('/ratings', adminController.listRatings);
+adminRouter.delete('/ratings/:id', adminController.deleteRating);
+
+adminRouter.get('/follows', adminController.listFollows);
+adminRouter.delete('/follows/:id', adminController.deleteFollow);
