@@ -19,6 +19,7 @@ export interface CreatePostInput {
 export interface ListPostInput {
   status?: PostStatus;
   authorId?: string;
+  viewerId?: string;
 }
 
 const postInclude = {
@@ -79,7 +80,17 @@ export const postDbService = {
         ...(input.status ? {status: input.status} : {}),
         ...(input.authorId ? {authorId: input.authorId} : {}),
       },
-      include: postInclude,
+      include: {
+        ...postInclude,
+        comments: {
+          include: {
+            user: {select: {id: true, name: true, email: true, avatar: true}},
+          },
+          orderBy: {createdAt: 'asc'},
+        },
+        _count: {select: {likes: true, comments: true, shares: true}},
+        likes: input.viewerId ? {where: {userId: input.viewerId}, select: {id: true}} : false,
+      },
       orderBy: {
         createdAt: 'desc',
       },
@@ -91,5 +102,38 @@ export const postDbService = {
       where: {id},
       include: postInclude,
     });
+  },
+
+  async toggleLike(postId: string, userId: string) {
+    const existing = await prisma.postLike.findUnique({
+      where: {postId_userId: {postId, userId}},
+    });
+
+    if (existing) {
+      await prisma.postLike.delete({where: {id: existing.id}});
+    } else {
+      await prisma.postLike.create({data: {postId, userId}});
+    }
+
+    return {
+      liked: !existing,
+      count: await prisma.postLike.count({where: {postId}}),
+    };
+  },
+
+  async addComment(postId: string, userId: string, content: string) {
+    const comment = await prisma.postComment.create({
+      data: {postId, userId, content},
+      include: {
+        user: {select: {id: true, name: true, email: true, avatar: true}},
+      },
+    });
+    const count = await prisma.postComment.count({where: {postId}});
+    return {comment, count};
+  },
+
+  async addShare(postId: string, userId: string) {
+    await prisma.postShare.create({data: {postId, userId}});
+    return {count: await prisma.postShare.count({where: {postId}})};
   },
 };

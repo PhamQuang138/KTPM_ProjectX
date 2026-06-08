@@ -3,10 +3,10 @@ import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 import SocialPost, { SocialPostProps } from '../components/SocialPost';
 import MobileNav from '../components/MobileNav';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Plus, TrendingUp, Hash, Users, Sparkles, MessageSquare, Heart, Clock, Bookmark, Camera, PenTool, LayoutGrid, Bell, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSidebarStore } from '../store/useSidebarStore';
 import { apiRequest } from '../lib/api';
 import { useAuthStore } from '../store/useAuthStore';
@@ -42,8 +42,9 @@ const hubPosts: SocialPostProps[] = [
     content: "The final piece of the puzzle arrived today for the 1974 2.7 RS project. These period-correct Fuchs wheels are everything. Restoration is 98% complete. \n\nWhat do you guys think of the silver-on-black finish?",
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDQcQwnFFiEl1uaEzWESRhLrrSmtUEXLk_aTY5GsfuNE2ZwHKMzO0ApXtv6ZwPkBCSYd_iQj3wiCSo9X97Y1dWXHF59FzI8n6gUllE2SVFuTQWAbZepD1t14ugConVJCdPvFt0yCLq7s3c_6O6zt2ufeNM4fRDemBJHX7kram1oxbzUZGRbQN5WZo5cWxgIhSByeJr-7mFte6R4OxB46WfNkHE8ZcGttyVRyHhixX3bz2XEWQJmlJzSDhQKqVvcN4rpxg8kPDDnZw",
     timestamp: "12m ago",
-    likes: 245,
-    comments: 34,
+    likes: 0,
+    comments: 0,
+    shares: 0,
     category: "Restoration",
     tags: ["Porsche911", "RestoMod", "Vintage"]
   },
@@ -57,8 +58,9 @@ const hubPosts: SocialPostProps[] = [
     type: 'marketplace',
     content: "Helping a friend move this beautiful Stingray. Honestly, the mid-engine layout change was the best thing to happen to this platform in decades. Handling is razor sharp.",
     timestamp: "1h ago",
-    likes: 1205,
-    comments: 56,
+    likes: 0,
+    comments: 0,
+    shares: 0,
     category: "Hot Deals",
     marketplaceListing: {
       title: "Chevrolet Corvette Stingray Z51",
@@ -79,8 +81,9 @@ const hubPosts: SocialPostProps[] = [
       "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800"
     ],
     timestamp: "3h ago",
-    likes: 890,
-    comments: 12,
+    likes: 0,
+    comments: 0,
+    shares: 0,
     category: "Road Trip",
     tags: ["Exploring", "Cotswolds", "Escape"]
   },
@@ -93,8 +96,9 @@ const hubPosts: SocialPostProps[] = [
     type: 'maintenance',
     content: "Quick tip: If you're hearing a slight high-pitched whistle under acceleration in your E30, check the throttle body gasket. Super common vacuum leak point that often gets misdiagnosed as turbo whine (even if you don't have one 😂).",
     timestamp: "5h ago",
-    likes: 156,
-    comments: 42,
+    likes: 0,
+    comments: 0,
+    shares: 0,
     category: "Tech Help"
   }
 ];
@@ -105,6 +109,10 @@ export default function Editorial() {
   const [postContent, setPostContent] = useState('');
   const [posts, setPosts] = useState<SocialPostProps[]>(hubPosts);
   const [isSubmittingPost, setIsSubmittingPost] = useState(false);
+  const [postError, setPostError] = useState('');
+  const postInputRef = useRef<HTMLTextAreaElement>(null);
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isOpen } = useSidebarStore();
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -114,8 +122,13 @@ export default function Editorial() {
 
   const handleCreatePost = async () => {
     const content = postContent.trim();
-    if (!content || isSubmittingPost || !user) return;
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (!content || isSubmittingPost) return;
 
+    setPostError('');
     setIsSubmittingPost(true);
     try {
       const createdPost = await apiRequest<SocialPostProps>('/posts/community', {
@@ -124,17 +137,33 @@ export default function Editorial() {
           content,
           title: content.slice(0, 80),
           status: 'PUBLISHED',
-          authorId: user.id,
         }),
       });
 
       setPosts((currentPosts) => [createdPost, ...currentPosts]);
       setPostContent('');
       setIsPosting(false);
+    } catch (error) {
+      setPostError(error instanceof Error ? error.message : 'Unable to create the post.');
     } finally {
       setIsSubmittingPost(false);
     }
   };
+
+  useEffect(() => {
+    if (searchParams.get('compose') !== '1') return;
+
+    if (!isAuthenticated) {
+      navigate('/login', {replace: true});
+      return;
+    }
+
+    setIsPosting(true);
+    window.setTimeout(() => postInputRef.current?.focus(), 0);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('compose');
+    setSearchParams(nextParams, {replace: true});
+  }, [isAuthenticated, navigate, searchParams, setSearchParams]);
 
   useEffect(() => {
     let isMounted = true;
@@ -251,12 +280,19 @@ export default function Editorial() {
                 <img src={avatar} alt={displayName} className="w-12 h-12 rounded-full border border-white/10 object-cover" />
                 <div className="flex-grow space-y-4">
                   <textarea 
+                    ref={postInputRef}
                     onFocus={() => setIsPosting(true)}
                     value={postContent}
                     onChange={(event) => setPostContent(event.target.value)}
                     placeholder="Share your car's latest adventure..." 
                     className="w-full bg-transparent border-none focus:ring-0 text-base md:text-lg resize-none min-h-[60px] max-h-40 py-2"
                   />
+
+                  {postError && (
+                    <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                      {postError}
+                    </div>
+                  )}
                   
                   <AnimatePresence>
                     {isPosting && (
@@ -370,6 +406,14 @@ export default function Editorial() {
       <motion.button 
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
+        onClick={() => {
+          if (!isAuthenticated) {
+            navigate('/login');
+            return;
+          }
+          setIsPosting(true);
+          window.setTimeout(() => postInputRef.current?.focus(), 0);
+        }}
         className="fixed bottom-24 right-6 lg:hidden w-14 h-14 bg-primary text-on-primary rounded-2xl shadow-2xl shadow-primary/40 flex items-center justify-center z-50 shimmer-effect"
       >
         <Plus className="w-6 h-6" />

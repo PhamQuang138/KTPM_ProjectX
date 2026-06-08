@@ -24,6 +24,10 @@ export default function TopNav({ title }: { title?: string }) {
     navigate('/login');
   };
 
+  const handleCreatePost = () => {
+    navigate(isAuthenticated ? '/feed?compose=1' : '/login');
+  };
+
   const getPageTitle = () => {
     if (title) return title;
     switch (location.pathname) {
@@ -39,7 +43,7 @@ export default function TopNav({ title }: { title?: string }) {
     <>
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-white/10 shadow-lg px-6 md:px-margin-desktop py-4 flex justify-between items-center transition-all duration-500">
         <div className="flex items-center gap-4">
-          {!isOpen && (
+          {isAuthenticated && !isOpen && (
             <motion.button 
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -66,9 +70,13 @@ export default function TopNav({ title }: { title?: string }) {
           <nav className="hidden lg:flex space-x-8">
             {[
               { label: 'Explore', path: '/' },
-              { label: 'Community', path: '/feed' },
-              { label: 'Market', path: '/market' },
-              { label: 'Garage', path: '/garage' },
+              ...(isAuthenticated
+                ? [
+                    { label: 'Community', path: '/feed' },
+                    { label: 'Market', path: '/market' },
+                    { label: 'Garage', path: '/garage' },
+                  ]
+                : []),
               ...(user?.role === 'ADMIN' ? [{ label: 'Admin', path: '/admin' }] : []),
             ].map((item) => (
               <Link
@@ -90,17 +98,21 @@ export default function TopNav({ title }: { title?: string }) {
           </nav>
 
           <div className="flex items-center space-x-2 md:space-x-4 border-l border-white/10 pl-6">
-            <button className="hidden md:flex p-2 text-on-surface hover:text-primary transition-all hover:scale-110">
-              <Search className="w-5 h-5" />
-            </button>
-            
-            <button 
-              onClick={() => setIsNotificationsOpen(true)}
-              className="relative p-2 text-on-surface hover:text-primary transition-all hover:scale-110"
-            >
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background"></span>
-            </button>
+            {isAuthenticated && (
+              <>
+                <button className="hidden md:flex p-2 text-on-surface hover:text-primary transition-all hover:scale-110">
+                  <Search className="w-5 h-5" />
+                </button>
+
+                <button
+                  onClick={() => setIsNotificationsOpen(true)}
+                  className="relative p-2 text-on-surface hover:text-primary transition-all hover:scale-110"
+                >
+                  <Bell className="w-5 h-5" />
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background"></span>
+                </button>
+              </>
+            )}
 
             {isAuthenticated ? (
               <>
@@ -116,19 +128,32 @@ export default function TopNav({ title }: { title?: string }) {
                 </button>
               </>
             ) : (
-              <Link to="/login" className="hidden md:flex font-mono text-[10px] uppercase tracking-[0.2em] text-primary font-bold">
+              <Link to="/login" className="flex font-mono text-[10px] uppercase tracking-[0.2em] text-primary font-bold">
                 Login
               </Link>
             )}
 
-            <button className="btn-primary py-2 px-4 text-[10px] hidden md:flex items-center gap-2">
-              <PlusCircle className="w-3.5 h-3.5" />
-              Post
-            </button>
+            {isAuthenticated && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleCreatePost}
+                  className="btn-primary py-2 px-4 text-[10px] hidden md:flex items-center gap-2"
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  Post
+                </button>
 
-            <button className="p-2 text-on-surface hover:text-primary transition-colors md:hidden">
-              <PlusCircle className="w-6 h-6" />
-            </button>
+                <button
+                  type="button"
+                  onClick={handleCreatePost}
+                  className="p-2 text-on-surface hover:text-primary transition-colors md:hidden"
+                  aria-label="Create post"
+                >
+                  <PlusCircle className="w-6 h-6" />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>

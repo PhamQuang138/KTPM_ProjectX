@@ -7,16 +7,18 @@ import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import Admin from './pages/Admin';
 import VehicleDetail from './pages/VehicleDetail';
+import PublicProfile from './pages/PublicProfile';
 
 export default function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/feed" element={<Editorial />} />
-        <Route path="/market" element={<Marketplace />} />
-        <Route path="/market/:id" element={<VehicleDetail />} />
+        <Route path="/feed" element={<ProtectedRoute><Editorial /></ProtectedRoute>} />
+        <Route path="/market" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
+        <Route path="/market/:id" element={<ProtectedRoute><VehicleDetail /></ProtectedRoute>} />
         <Route path="/garage" element={<ProtectedRoute><Garage /></ProtectedRoute>} />
+        <Route path="/profile/:id" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/" replace />} />

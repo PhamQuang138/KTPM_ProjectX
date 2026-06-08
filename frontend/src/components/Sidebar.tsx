@@ -25,6 +25,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const { isOpen, toggle } = useSidebarStore();
   const { user, isAuthenticated, logout } = useAuthStore();
+  const visibleNavItems = isAuthenticated ? navItems : navItems.filter((item) => item.path === '/');
 
   const handleLogout = async () => {
     await logout();
@@ -75,7 +76,7 @@ export default function Sidebar() {
           </div>
 
           <div className="flex-grow space-y-1 px-2">
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
                 <Link
@@ -110,14 +111,16 @@ export default function Sidebar() {
                 Logout
               </button>
             )}
-            <button 
-              className="relative overflow-hidden w-full bg-surface-container-highest text-on-surface py-3 rounded-xl font-mono uppercase text-[10px] tracking-widest hover:brightness-110 transition-all border border-white/5 shadow-xl hover:bg-primary hover:text-on-primary group"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                <Zap className="w-3 h-3 group-hover:fill-current" />
-                New Listing
-              </span>
-            </button>
+            {isAuthenticated && (
+              <button
+                className="relative overflow-hidden w-full bg-surface-container-highest text-on-surface py-3 rounded-xl font-mono uppercase text-[10px] tracking-widest hover:brightness-110 transition-all border border-white/5 shadow-xl hover:bg-primary hover:text-on-primary group"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <Zap className="w-3 h-3 group-hover:fill-current" />
+                  New Listing
+                </span>
+              </button>
+            )}
           </div>
         </motion.nav>
       )}

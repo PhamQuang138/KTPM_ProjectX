@@ -1,11 +1,37 @@
 import { Heart, MessageSquare, Share2, Bookmark, MoreHorizontal, CheckCircle2, ChevronDown, Repeat2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useState } from 'react';
+import { FormEvent, ReactNode, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
+import { apiRequest } from '../lib/api';
+
+interface PostComment {
+  id: string;
+  content: string;
+  createdAt: string;
+  author: {
+    id: string;
+    name: string;
+    handle: string;
+    avatar: string;
+  };
+}
+
+function LinkOrDiv({to, className, children}: {to?: string; className?: string; children: ReactNode}) {
+  if (!to) return <div className={className}>{children}</div>;
+  return <Link to={to} className={className}>{children}</Link>;
+}
+
+function LinkOrSpan({to, className, children}: {to?: string; className?: string; children: ReactNode}) {
+  if (!to) return <span className={className}>{children}</span>;
+  return <Link to={to} className={className}>{children}</Link>;
+}
 
 export interface SocialPostProps {
   key?: string | number;
+  id?: string;
   author: {
+    id?: string;
     name: string;
     handle: string;
     avatar: string;
@@ -25,6 +51,7 @@ export interface SocialPostProps {
   tags?: string[];
   isLikedInitial?: boolean;
   isBookmarkedInitial?: boolean;
+  commentItems?: PostComment[];
   marketplaceListing?: {
     title: string;
     price: string;
@@ -33,6 +60,7 @@ export interface SocialPostProps {
 }
 
 export default function SocialPost({
+  id,
   author,
   content,
   image,
@@ -41,23 +69,108 @@ export default function SocialPost({
   timestamp,
   likes: initialLikes,
   comments,
-  shares = 3,
+  shares: initialShares = 0,
   category,
   tags = [],
   isLikedInitial = false,
   isBookmarkedInitial = false,
+  commentItems = [],
   marketplaceListing
 }: SocialPostProps) {
+  const navigate = useNavigate();
   const [likes, setLikes] = useState(initialLikes);
+  const [commentCount, setCommentCount] = useState(comments);
+  const [shareCount, setShareCount] = useState(initialShares);
   const [isLiked, setIsLiked] = useState(isLikedInitial);
   const [isBookmarked, setIsBookmarked] = useState(isBookmarkedInitial);
   const [showComments, setShowComments] = useState(false);
+  const [commentsList, setCommentsList] = useState(commentItems);
+  const [commentContent, setCommentContent] = useState('');
+  const [interactionError, setInteractionError] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const currentUser = useAuthStore((state) => state.user);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const currentUserAvatar = currentUser?.avatar ?? `https://i.pravatar.cc/100?u=${encodeURIComponent(currentUser?.email ?? 'guest')}`;
+  const authorProfilePath = author.id ? `/profile/${author.id}` : undefined;
 
-  const toggleLike = () => {
-    setIsLiked(!isLiked);
-    setLikes(prev => isLiked ? prev - 1 : prev + 1);
+  const requireLogin = () => {
+    if (isAuthenticated) return true;
+    navigate('/login');
+    return false;
+  };
+
+  const toggleLike = async () => {
+    if (!requireLogin()) return;
+    setInteractionError('');
+
+    if (!id) {
+      setIsLiked((current) => !current);
+      setLikes((current) => (isLiked ? Math.max(0, current - 1) : current + 1));
+      return;
+    }
+
+    try {
+      const result = await apiRequest<{liked: boolean; count: number}>(`/posts/${id}/like`, {method: 'POST'});
+      setIsLiked(result.liked);
+      setLikes(result.count);
+    } catch (error) {
+      setInteractionError(error instanceof Error ? error.message : 'Unable to update reaction.');
+    }
+  };
+
+  const submitComment = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!requireLogin()) return;
+    const nextContent = commentContent.trim();
+    if (!nextContent || isSubmittingComment) return;
+
+    setInteractionError('');
+    setIsSubmittingComment(true);
+    try {
+      if (!id) {
+        const localComment: PostComment = {
+          id: crypto.randomUUID(),
+          content: nextContent,
+          createdAt: new Date().toISOString(),
+          author: {
+            id: currentUser?.id ?? 'local',
+            name: currentUser?.name ?? 'User',
+            handle: currentUser?.email.split('@')[0] ?? 'user',
+            avatar: currentUserAvatar,
+          },
+        };
+        setCommentsList((current) => [...current, localComment]);
+        setCommentCount((current) => current + 1);
+      } else {
+        const result = await apiRequest<{comment: PostComment; count: number}>(`/posts/${id}/comments`, {
+          method: 'POST',
+          body: JSON.stringify({content: nextContent}),
+        });
+        setCommentsList((current) => [...current, result.comment]);
+        setCommentCount(result.count);
+      }
+      setCommentContent('');
+    } catch (error) {
+      setInteractionError(error instanceof Error ? error.message : 'Unable to add comment.');
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
+
+  const sharePost = async () => {
+    if (!requireLogin()) return;
+    setInteractionError('');
+    try {
+      if (id) {
+        const result = await apiRequest<{count: number}>(`/posts/${id}/share`, {method: 'POST'});
+        setShareCount(result.count);
+      } else {
+        setShareCount((current) => current + 1);
+      }
+      await navigator.clipboard?.writeText(`${window.location.origin}/feed${id ? `#post-${id}` : ''}`);
+    } catch (error) {
+      setInteractionError(error instanceof Error ? error.message : 'Unable to share post.');
+    }
   };
 
   const getBadgeColor = () => {
@@ -77,21 +190,24 @@ export default function SocialPost({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="social-card group mb-6"
+      id={id ? `post-${id}` : undefined}
     >
       {/* Post Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex gap-3">
-          <div className="relative">
+          <LinkOrDiv to={authorProfilePath} className="relative">
             <img src={author.avatar} alt={author.name} className="user-avatar" />
             {author.isProUser && (
               <div className="absolute -bottom-1 -right-1 bg-primary text-[8px] font-bold p-0.5 rounded-full ring-2 ring-background">
                 <CheckCircle2 className="w-2.5 h-2.5 text-on-primary" />
               </div>
             )}
-          </div>
+          </LinkOrDiv>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-sm hover:text-primary cursor-pointer transition-colors">{author.name}</span>
+              <LinkOrSpan to={authorProfilePath} className="font-bold text-sm hover:text-primary cursor-pointer transition-colors">
+                {author.name}
+              </LinkOrSpan>
               {author.isVerified && <CheckCircle2 className="w-3 h-3 text-blue-400 fill-blue-400/10" />}
               <span className="text-[10px] text-on-surface-variant font-mono">@{author.handle}</span>
             </div>
@@ -171,12 +287,12 @@ export default function SocialPost({
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-on-surface-variant hover:bg-white/5 transition-all"
           >
             <MessageSquare className="w-4 h-4" />
-            <span className="text-xs font-medium">{comments}</span>
+            <span className="text-xs font-medium">{commentCount}</span>
           </button>
 
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-on-surface-variant hover:bg-white/5 transition-all hidden md:flex">
+          <button onClick={sharePost} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-on-surface-variant hover:bg-white/5 transition-all hidden md:flex">
             <Repeat2 className="w-4 h-4" />
-            <span className="text-xs font-medium">{shares}</span>
+            <span className="text-xs font-medium">{shareCount}</span>
           </button>
         </div>
 
@@ -187,7 +303,7 @@ export default function SocialPost({
           >
             <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
           </button>
-          <button className="interactive-icon">
+          <button onClick={sharePost} className="interactive-icon" aria-label="Share post">
             <Share2 className="w-4 h-4 text-on-surface-variant" />
           </button>
         </div>
@@ -203,16 +319,43 @@ export default function SocialPost({
             className="overflow-hidden"
           >
             <div className="pt-4 mt-4 border-t border-white/5 space-y-4">
-              <div className="flex gap-3 px-2">
+              {commentsList.map((comment) => (
+                <div key={comment.id} className="flex gap-3 px-2">
+                  <Link to={`/profile/${comment.author.id}`}>
+                    <img src={comment.author.avatar} className="w-8 h-8 rounded-full border border-white/10 object-cover" alt={comment.author.name} />
+                  </Link>
+                  <div className="flex-grow rounded-xl bg-surface-container px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <Link to={`/profile/${comment.author.id}`} className="text-xs font-bold hover:text-primary transition-colors">
+                        {comment.author.name}
+                      </Link>
+                      <span className="text-[10px] text-on-surface-variant">@{comment.author.handle}</span>
+                    </div>
+                    <p className="mt-1 text-sm text-on-surface">{comment.content}</p>
+                  </div>
+                </div>
+              ))}
+              <form onSubmit={submitComment} className="flex gap-3 px-2">
                 <img src={currentUserAvatar} className="w-8 h-8 rounded-full border border-white/10 object-cover" alt={currentUser?.name ?? 'Guest'} />
-                <div className="flex-grow relative">
+                <div className="flex-grow flex gap-2">
                   <input 
                     type="text" 
                     placeholder="Write a reply..." 
+                    value={commentContent}
+                    onChange={(event) => setCommentContent(event.target.value)}
+                    maxLength={2000}
                     className="w-full bg-surface-container rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary/40 border border-white/5"
                   />
+                  <button
+                    type="submit"
+                    disabled={!commentContent.trim() || isSubmittingComment}
+                    className="btn-primary px-4 py-2 disabled:opacity-50"
+                  >
+                    {isSubmittingComment ? '...' : 'Send'}
+                  </button>
                 </div>
-              </div>
+              </form>
+              {interactionError && <p className="px-2 text-xs text-red-300">{interactionError}</p>}
             </div>
           </motion.div>
         )}

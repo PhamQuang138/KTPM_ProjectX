@@ -3,14 +3,27 @@ import bcrypt from 'bcrypt';
 import {PostStatus, PrismaClient, UserRole} from '@prisma/client';
 import {PrismaPg} from '@prisma/adapter-pg';
 
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) throw new Error('DATABASE_URL is required');
+
 const prisma = new PrismaClient({
   adapter: new PrismaPg({
-    connectionString: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5432/carhub?schema=public',
+    connectionString: databaseUrl,
   }),
 });
 
 async function main() {
+  const adminUsername = process.env.ADMIN_USERNAME?.trim().toLowerCase();
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminUsername) throw new Error('ADMIN_USERNAME is required');
+  if (!adminPassword || adminPassword.length < 8) {
+    throw new Error('ADMIN_PASSWORD must be at least 8 characters');
+  }
+
   // Seed starts from a clean state so local test data is deterministic.
+  await prisma.passwordResetToken.deleteMany();
+  await prisma.userFollow.deleteMany();
+  await prisma.userRating.deleteMany();
   await prisma.image.deleteMany();
   await prisma.vehicle.deleteMany();
   await prisma.post.deleteMany();
@@ -29,16 +42,16 @@ async function main() {
   });
 
   await prisma.user.upsert({
-    where: {email: 'admin'},
+    where: {email: adminUsername},
     update: {
-      password: await bcrypt.hash('12345', 10),
+      password: await bcrypt.hash(adminPassword, 10),
       name: 'Administrator',
       avatar: 'https://i.pravatar.cc/200?u=admin',
       role: UserRole.ADMIN,
     },
     create: {
-      email: 'admin',
-      password: await bcrypt.hash('12345', 10),
+      email: adminUsername,
+      password: await bcrypt.hash(adminPassword, 10),
       name: 'Administrator',
       avatar: 'https://i.pravatar.cc/200?u=admin',
       role: UserRole.ADMIN,

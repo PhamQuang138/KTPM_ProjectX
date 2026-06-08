@@ -22,8 +22,21 @@ model User {
   password  String
   name      String
   avatar    String?
+  bannerImage String?
+  bio       String?  @db.Text
+  location  String?
+  focusBrands String[] @default([])
+  isVerifiedProfessional Boolean @default(false)
   role      UserRole @default(USER)
   posts     Post[]
+  postLikes PostLike[]
+  postComments PostComment[]
+  postShares PostShare[]
+  passwordResetTokens PasswordResetToken[]
+  ratingsGiven UserRating[] @relation("RatingsGiven")
+  ratingsReceived UserRating[] @relation("RatingsReceived")
+  following UserFollow[] @relation("Following")
+  followers UserFollow[] @relation("Followers")
   vehicles  Vehicle[]
   garageVehicles GarageVehicle[]
   vehicleListings VehicleListing[]
@@ -31,6 +44,48 @@ model User {
   updatedAt DateTime @updatedAt
 
   @@map("users")
+}
+
+model UserFollow {
+  id          String   @id @default(uuid())
+  followerId  String
+  followingId String
+  follower    User     @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
+  @@map("user_follows")
+}
+
+model UserRating {
+  id           String   @id @default(uuid())
+  raterId      String
+  targetUserId String
+  score        Int
+  rater        User     @relation("RatingsGiven", fields: [raterId], references: [id], onDelete: Cascade)
+  targetUser   User     @relation("RatingsReceived", fields: [targetUserId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([raterId, targetUserId])
+  @@index([targetUserId])
+  @@map("user_ratings")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
 }
 
 model Post {
@@ -42,12 +97,56 @@ model Post {
   authorId  String
   author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
   images    Image[]
+  likes     PostLike[]
+  comments  PostComment[]
+  shares    PostShare[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
   @@index([authorId])
   @@index([status])
   @@map("posts")
+}
+
+model PostLike {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@index([userId])
+  @@map("post_likes")
+}
+
+model PostComment {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  postId    String
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+  @@index([userId])
+  @@map("post_comments")
+}
+
+model PostShare {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+  @@index([userId])
+  @@map("post_shares")
 }
 
 model Image {

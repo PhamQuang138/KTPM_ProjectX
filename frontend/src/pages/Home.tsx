@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import TopNav from '../components/TopNav';
 import Footer from '../components/Footer';
+import { useAuthStore } from '../store/useAuthStore';
 
 const stats = [
   { label: 'Active Users', value: '124K+', suffix: 'Community' },
@@ -81,6 +82,9 @@ const featuredArticles = [
 ];
 
 export default function Home() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const gatedPath = (path: string) => (isAuthenticated ? path : '/login');
+
   return (
     <div className="min-h-screen bg-background text-on-background">
       <TopNav />
@@ -129,11 +133,11 @@ export default function Home() {
                transition={{ duration: 0.6, delay: 0.3 }}
                className="flex flex-col sm:flex-row items-center justify-center gap-4"
              >
-               <Link to="/market" className="btn-primary px-10 py-5 rounded-2xl text-base shadow-2xl shadow-primary/20 group w-full sm:w-auto">
+               <Link to={gatedPath('/market')} className="btn-primary px-10 py-5 rounded-2xl text-base shadow-2xl shadow-primary/20 group w-full sm:w-auto">
                  Explore Marketplace
                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                </Link>
-               <Link to="/feed" className="bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 text-on-background px-10 py-5 rounded-2xl text-base transition-all w-full sm:w-auto">
+               <Link to={gatedPath('/feed')} className="bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 text-on-background px-10 py-5 rounded-2xl text-base transition-all w-full sm:w-auto">
                  Join Community
                </Link>
              </motion.div>
@@ -187,7 +191,7 @@ export default function Home() {
                   </div>
                   <h4 className="text-xl font-bold mb-4">{f.title}</h4>
                   <p className="text-sm text-on-surface-variant leading-relaxed mb-8 opacity-80">{f.description}</p>
-                  <Link to={f.link} className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-primary font-bold group-hover:gap-4 transition-all">
+                  <Link to={gatedPath(f.link)} className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-primary font-bold group-hover:gap-4 transition-all">
                      Explore More <ChevronRight className="w-4 h-4" />
                   </Link>
                 </motion.div>
@@ -203,7 +207,7 @@ export default function Home() {
                     <h3 className="font-display text-3xl font-bold tracking-tight">Trending Listings</h3>
                     <p className="text-sm text-on-surface-variant mt-2">The hottest finds updated hourly</p>
                  </div>
-                 <Link to="/market" className="btn-secondary px-6">View All Listings</Link>
+                 <Link to={gatedPath('/market')} className="btn-secondary px-6">View All Listings</Link>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -240,7 +244,7 @@ export default function Home() {
                     Automotive depth. <br /> Curated by experts.
                  </h3>
               </div>
-              <Link to="/feed" className="btn-secondary px-8">Browse All Stories</Link>
+              <Link to={gatedPath('/feed')} className="btn-secondary px-8">Browse All Stories</Link>
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -306,7 +310,7 @@ export default function Home() {
                  <Link to="/login" className="bg-white text-primary px-12 py-5 rounded-2xl text-lg font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all w-full sm:w-auto">
                     Get Started Free
                  </Link>
-                 <Link to="/market" className="border-2 border-white/30 text-white px-12 py-5 rounded-2xl text-lg font-bold hover:bg-white hover:text-primary transition-all w-full sm:w-auto">
+                 <Link to={gatedPath('/market')} className="border-2 border-white/30 text-white px-12 py-5 rounded-2xl text-lg font-bold hover:bg-white hover:text-primary transition-all w-full sm:w-auto">
                     List Your Vehicle
                  </Link>
               </div>

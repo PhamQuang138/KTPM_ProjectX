@@ -2,6 +2,7 @@ import { LayoutGrid, ShoppingBag, PlusSquare, Users, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useAuthStore } from '../store/useAuthStore';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -9,20 +10,26 @@ function cn(...inputs: ClassValue[]) {
 
 export default function MobileNav() {
   const location = useLocation();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const navItems = [
-    { icon: LayoutGrid, label: 'Feed', path: '/' },
-    { icon: ShoppingBag, label: 'Market', path: '/market' },
-    { icon: PlusSquare, label: 'Post', path: '#' },
-    { icon: Users, label: 'Clubs', path: '#' },
-    { icon: User, label: 'Garage', path: '/garage' },
+    { icon: LayoutGrid, label: 'Explore', path: '/' },
+    ...(isAuthenticated
+      ? [
+          { icon: ShoppingBag, label: 'Market', path: '/market' },
+          { icon: PlusSquare, label: 'Post', path: '/feed?compose=1' },
+          { icon: Users, label: 'Clubs', path: '#' },
+          { icon: User, label: 'Garage', path: '/garage' },
+        ]
+      : []),
   ];
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-white/5 px-4 pb-safe">
       <div className="flex justify-between items-center h-16">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const itemPathname = item.path.split('?')[0];
+          const isActive = location.pathname === itemPathname;
           return (
             <Link
               key={item.label}

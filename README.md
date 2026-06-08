@@ -39,12 +39,7 @@ Marketplace:
 - Manage vehicle listings
 - Moderate system content
 
-Admin login:
-
-```txt
-username: admin
-password: 12345
-```
+Admin login is configured with `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `backend/.env`.
 
 Admin page:
 
@@ -81,12 +76,22 @@ NODE_ENV=development
 PORT=4000
 CORS_ORIGIN=http://localhost:3000
 DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@127.0.0.1:5432/carhub?schema=public
-JWT_SECRET=change-me-in-production
+JWT_SECRET=replace-with-a-random-secret-at-least-32-characters
 JWT_EXPIRES_IN=7d
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=replace-with-a-strong-password
 RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX=100
 LOG_LEVEL=info
 ```
+
+Generate a local JWT secret in PowerShell:
+
+```powershell
+[Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
+```
+
+Replace the example values for `JWT_SECRET` and `ADMIN_PASSWORD` before starting the backend.
 
 ## Database
 

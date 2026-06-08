@@ -15,6 +15,7 @@ interface AdminUser {
   email: string;
   name: string;
   role: 'USER' | 'ADMIN';
+  isVerifiedProfessional: boolean;
   _count: {posts: number; vehicles: number};
 }
 
@@ -39,42 +40,79 @@ export default function Admin() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [posts, setPosts] = useState<AdminPost[]>([]);
   const [vehicles, setVehicles] = useState<AdminVehicle[]>([]);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadAdminData = async () => {
-    const [dashboardData, usersData, postsData, vehiclesData] = await Promise.all([
-      apiRequest<Dashboard>('/admin/dashboard'),
-      apiRequest<AdminUser[]>('/admin/users'),
-      apiRequest<AdminPost[]>('/admin/posts'),
-      apiRequest<AdminVehicle[]>('/admin/vehicles'),
-    ]);
+    setError('');
+    setIsLoading(true);
+    try {
+      const [dashboardData, usersData, postsData, vehiclesData] = await Promise.all([
+        apiRequest<Dashboard>('/admin/dashboard'),
+        apiRequest<AdminUser[]>('/admin/users'),
+        apiRequest<AdminPost[]>('/admin/posts'),
+        apiRequest<AdminVehicle[]>('/admin/vehicles'),
+      ]);
 
-    setDashboard(dashboardData);
-    setUsers(usersData);
-    setPosts(postsData);
-    setVehicles(vehiclesData);
+      setDashboard(dashboardData);
+      setUsers(usersData);
+      setPosts(postsData);
+      setVehicles(vehiclesData);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Unable to load admin data.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
-    loadAdminData().catch(() => undefined);
+    void loadAdminData();
   }, []);
 
   const updatePostStatus = async (id: string, status: 'DRAFT' | 'PUBLISHED') => {
-    await apiRequest(`/admin/posts/${id}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({status}),
-    });
-    await loadAdminData();
+    try {
+      await apiRequest(`/admin/posts/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({status}),
+      });
+      await loadAdminData();
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Unable to update the post.');
+    }
+  };
+
+  const updateUserVerification = async (id: string, isVerifiedProfessional: boolean) => {
+    try {
+      await apiRequest(`/admin/users/${id}/verification`, {
+        method: 'PATCH',
+        body: JSON.stringify({isVerifiedProfessional}),
+      });
+      await loadAdminData();
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Unable to update user verification.');
+    }
   };
 
   const deleteResource = async (path: string) => {
-    await apiRequest(path, {method: 'DELETE'});
-    await loadAdminData();
+    if (!window.confirm('Delete this item permanently?')) return;
+    try {
+      await apiRequest(path, {method: 'DELETE'});
+      await loadAdminData();
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Unable to delete the item.');
+    }
   };
 
   return (
     <div className="min-h-screen bg-background text-on-background">
       <TopNav title="Admin" />
       <main className="max-w-container-max mx-auto px-6 md:px-margin-desktop py-10 space-y-10">
+        {error && (
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+        {isLoading && <p className="text-sm text-on-surface-variant">Loading admin data...</p>}
         <section className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[
             ['Users', dashboard?.users ?? 0],
@@ -94,12 +132,23 @@ export default function Admin() {
           <h2 className="font-display text-2xl font-bold">Users</h2>
           <div className="space-y-2">
             {users.map((user) => (
-              <div key={user.id} className="flex items-center justify-between bg-white/[0.03] border border-white/10 rounded-xl p-4">
+              <div key={user.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/[0.03] border border-white/10 rounded-xl p-4">
                 <div>
-                  <p className="font-bold">{user.name} <span className="text-primary text-xs">{user.role}</span></p>
+                  <p className="font-bold">
+                    {user.name} <span className="text-primary text-xs">{user.role}</span>{' '}
+                    {user.isVerifiedProfessional && <span className="text-green-300 text-xs">Verified Pro</span>}
+                  </p>
                   <p className="text-xs text-on-surface-variant">{user.email} · {user._count.posts} posts · {user._count.vehicles} vehicles</p>
                 </div>
-                {user.role !== 'ADMIN' && <button onClick={() => deleteResource(`/admin/users/${user.id}`)} className="text-red-300 text-xs font-bold">Delete</button>}
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => updateUserVerification(user.id, !user.isVerifiedProfessional)}
+                    className="btn-secondary px-4 py-2 text-[10px]"
+                  >
+                    {user.isVerifiedProfessional ? 'Revoke Verified' : 'Verify Pro'}
+                  </button>
+                  {user.role !== 'ADMIN' && <button onClick={() => deleteResource(`/admin/users/${user.id}`)} className="text-red-300 text-xs font-bold">Delete</button>}
+                </div>
               </div>
             ))}
           </div>
@@ -110,13 +159,13 @@ export default function Admin() {
           <div className="space-y-2">
             {posts.map((post) => (
               <div key={post.id} className="bg-white/[0.03] border border-white/10 rounded-xl p-4">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div>
                     <p className="font-bold">{post.title}</p>
                     <p className="text-xs text-on-surface-variant">By {post.author.name} · {post.status}</p>
                     <p className="text-sm text-on-surface-variant mt-2 line-clamp-2">{post.content}</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <button onClick={() => updatePostStatus(post.id, post.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED')} className="btn-secondary px-4 py-2 text-[10px]">
                       {post.status === 'PUBLISHED' ? 'Unpublish' : 'Publish'}
                     </button>
@@ -132,7 +181,7 @@ export default function Admin() {
           <h2 className="font-display text-2xl font-bold">Vehicle Listings</h2>
           <div className="space-y-2">
             {vehicles.map((vehicle) => (
-              <div key={vehicle.id} className="flex items-center justify-between bg-white/[0.03] border border-white/10 rounded-xl p-4">
+              <div key={vehicle.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/[0.03] border border-white/10 rounded-xl p-4">
                 <div>
                   <p className="font-bold">{vehicle.title} <span className="text-primary">{vehicle.price}</span></p>
                   <p className="text-xs text-on-surface-variant">Seller: {vehicle.seller.name} · {vehicle.status}</p>

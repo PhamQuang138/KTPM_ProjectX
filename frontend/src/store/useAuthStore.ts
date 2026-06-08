@@ -20,6 +20,7 @@ interface AuthState {
   isAuthenticated: boolean;
   signup: (input: {email: string; password: string; name: string; avatar?: string}) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
+  updateUser: (input: Partial<AuthUser>) => void;
   logout: () => Promise<void>;
 }
 
@@ -61,6 +62,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       user: result.user,
       isAuthenticated: true,
     });
+  },
+
+  updateUser(input) {
+    const currentUser = get().user;
+    if (!currentUser) return;
+
+    const nextUser = {...currentUser, ...input};
+    localStorage.setItem('auth_user', JSON.stringify(nextUser));
+    set({user: nextUser});
   },
 
   async logout() {

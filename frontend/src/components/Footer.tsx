@@ -6,7 +6,7 @@ export default function Footer({ hideLogo }: { hideLogo?: boolean }) {
       {!hideLogo && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 px-6 md:px-margin-desktop py-16 max-w-container-max mx-auto">
           <div className="space-y-6">
-            <h3 className="font-display text-3xl text-on-surface font-bold tracking-tighter">AUTOVISTA</h3>
+            <h3 className="font-display text-3xl text-on-surface font-bold tracking-tighter">CarHub</h3>
             <p className="text-secondary text-sm max-w-sm font-sans opacity-80 leading-relaxed">
               Defining the future of luxury automotive trade through precision data and exclusive collector access.
             </p>
@@ -54,7 +54,7 @@ export default function Footer({ hideLogo }: { hideLogo?: boolean }) {
       
       <div className={`${hideLogo ? 'px-0 py-4 opacity-50' : 'px-6 md:px-margin-desktop py-8 border-t border-white/5'} max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-4`}>
         <p className="font-mono text-[9px] text-secondary/60 tracking-[0.2em] uppercase">
-          © {new Date().getFullYear()} AUTOVISTA
+          © {new Date().getFullYear()} CarHub
         </p>
         {!hideLogo && (
           <div className="flex gap-8">

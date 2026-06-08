@@ -49,6 +49,17 @@ export const vehicleService = {
     return prisma.garageVehicle.findUnique({where: {id}, include: garageInclude});
   },
 
+  findActiveListingByGarageVehicleId(vehicleId: string) {
+    return prisma.vehicleListing.findFirst({
+      where: {
+        vehicleId,
+        status: {not: 'Sold'},
+      },
+      include: listingInclude,
+      orderBy: {createdAt: 'desc'},
+    });
+  },
+
   createGarageVehicle(input: CreateGarageVehicleInput) {
     return prisma.garageVehicle.create({
       data: {
@@ -79,6 +90,7 @@ export const vehicleService = {
         ...(category ? {category: {equals: category, mode: 'insensitive' as const}} : {}),
         ...(search ? {title: {contains: search, mode: 'insensitive' as const}} : {}),
         ...(sellerId ? {sellerId} : {}),
+        ...(!sellerId ? {status: {not: 'Hidden'}} : {}),
       },
       include: listingInclude,
       orderBy: {createdAt: 'desc'},

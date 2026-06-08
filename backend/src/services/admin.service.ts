@@ -22,12 +22,43 @@ export const adminService = {
         name: true,
         avatar: true,
         role: true,
+        isVerifiedProfessional: true,
         createdAt: true,
         _count: {
           select: {posts: true, vehicles: true},
         },
       },
       orderBy: {createdAt: 'desc'},
+    });
+  },
+
+  getUserById(id: string) {
+    return prisma.user.findUnique({
+      where: {id},
+      select: {id: true, role: true},
+    });
+  },
+
+  countAdmins() {
+    return prisma.user.count({where: {role: 'ADMIN'}});
+  },
+
+  updateUserVerification(id: string, isVerifiedProfessional: boolean) {
+    return prisma.user.update({
+      where: {id},
+      data: {isVerifiedProfessional},
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatar: true,
+        role: true,
+        isVerifiedProfessional: true,
+        createdAt: true,
+        _count: {
+          select: {posts: true, vehicles: true},
+        },
+      },
     });
   },
 
