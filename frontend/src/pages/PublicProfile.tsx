@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {Link, Navigate, useParams} from 'react-router-dom';
-import {ArrowLeft, Globe, Grid3X3, List, MapPin, MessageCircle, PenTool, Star} from 'lucide-react';
+import {ArrowLeft, Camera, Globe, Grid3X3, List, LoaderCircle, MapPin, MessageCircle, PenTool, Star} from 'lucide-react';
 import {AnimatePresence, motion} from 'motion/react';
 import TopNav from '../components/TopNav';
 import MobileNav from '../components/MobileNav';
@@ -10,6 +10,7 @@ import {apiRequest} from '../lib/api';
 import {useAuthStore} from '../store/useAuthStore';
 import {useSidebarStore} from '../store/useSidebarStore';
 import {useMessageStore} from '../store/useMessageStore';
+import {uploadImage} from '../lib/imageUpload';
 
 interface PublicPost {
   id: string;
@@ -69,6 +70,7 @@ interface PublicProfileData {
 export default function PublicProfile() {
   const {id} = useParams();
   const currentUser = useAuthStore((state) => state.user);
+  const updateUser = useAuthStore((state) => state.updateUser);
   const {isOpen} = useSidebarStore();
   const startDirect = useMessageStore((state) => state.startDirect);
   const [profile, setProfile] = useState<PublicProfileData | null>(null);
@@ -78,6 +80,9 @@ export default function PublicProfile() {
   const [ratingError, setRatingError] = useState('');
   const [followError, setFollowError] = useState('');
   const [isFollowLoading, setIsFollowLoading] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
+  const [avatarPreview, setAvatarPreview] = useState('');
 
   useEffect(() => {
     if (!id) return;
@@ -134,10 +139,36 @@ export default function PublicProfile() {
     }
   };
 
+  const handleAvatarUpload = async (file?: File) => {
+    if (!file || !profile || currentUser?.id !== profile.id || isUploadingAvatar) return;
+
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview(previewUrl);
+    setAvatarError('');
+    setIsUploadingAvatar(true);
+    try {
+      const uploaded = await uploadImage(file);
+      const updated = await apiRequest<{avatar?: string | null}>('/users/me/profile', {
+        method: 'PATCH',
+        body: JSON.stringify({avatar: uploaded.url}),
+      });
+      const nextAvatar = updated.avatar ?? uploaded.url;
+      updateUser({avatar: nextAvatar});
+      setProfile((current) => current ? {...current, avatar: nextAvatar} : current);
+      setAvatarPreview('');
+    } catch (error) {
+      setAvatarPreview('');
+      setAvatarError(error instanceof Error ? error.message : 'Không thể cập nhật ảnh đại diện.');
+    } finally {
+      URL.revokeObjectURL(previewUrl);
+      setIsUploadingAvatar(false);
+    }
+  };
+
   if (!id) return <Navigate to="/market" replace />;
 
   const handle = profile?.email.split('@')[0] ?? 'collector';
-  const avatar = profile?.avatar ?? `https://i.pravatar.cc/200?u=${encodeURIComponent(profile?.email ?? 'collector')}`;
+  const avatar = avatarPreview || profile?.avatar || `https://i.pravatar.cc/200?u=${encodeURIComponent(profile?.email ?? 'collector')}`;
   const banner =
     profile?.bannerImage ||
     'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=2000';
@@ -210,11 +241,37 @@ export default function PublicProfile() {
                     <div className="relative shrink-0">
                       <div className="w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] overflow-hidden border-[6px] border-background bg-background p-1.5 shadow-2xl">
                         <img src={avatar} className="w-full h-full object-cover rounded-[2rem]" alt={profile.name} />
+                        {isUploadingAvatar && (
+                          <div className="absolute inset-1.5 flex items-center justify-center rounded-[2rem] bg-black/55">
+                            <LoaderCircle className="h-8 w-8 animate-spin text-white" />
+                          </div>
+                        )}
                       </div>
+                      {currentUser?.id === profile.id && (
+                        <label
+                          className={`absolute right-2 top-2 rounded-xl border border-white/10 bg-black/70 p-2 shadow-lg transition ${isUploadingAvatar ? 'cursor-wait opacity-70' : 'cursor-pointer hover:bg-primary hover:text-on-primary'}`}
+                          title="Đổi ảnh đại diện"
+                        >
+                          {isUploadingAvatar ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            className="hidden"
+                            disabled={isUploadingAvatar}
+                            onChange={(event) => {
+                              void handleAvatarUpload(event.target.files?.[0]);
+                              event.currentTarget.value = '';
+                            }}
+                          />
+                        </label>
+                      )}
                       {profile.social.followers >= 5 && (
                         <div className="absolute bottom-4 -right-2 bg-primary p-2 rounded-xl shadow-lg border-2 border-background" title="Popular collector">
                           <Star className="w-4 h-4 text-on-primary fill-current" />
                         </div>
+                      )}
+                      {avatarError && (
+                        <p className="absolute left-0 top-full mt-2 w-56 text-left text-xs text-red-300">{avatarError}</p>
                       )}
                     </div>
 

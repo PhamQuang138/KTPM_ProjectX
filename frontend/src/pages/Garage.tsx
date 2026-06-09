@@ -3,7 +3,7 @@ import TopNav from '../components/TopNav';
 import MobileNav from '../components/MobileNav';
 import SocialPost from '../components/SocialPost';
 import { Link } from 'react-router-dom';
-import { Eye, MessageCircle, TrendingUp, Plus, Star, Heart, Users, MapPin, Globe, Grid3X3, List, PenTool, Camera } from 'lucide-react';
+import { Eye, MessageCircle, TrendingUp, Plus, Star, Heart, Users, MapPin, Globe, Grid3X3, List, PenTool, Camera, LoaderCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FormEvent, useEffect, useState } from 'react';
 import { useSidebarStore } from '../store/useSidebarStore';
@@ -177,12 +177,14 @@ export default function Garage() {
   const [profileForm, setProfileForm] = useState<ProfileFormState>({bio: '', location: '', focusBrands: []});
   const [profileFormError, setProfileFormError] = useState('');
   const [profileMediaError, setProfileMediaError] = useState('');
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState('');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const { isOpen } = useSidebarStore();
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
   const displayName = user?.name ?? 'Khách';
-  const avatar = user?.avatar ?? `https://i.pravatar.cc/200?u=${encodeURIComponent(user?.email ?? 'guest')}`;
+  const avatar = avatarPreview || user?.avatar || `https://i.pravatar.cc/200?u=${encodeURIComponent(user?.email ?? 'guest')}`;
   const handle = user?.email.split('@')[0] ?? 'guest';
   useEffect(() => {
     if (!user) return;
@@ -264,6 +266,11 @@ export default function Garage() {
     if (!file) return;
 
     setProfileMediaError('');
+    const previewUrl = URL.createObjectURL(file);
+    if (type === 'avatar') {
+      setAvatarPreview(previewUrl);
+      setIsUploadingAvatar(true);
+    }
     try {
       const uploaded = await uploadImage(file);
       const updatedProfile = await apiRequest<{avatar?: string | null; bannerImage?: string | null}>('/users/me/profile', {
@@ -273,11 +280,16 @@ export default function Garage() {
 
       if (type === 'avatar') {
         updateUser({avatar: updatedProfile.avatar ?? uploaded.url});
+        setAvatarPreview('');
       } else {
         setProfileBannerImage(updatedProfile.bannerImage ?? uploaded.url);
       }
     } catch (error) {
+      if (type === 'avatar') setAvatarPreview('');
       setProfileMediaError(error instanceof Error ? error.message : 'Không thể tải ảnh lên.');
+    } finally {
+      URL.revokeObjectURL(previewUrl);
+      if (type === 'avatar') setIsUploadingAvatar(false);
     }
   };
 
@@ -532,14 +544,23 @@ export default function Garage() {
                 <div className="relative">
                   <div className="w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] overflow-hidden border-[6px] border-background bg-background p-1.5 shadow-2xl">
                     <img src={avatar} className="w-full h-full object-cover rounded-[2rem]" alt="Profile" />
+                    {isUploadingAvatar && (
+                      <div className="absolute inset-1.5 flex items-center justify-center rounded-[2rem] bg-black/55">
+                        <LoaderCircle className="h-8 w-8 animate-spin text-white" />
+                      </div>
+                    )}
                   </div>
-                  <label className="absolute top-3 right-3 bg-black/70 p-2 rounded-xl shadow-lg border border-white/10 cursor-pointer hover:bg-primary hover:text-on-primary transition-all">
-                    <Camera className="w-4 h-4" />
+                  <label className={`absolute top-3 right-3 bg-black/70 p-2 rounded-xl shadow-lg border border-white/10 transition-all ${isUploadingAvatar ? 'cursor-wait opacity-70' : 'cursor-pointer hover:bg-primary hover:text-on-primary'}`} title="Đổi ảnh đại diện">
+                    {isUploadingAvatar ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Camera className="w-4 h-4" />}
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp"
                       className="hidden"
-                      onChange={(event) => handleProfileImageUpload(event.target.files?.[0], 'avatar')}
+                      disabled={isUploadingAvatar}
+                      onChange={(event) => {
+                        void handleProfileImageUpload(event.target.files?.[0], 'avatar');
+                        event.currentTarget.value = '';
+                      }}
                     />
                   </label>
                   {followersCount >= 5 && (
