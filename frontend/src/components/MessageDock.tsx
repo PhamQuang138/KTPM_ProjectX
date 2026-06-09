@@ -1,5 +1,6 @@
 import {FormEvent, useCallback, useEffect, useRef, useState} from 'react';
-import {ChevronLeft, LoaderCircle, MessageCircle, Send, X} from 'lucide-react';
+import {ChevronLeft, ExternalLink, LoaderCircle, MessageCircle, Send, X} from 'lucide-react';
+import {Link} from 'react-router-dom';
 import {apiRequest} from '../lib/api';
 import {useAuthStore} from '../store/useAuthStore';
 import {useMessageStore} from '../store/useMessageStore';
@@ -77,6 +78,11 @@ export default function MessageDock() {
     })
       .then(async (conversation) => {
         await loadConversations();
+        if (!conversation.messages.length) {
+          setContent(
+            `Chào ${contactTarget.sellerName}, tôi muốn trao đổi thêm về ${contactTarget.listingTitle} (${contactTarget.listingPrice}).`,
+          );
+        }
         selectConversation(conversation.id);
       })
       .catch((requestError) =>
@@ -220,6 +226,32 @@ export default function MessageDock() {
 
       {!isLoading && activeConversationId && (
         <>
+          {activeConversation && (
+            <Link
+              to={`/market/${activeConversation.listing.id}`}
+              className="mx-3 mt-3 flex shrink-0 items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3 hover:bg-primary/10"
+            >
+              {activeConversation.listing.vehicle?.image ? (
+                <img
+                  src={activeConversation.listing.vehicle.image}
+                  alt={activeConversation.listing.title}
+                  className="h-14 w-16 shrink-0 rounded-lg object-cover"
+                />
+              ) : (
+                <div className="flex h-14 w-16 shrink-0 items-center justify-center rounded-lg bg-surface-container-high">
+                  <MessageCircle className="h-5 w-5 text-primary" />
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-bold">{activeConversation.listing.title}</p>
+                <p className="mt-1 text-xs font-bold text-primary">{activeConversation.listing.price}</p>
+                <p className="mt-1 text-[9px] uppercase tracking-widest text-on-surface-variant">
+                  Sản phẩm đang trao đổi
+                </p>
+              </div>
+              <ExternalLink className="h-4 w-4 shrink-0 text-on-surface-variant" />
+            </Link>
+          )}
           <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
             {messages.map((message) => {
               const isMine = message.sender.id === currentUser.id;

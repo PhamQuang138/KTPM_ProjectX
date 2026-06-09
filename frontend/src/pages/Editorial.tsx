@@ -88,25 +88,34 @@ export default function Editorial() {
     }
   };
 
-  const handlePostImageUpload = async (file: File | undefined) => {
-    if (!file) return;
+  const handlePostImageUpload = async (files: FileList | null) => {
+    if (!files?.length) return;
     if (!user) {
       navigate('/login');
       return;
     }
 
-    if (postImages.length >= 4) {
-      setPostError('Bạn có thể đính kèm tối đa 4 ảnh cho mỗi bài viết.');
+    const selectedFiles = Array.from(files);
+    const availableSlots = 8 - postImages.length;
+    if (availableSlots <= 0) {
+      setPostError('Bạn có thể đính kèm tối đa 8 ảnh cho mỗi bài viết.');
       return;
     }
 
     setPostError('');
     setIsUploadingPostImage(true);
     try {
-      const uploaded = await uploadImage(file);
+      const uploadedUrls: string[] = [];
+      for (const file of selectedFiles.slice(0, availableSlots)) {
+        const uploaded = await uploadImage(file);
+        uploadedUrls.push(uploaded.url);
+      }
 
-      setPostImages((current) => [...current, uploaded.url]);
+      setPostImages((current) => [...current, ...uploadedUrls]);
       setIsPosting(true);
+      if (selectedFiles.length > availableSlots) {
+        setPostError(`Chỉ thêm ${availableSlots} ảnh để không vượt quá giới hạn 8 ảnh.`);
+      }
     } catch (error) {
       setPostError(error instanceof Error ? error.message : 'Không thể tải ảnh lên.');
     } finally {
@@ -273,19 +282,26 @@ export default function Editorial() {
                         className="flex items-center justify-between pt-4 border-t border-white/5"
                       >
                         <div className="flex gap-2">
-                          <label className={`interactive-icon text-primary cursor-pointer ${isUploadingPostImage ? 'opacity-50 pointer-events-none' : ''}`}>
+                          <label className={`btn-secondary flex cursor-pointer items-center gap-2 px-3 py-2 text-[10px] ${isUploadingPostImage || postImages.length >= 8 ? 'opacity-50 pointer-events-none' : ''}`}>
                             <Camera className="w-5 h-5" />
+                            <span>{postImages.length ? 'Thêm ảnh' : 'Chọn ảnh'}</span>
                             <input
                               type="file"
+                              multiple
                               accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
                               className="hidden"
-                              disabled={isUploadingPostImage}
+                              disabled={isUploadingPostImage || postImages.length >= 8}
                               onChange={(event) => {
-                                void handlePostImageUpload(event.target.files?.[0]);
+                                void handlePostImageUpload(event.target.files);
                                 event.target.value = '';
                               }}
                             />
                           </label>
+                          {postImages.length > 0 && (
+                            <span className="self-center text-[10px] text-on-surface-variant">
+                              {postImages.length}/8 ảnh
+                            </span>
+                          )}
                           <button className="interactive-icon"><Hash className="w-5 h-5" /></button>
                         </div>
                         <div className="flex gap-3">

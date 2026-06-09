@@ -167,6 +167,8 @@ export default function VehicleDetail() {
                       startContact({
                         listingId: vehicle.id,
                         listingTitle: vehicle.title,
+                        listingPrice: vehicle.price,
+                        listingImage: vehicle.vehicle?.image,
                         sellerName: vehicle.seller.name,
                       })
                     }

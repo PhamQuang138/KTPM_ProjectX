@@ -137,7 +137,7 @@ export default function Garage() {
     listingDescription: '',
     price: '',
     location: '',
-    image: '',
+    images: [] as string[],
     condition: 'Used',
     category: 'Daily',
     specs: '',
@@ -267,15 +267,28 @@ export default function Garage() {
     }
   };
 
-  const handleVehicleImageUpload = async (file: File | undefined) => {
-    if (!file) return;
+  const handleVehicleImageUpload = async (files: FileList | null) => {
+    if (!files?.length) return;
 
     setVehicleFormError('');
+    const selectedFiles = Array.from(files);
+    const availableSlots = 12 - vehicleForm.images.length;
+    if (availableSlots <= 0) {
+      setVehicleFormError('Bạn có thể tải tối đa 12 ảnh cho mỗi xe.');
+      return;
+    }
+
     setIsUploadingVehicleImage(true);
     try {
-      const uploaded = await uploadImage(file);
-
-      setVehicleForm((current) => ({...current, image: uploaded.url}));
+      const uploadedUrls: string[] = [];
+      for (const file of selectedFiles.slice(0, availableSlots)) {
+        const uploaded = await uploadImage(file);
+        uploadedUrls.push(uploaded.url);
+      }
+      setVehicleForm((current) => ({...current, images: [...current.images, ...uploadedUrls]}));
+      if (selectedFiles.length > availableSlots) {
+        setVehicleFormError(`Chỉ thêm ${availableSlots} ảnh để không vượt quá giới hạn 12 ảnh.`);
+      }
     } catch (error) {
       setVehicleFormError(error instanceof Error ? error.message : 'Không thể tải ảnh xe lên.');
     } finally {
@@ -289,7 +302,7 @@ export default function Garage() {
 
     setVehicleFormError('');
 
-    if (!vehicleForm.image) {
+    if (!vehicleForm.images.length) {
       setVehicleFormError('Vui lòng tải ảnh xe lên trước khi lưu.');
       return;
     }
@@ -306,8 +319,8 @@ export default function Garage() {
         body: JSON.stringify({
           title: vehicleForm.title,
           description: vehicleForm.description,
-          image: vehicleForm.image,
-          images: [vehicleForm.image],
+          image: vehicleForm.images[0],
+          images: vehicleForm.images,
           condition: vehicleForm.condition,
           specs: vehicleForm.specs
             .split(',')
@@ -339,7 +352,7 @@ export default function Garage() {
         listingDescription: '',
         price: '',
         location: '',
-        image: '',
+        images: [],
         condition: 'Used',
         category: 'Daily',
         specs: '',
@@ -779,30 +792,66 @@ export default function Garage() {
             </div>
 
             <textarea required placeholder="Mô tả xe trong Garage" value={vehicleForm.description} onChange={(event) => setVehicleForm({...vehicleForm, description: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 min-h-24" />
-            <div className="rounded-2xl border border-white/10 bg-background p-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="aspect-[4/3] md:w-48 rounded-xl overflow-hidden border border-white/10 bg-white/[0.03] flex items-center justify-center">
-                  {vehicleForm.image ? (
-                    <img src={vehicleForm.image} alt="Vehicle preview" className="h-full w-full object-cover" />
-                  ) : (
-                    <Camera className="w-8 h-8 text-on-surface-variant" />
-                  )}
-                </div>
-                <div className="flex-1 flex flex-col justify-center gap-3">
+            <div className="space-y-4 rounded-2xl border border-white/10 bg-background p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
                   <p className="text-sm font-bold">Ảnh xe</p>
-                  <p className="text-xs text-on-surface-variant">Tải lên ảnh JPG, PNG hoặc WebP. Dung lượng tối đa 4MB.</p>
-                  <label className="btn-secondary w-fit px-5 py-3 text-[10px] cursor-pointer">
-                    {isUploadingVehicleImage ? 'Đang tải...' : vehicleForm.image ? 'Đổi ảnh' : 'Chọn ảnh'}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      disabled={isUploadingVehicleImage}
-                      className="hidden"
-                      onChange={(event) => handleVehicleImageUpload(event.target.files?.[0])}
-                    />
-                  </label>
+                  <p className="text-xs text-on-surface-variant">
+                    Ảnh đầu tiên là ảnh bìa. Có thể tải tối đa 12 ảnh.
+                  </p>
                 </div>
+                <label className="btn-secondary w-fit cursor-pointer px-5 py-3 text-[10px]">
+                  {isUploadingVehicleImage
+                    ? 'Đang tải...'
+                    : vehicleForm.images.length
+                      ? 'Thêm ảnh'
+                      : 'Chọn ảnh'}
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                    disabled={isUploadingVehicleImage || vehicleForm.images.length >= 12}
+                    className="hidden"
+                    onChange={(event) => {
+                      void handleVehicleImageUpload(event.target.files);
+                      event.target.value = '';
+                    }}
+                  />
+                </label>
               </div>
+              {vehicleForm.images.length ? (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {vehicleForm.images.map((imageUrl, index) => (
+                    <div key={imageUrl} className="relative aspect-video overflow-hidden rounded-xl border border-white/10">
+                      <img src={imageUrl} alt={`Ảnh xe ${index + 1}`} className="h-full w-full object-cover" />
+                      {index === 0 && (
+                        <span className="absolute left-2 top-2 rounded-md bg-primary px-2 py-1 text-[9px] font-bold text-on-primary">
+                          Ảnh bìa
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setVehicleForm((current) => ({
+                            ...current,
+                            images: current.images.filter((url) => url !== imageUrl),
+                          }))
+                        }
+                        className="absolute right-2 top-2 rounded-md bg-black/75 px-2 py-1 text-[9px] font-bold text-white hover:bg-red-500"
+                      >
+                        Xóa
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex aspect-[3/1] items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.03]">
+                  <Camera className="h-8 w-8 text-on-surface-variant" />
+                </div>
+              )}
+              <p className="text-right text-[10px] text-on-surface-variant">
+                {vehicleForm.images.length}/12 ảnh
+              </p>
             </div>
 
             <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-background px-4 py-3">

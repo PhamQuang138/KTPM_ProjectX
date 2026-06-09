@@ -3,6 +3,8 @@ import {create} from 'zustand';
 interface ContactTarget {
   listingId: string;
   listingTitle: string;
+  listingPrice: string;
+  listingImage?: string;
   sellerName: string;
 }
 
