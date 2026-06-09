@@ -24,6 +24,7 @@
     "db:migrate-images": "ts-node-dev --transpile-only --exit-child scripts/migrate-images-to-blob.ts",
     "db:seed-marketplace": "ts-node --transpile-only scripts/seed-marketplace-catalog.ts",
     "db:seed-marketplace-asia": "ts-node --transpile-only scripts/seed-marketplace-asia.ts",
+    "db:seed-community-asia-extra": "ts-node --transpile-only scripts/seed-community-and-asia-extra.ts",
     "db:backfill-vehicle-search": "ts-node --transpile-only scripts/backfill-vehicle-search-metadata.ts",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio"

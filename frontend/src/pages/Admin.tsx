@@ -4,6 +4,8 @@ import {
   BarChart3,
   Car,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   FileText,
   Gauge,
   MessageSquare,
@@ -123,7 +125,7 @@ const dayKey = (date: Date) =>
   }).format(date);
 
 const shortDay = (date: Date) =>
-  new Intl.DateTimeFormat('en', {
+  new Intl.DateTimeFormat('vi-VN', {
     weekday: 'short',
   }).format(date);
 
@@ -146,7 +148,7 @@ const countByDay = (items: {createdAt?: string}[]): ChartPoint[] => {
   });
 };
 
-const formatDate = (date: string) => new Date(date).toLocaleDateString();
+const formatDate = (date: string) => new Date(date).toLocaleDateString('vi-VN');
 
 function StatCard({
   label,
@@ -162,12 +164,12 @@ function StatCard({
   tone: string;
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-lg border border-white/10 bg-surface-container-low p-5 shadow-lg">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">{label}</p>
-          <p className="mt-3 text-3xl font-bold text-slate-900">{value}</p>
-          <p className="mt-2 text-xs text-slate-500">{note}</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">{label}</p>
+          <p className="mt-3 text-3xl font-bold text-on-surface">{value}</p>
+          <p className="mt-2 text-xs text-on-surface-variant">{note}</p>
         </div>
         <div className={`rounded-lg p-3 ${tone}`}>
           <Icon className="h-5 w-5" />
@@ -181,15 +183,15 @@ function BarChart({title, subtitle, data, color}: {title: string; subtitle: stri
   const max = Math.max(...data.map((point) => point.value), 1);
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-lg border border-white/10 bg-surface-container-low p-6 shadow-lg">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-slate-700">{title}</h2>
-          <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface">{title}</h2>
+          <p className="mt-1 text-xs text-on-surface-variant">{subtitle}</p>
         </div>
-        <BarChart3 className="h-5 w-5 text-slate-400" />
+        <BarChart3 className="h-5 w-5 text-on-surface-variant" />
       </div>
-      <div className="flex h-56 items-end gap-3 border-b border-slate-100 pb-3">
+      <div className="flex h-56 items-end gap-3 border-b border-white/10 pb-3">
         {data.map((point) => (
           <div key={point.label} className="flex h-full flex-1 flex-col items-center justify-end gap-2">
             <div className="flex h-full w-full items-end justify-center">
@@ -199,7 +201,7 @@ function BarChart({title, subtitle, data, color}: {title: string; subtitle: stri
                 title={`${point.label}: ${point.value}`}
               />
             </div>
-            <p className="text-[10px] font-bold uppercase text-slate-400">{point.label}</p>
+            <p className="text-[10px] font-bold uppercase text-on-surface-variant">{point.label}</p>
           </div>
         ))}
       </div>
@@ -212,10 +214,10 @@ function ProgressRow({label, value, total, color}: {label: string; value: number
   return (
     <div>
       <div className="mb-2 flex items-center justify-between text-xs">
-        <span className="font-semibold text-slate-700">{label}</span>
-        <span className="text-slate-500">{percent}%</span>
+        <span className="font-semibold text-on-surface">{label}</span>
+        <span className="text-on-surface-variant">{percent}%</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+      <div className="h-2 overflow-hidden rounded-full bg-white/10">
         <div className={`h-full rounded-full ${color}`} style={{width: `${percent}%`}} />
       </div>
     </div>
@@ -228,8 +230,8 @@ function ActionButton({children, onClick, danger = false}: {children: string; on
       onClick={onClick}
       className={`rounded-md border px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition ${
         danger
-          ? 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100'
-          : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+          ? 'border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20'
+          : 'border-white/10 bg-white/5 text-on-surface hover:bg-white/10'
       }`}
     >
       {children}
@@ -238,6 +240,7 @@ function ActionButton({children, onClick, danger = false}: {children: string; on
 }
 
 export default function Admin() {
+  const usersPerPage = 10;
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [posts, setPosts] = useState<AdminPost[]>([]);
@@ -249,6 +252,7 @@ export default function Admin() {
   const [follows, setFollows] = useState<AdminFollow[]>([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [userPage, setUserPage] = useState(1);
 
   const loadAdminData = async () => {
     setError('');
@@ -286,7 +290,7 @@ export default function Admin() {
       setRatings(ratingsData);
       setFollows(followsData);
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Unable to load admin data.');
+      setError(requestError instanceof Error ? requestError.message : 'Không thể tải dữ liệu quản trị.');
     } finally {
       setIsLoading(false);
     }
@@ -308,7 +312,7 @@ export default function Admin() {
       });
       await loadAdminData();
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Unable to update user verification.');
+      setError(requestError instanceof Error ? requestError.message : 'Không thể cập nhật trạng thái xác thực.');
     }
   };
 
@@ -320,17 +324,17 @@ export default function Admin() {
       });
       await loadAdminData();
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Unable to update status.');
+      setError(requestError instanceof Error ? requestError.message : 'Không thể cập nhật trạng thái.');
     }
   };
 
   const deleteResource = async (path: string) => {
-    if (!window.confirm('Delete this item permanently?')) return;
+    if (!window.confirm('Xóa vĩnh viễn mục này?')) return;
     try {
       await apiRequest(path, {method: 'DELETE'});
       await loadAdminData();
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Unable to delete the item.');
+      setError(requestError instanceof Error ? requestError.message : 'Không thể xóa mục này.');
     }
   };
 
@@ -355,39 +359,45 @@ export default function Admin() {
     ...posts.slice(0, 4).map((post) => ({
       id: `post-${post.id}`,
       title: post.title,
-      meta: `Post by ${post.author.name}`,
+      meta: `Bài đăng của ${post.author.name}`,
       date: post.createdAt,
     })),
     ...comments.slice(0, 4).map((comment) => ({
       id: `comment-${comment.id}`,
       title: comment.content,
-      meta: `Comment by ${comment.user.name}`,
+      meta: `Bình luận của ${comment.user.name}`,
       date: comment.createdAt,
     })),
   ]
     .filter((item) => item.date)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 6);
+  const userTotalPages = Math.max(1, Math.ceil(users.length / usersPerPage));
+  const visibleUsers = users.slice((userPage - 1) * usersPerPage, userPage * usersPerPage);
+
+  useEffect(() => {
+    if (userPage > userTotalPages) setUserPage(userTotalPages);
+  }, [userPage, userTotalPages]);
 
   return (
-    <div className="min-h-screen bg-[#f1f4f6] text-slate-800">
+    <div className="min-h-screen bg-background text-on-background">
       <TopNav title="Admin" />
       <main className="mx-auto max-w-[1500px] px-4 py-8 sm:px-6 lg:px-10">
-        <div className="mb-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-8 rounded-lg border border-white/10 bg-surface-container-low p-6 shadow-lg">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-blue-600">CarHub Control Center</p>
-              <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Operations Dashboard</h1>
-              <p className="mt-2 max-w-2xl text-sm text-slate-500">
-                Monitor community content, marketplace listings, user growth, and moderation workload from one admin surface.
+              <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-primary">Trung tâm điều hành CarHub</p>
+              <h1 className="mt-2 text-3xl font-bold tracking-tight text-on-surface">Bảng điều khiển quản trị</h1>
+              <p className="mt-2 max-w-2xl text-sm text-on-surface-variant">
+                Theo dõi cộng đồng, chợ xe, người dùng và công việc kiểm duyệt trong một giao diện thống nhất.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <button onClick={() => void loadAdminData()} className="rounded-md bg-slate-900 px-5 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-slate-700">
-                Refresh
+              <button onClick={() => void loadAdminData()} className="rounded-md bg-primary px-5 py-3 text-xs font-bold uppercase tracking-widest text-on-primary hover:brightness-110">
+                Làm mới
               </button>
-              <div className="rounded-md border border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold text-slate-600">
-                {isLoading ? 'Syncing...' : 'Live data'}
+              <div className="rounded-md border border-white/10 bg-white/5 px-5 py-3 text-xs font-semibold text-on-surface-variant">
+                {isLoading ? 'Đang đồng bộ...' : 'Dữ liệu trực tiếp'}
               </div>
             </div>
           </div>
@@ -400,41 +410,41 @@ export default function Admin() {
         )}
 
         <section className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Users" value={dashboard?.users ?? 0} note="Registered accounts" icon={Users} tone="bg-blue-50 text-blue-600" />
-          <StatCard label="Published Posts" value={dashboard?.publishedPosts ?? 0} note={`${dashboard?.draftPosts ?? 0} drafts waiting`} icon={FileText} tone="bg-emerald-50 text-emerald-600" />
-          <StatCard label="Marketplace" value={dashboard?.vehicleListings ?? 0} note={`${totalVehicles} total vehicle records`} icon={Car} tone="bg-amber-50 text-amber-600" />
-          <StatCard label="Moderation" value={moderationQueue} note="Draft articles and posts" icon={Gauge} tone="bg-rose-50 text-rose-600" />
+          <StatCard label="Người dùng" value={dashboard?.users ?? 0} note="Tài khoản đã đăng ký" icon={Users} tone="bg-blue-500/10 text-blue-300" />
+          <StatCard label="Bài đã đăng" value={dashboard?.publishedPosts ?? 0} note={`${dashboard?.draftPosts ?? 0} bản nháp chờ xử lý`} icon={FileText} tone="bg-emerald-500/10 text-emerald-300" />
+          <StatCard label="Chợ xe" value={dashboard?.vehicleListings ?? 0} note={`${totalVehicles} bản ghi xe`} icon={Car} tone="bg-amber-500/10 text-amber-300" />
+          <StatCard label="Kiểm duyệt" value={moderationQueue} note="Bài viết và chuyên đề nháp" icon={Gauge} tone="bg-rose-500/10 text-rose-300" />
         </section>
 
         <section className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
           <div className="xl:col-span-2 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <BarChart title="Posts by Day" subtitle="Published and draft posts created over the last 7 days." data={postChart} color="bg-blue-500" />
-            <BarChart title="New Users" subtitle="Registered accounts over the last 7 days." data={userChart} color="bg-emerald-500" />
+            <BarChart title="Bài đăng theo ngày" subtitle="Bài đã đăng và bản nháp trong 7 ngày gần nhất." data={postChart} color="bg-blue-500" />
+            <BarChart title="Người dùng mới" subtitle="Tài khoản đăng ký trong 7 ngày gần nhất." data={userChart} color="bg-emerald-500" />
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-lg border border-white/10 bg-surface-container-low p-6 shadow-lg">
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-700">Community Activity</h2>
-                <p className="mt-1 text-xs text-slate-500">Actual comments, follows, ratings and post reactions recorded by the system.</p>
+                <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface">Hoạt động cộng đồng</h2>
+                <p className="mt-1 text-xs text-on-surface-variant">Bình luận, theo dõi, đánh giá và lượt tương tác thực tế.</p>
               </div>
-              <Activity className="h-5 w-5 text-slate-400" />
+              <Activity className="h-5 w-5 text-on-surface-variant" />
             </div>
             <div className="space-y-5">
-              <ProgressRow label="Posts" value={dashboard?.posts ?? 0} total={Math.max(totalContent, 1)} color="bg-blue-500" />
-              <ProgressRow label="Articles" value={dashboard?.articles ?? 0} total={Math.max(totalContent, 1)} color="bg-purple-500" />
-              <ProgressRow label="Listings" value={dashboard?.vehicleListings ?? 0} total={Math.max(totalContent, 1)} color="bg-amber-500" />
-              <ProgressRow label="Comments" value={dashboard?.comments ?? 0} total={Math.max((dashboard?.comments ?? 0) + (dashboard?.ratings ?? 0) + (dashboard?.follows ?? 0), 1)} color="bg-emerald-500" />
+              <ProgressRow label="Bài cộng đồng" value={dashboard?.posts ?? 0} total={Math.max(totalContent, 1)} color="bg-blue-500" />
+              <ProgressRow label="Chuyên đề" value={dashboard?.articles ?? 0} total={Math.max(totalContent, 1)} color="bg-purple-500" />
+              <ProgressRow label="Tin bán xe" value={dashboard?.vehicleListings ?? 0} total={Math.max(totalContent, 1)} color="bg-amber-500" />
+              <ProgressRow label="Bình luận" value={dashboard?.comments ?? 0} total={Math.max((dashboard?.comments ?? 0) + (dashboard?.ratings ?? 0) + (dashboard?.follows ?? 0), 1)} color="bg-emerald-500" />
             </div>
-            <div className="mt-7 grid grid-cols-7 items-end gap-2 border-t border-slate-100 pt-5">
+            <div className="mt-7 grid grid-cols-7 items-end gap-2 border-t border-white/10 pt-5">
               {trafficChart.map((point) => {
                 const max = Math.max(...trafficChart.map((item) => item.value), 1);
                 return (
                   <div key={point.label} className="flex flex-col items-center gap-2">
-                    <div className="h-20 w-3 overflow-hidden rounded-full bg-slate-100 flex items-end">
-                      <div className="w-full rounded-full bg-slate-900" style={{height: `${Math.max(8, (point.value / max) * 100)}%`}} />
+                    <div className="flex h-20 w-3 items-end overflow-hidden rounded-full bg-white/10">
+                      <div className="w-full rounded-full bg-primary" style={{height: `${Math.max(8, (point.value / max) * 100)}%`}} />
                     </div>
-                    <span className="text-[9px] font-bold uppercase text-slate-400">{point.label}</span>
+                    <span className="text-[9px] font-bold uppercase text-on-surface-variant">{point.label}</span>
                   </div>
                 );
               })}
@@ -443,55 +453,55 @@ export default function Admin() {
         </section>
 
         <section className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
-          <div className="rounded-lg border border-slate-200 bg-white shadow-sm xl:col-span-2">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+          <div className="rounded-lg border border-white/10 bg-surface-container-low shadow-lg xl:col-span-2">
+            <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
               <div>
-                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-700">Users & Roles</h2>
-                <p className="mt-1 text-xs text-slate-500">Account verification and user moderation.</p>
+                <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface">Tài khoản và vai trò</h2>
+                <p className="mt-1 text-xs text-on-surface-variant">Xác thực và quản lý tài khoản, 10 người mỗi trang.</p>
               </div>
-              <Users className="h-5 w-5 text-slate-400" />
+              <Users className="h-5 w-5 text-on-surface-variant" />
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-left text-sm">
-                <thead className="bg-slate-50 text-[10px] uppercase tracking-widest text-slate-500">
+                <thead className="bg-white/5 text-[10px] uppercase tracking-widest text-on-surface-variant">
                   <tr>
-                    <th className="px-6 py-3">User</th>
-                    <th className="px-6 py-3">Role</th>
-                    <th className="px-6 py-3">Activity</th>
-                    <th className="px-6 py-3">Joined</th>
-                    <th className="px-6 py-3 text-right">Actions</th>
+                    <th className="px-6 py-3">Người dùng</th>
+                    <th className="px-6 py-3">Vai trò</th>
+                    <th className="px-6 py-3">Hoạt động</th>
+                    <th className="px-6 py-3">Ngày tham gia</th>
+                    <th className="px-6 py-3 text-right">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {users.map((user) => (
-                    <tr key={user.id} className="hover:bg-slate-50">
+                <tbody className="divide-y divide-white/10">
+                  {visibleUsers.map((user) => (
+                    <tr key={user.id} className="hover:bg-white/5">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <Link to={`/profile/${user.id}`} title="Xem hồ sơ người dùng">
                             <img src={user.avatar ?? `https://i.pravatar.cc/120?u=${encodeURIComponent(user.email)}`} alt={user.name} className="h-10 w-10 rounded-full object-cover ring-2 ring-transparent transition hover:ring-blue-500" />
                           </Link>
                           <div>
-                            <p className="font-semibold text-slate-900">{user.name}</p>
-                            <p className="text-xs text-slate-500">{user.email}</p>
+                            <p className="font-semibold text-on-surface">{user.name}</p>
+                            <p className="text-xs text-on-surface-variant">{user.email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase ${user.role === 'ADMIN' ? 'bg-slate-900 text-white' : 'bg-blue-50 text-blue-700'}`}>
+                        <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase ${user.role === 'ADMIN' ? 'bg-primary text-on-primary' : 'bg-blue-500/10 text-blue-300'}`}>
                           {user.role}
                         </span>
-                        {user.isVerifiedProfessional && <span className="ml-2 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold uppercase text-emerald-700">Verified</span>}
+                        {user.isVerifiedProfessional && <span className="ml-2 rounded-full bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase text-emerald-300">Đã xác thực</span>}
                       </td>
-                      <td className="px-6 py-4 text-xs text-slate-500">
+                      <td className="px-6 py-4 text-xs text-on-surface-variant">
                         {user._count.posts} posts - {user._count.garageVehicles} garage - {user._count.vehicleListings} listings
                       </td>
-                      <td className="px-6 py-4 text-xs text-slate-500">{formatDate(user.createdAt)}</td>
+                      <td className="px-6 py-4 text-xs text-on-surface-variant">{formatDate(user.createdAt)}</td>
                       <td className="px-6 py-4">
                         <div className="flex justify-end gap-2">
                           <ActionButton onClick={() => updateUserVerification(user.id, !user.isVerifiedProfessional)}>
-                            {user.isVerifiedProfessional ? 'Revoke' : 'Verify'}
+                            {user.isVerifiedProfessional ? 'Bỏ xác thực' : 'Xác thực'}
                           </ActionButton>
-                          {user.role !== 'ADMIN' && <ActionButton danger onClick={() => deleteResource(`/admin/users/${user.id}`)}>Delete</ActionButton>}
+                          {user.role !== 'ADMIN' && <ActionButton danger onClick={() => deleteResource(`/admin/users/${user.id}`)}>Xóa</ActionButton>}
                         </div>
                       </td>
                     </tr>
@@ -499,13 +509,39 @@ export default function Admin() {
                 </tbody>
               </table>
             </div>
+            <div className="flex items-center justify-between border-t border-white/10 px-6 py-4">
+              <p className="text-xs text-on-surface-variant">
+                {users.length === 0 ? 'Chưa có tài khoản' : `${(userPage - 1) * usersPerPage + 1}-${Math.min(userPage * usersPerPage, users.length)} / ${users.length} tài khoản`}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  title="Trang trước"
+                  disabled={userPage <= 1}
+                  onClick={() => setUserPage((value) => Math.max(1, value - 1))}
+                  className="interactive-icon disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="min-w-20 text-center text-xs text-on-surface">Trang {userPage}/{userTotalPages}</span>
+                <button
+                  type="button"
+                  title="Trang sau"
+                  disabled={userPage >= userTotalPages}
+                  onClick={() => setUserPage((value) => Math.min(userTotalPages, value + 1))}
+                  className="interactive-icon disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-lg border border-white/10 bg-surface-container-low p-6 shadow-lg">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-700">Recent Activity</h2>
-                <p className="mt-1 text-xs text-slate-500">Newest posts and comments.</p>
+                <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface">Hoạt động gần đây</h2>
+                <p className="mt-1 text-xs text-on-surface-variant">Bài viết và bình luận mới nhất.</p>
               </div>
               <CheckCircle2 className="h-5 w-5 text-emerald-500" />
             </div>
@@ -514,41 +550,41 @@ export default function Admin() {
                 <div key={item.id} className="flex gap-3">
                   <div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-blue-500" />
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-slate-800">{item.title}</p>
-                    <p className="text-xs text-slate-500">{item.meta} - {formatDate(item.date)}</p>
+                    <p className="truncate text-sm font-semibold text-on-surface">{item.title}</p>
+                    <p className="text-xs text-on-surface-variant">{item.meta} - {formatDate(item.date)}</p>
                   </div>
                 </div>
               ))}
-              {latestActivity.length === 0 && <p className="text-sm text-slate-500">No activity yet.</p>}
+              {latestActivity.length === 0 && <p className="text-sm text-on-surface-variant">Chưa có hoạt động.</p>}
             </div>
           </div>
         </section>
 
         <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-          <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+          <div className="rounded-lg border border-white/10 bg-surface-container-low shadow-lg">
+            <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
               <div>
-                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-700">Community Posts</h2>
-                <p className="mt-1 text-xs text-slate-500">Publish, unpublish, or delete user posts.</p>
+                <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface">Bài đăng cộng đồng</h2>
+                <p className="mt-1 text-xs text-on-surface-variant">Đăng, ẩn hoặc xóa bài của người dùng.</p>
               </div>
-              <FileText className="h-5 w-5 text-slate-400" />
+              <FileText className="h-5 w-5 text-on-surface-variant" />
             </div>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-white/10">
               {posts.slice(0, 8).map((post) => (
                 <div key={post.id} className="p-5">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
-                      <p className="truncate font-semibold text-slate-900">{post.title}</p>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="truncate font-semibold text-on-surface">{post.title}</p>
+                      <p className="mt-1 text-xs text-on-surface-variant">
                         {post.author.name} - {post.status} - {post._count.likes} likes - {post._count.comments} comments
                       </p>
-                      <p className="mt-2 line-clamp-2 text-sm text-slate-500">{post.content}</p>
+                      <p className="mt-2 line-clamp-2 text-sm text-on-surface-variant">{post.content}</p>
                     </div>
                     <div className="flex shrink-0 gap-2">
                       <ActionButton onClick={() => updatePostStatus(post.id, post.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED')}>
-                        {post.status === 'PUBLISHED' ? 'Hide' : 'Publish'}
+                        {post.status === 'PUBLISHED' ? 'Ẩn' : 'Đăng'}
                       </ActionButton>
-                      <ActionButton danger onClick={() => deleteResource(`/admin/posts/${post.id}`)}>Delete</ActionButton>
+                      <ActionButton danger onClick={() => deleteResource(`/admin/posts/${post.id}`)}>Xóa</ActionButton>
                     </div>
                   </div>
                 </div>
@@ -556,84 +592,84 @@ export default function Admin() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+          <div className="rounded-lg border border-white/10 bg-surface-container-low shadow-lg">
+            <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
               <div>
-                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-700">Marketplace Listings</h2>
-                <p className="mt-1 text-xs text-slate-500">Moderate sale listings and garage records.</p>
+                <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface">Tin đăng chợ xe</h2>
+                <p className="mt-1 text-xs text-on-surface-variant">Kiểm duyệt tin bán xe và dữ liệu Garage.</p>
               </div>
-              <Car className="h-5 w-5 text-slate-400" />
+              <Car className="h-5 w-5 text-on-surface-variant" />
             </div>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-white/10">
               {vehicles.slice(0, 8).map((vehicle) => (
                 <div key={vehicle.id} className="p-5">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="font-semibold text-slate-900">{vehicle.title} <span className="text-blue-600">{vehicle.price}</span></p>
-                      <p className="mt-1 text-xs text-slate-500">Seller: {vehicle.seller.name} - {vehicle.status}</p>
+                      <p className="font-semibold text-on-surface">{vehicle.title} <span className="text-primary">{vehicle.price}</span></p>
+                      <p className="mt-1 text-xs text-on-surface-variant">Người bán: {vehicle.seller.name} - {vehicle.status}</p>
                     </div>
                     <div className="flex gap-2">
                       <ActionButton onClick={() => updateStatus(`/admin/vehicles/${vehicle.id}/status`, vehicle.status === 'Hidden' ? 'Active Listing' : 'Hidden')}>
-                        {vehicle.status === 'Hidden' ? 'Show' : 'Hide'}
+                        {vehicle.status === 'Hidden' ? 'Hiện' : 'Ẩn'}
                       </ActionButton>
-                      <ActionButton danger onClick={() => deleteResource(`/admin/vehicles/${vehicle.id}`)}>Delete</ActionButton>
+                      <ActionButton danger onClick={() => deleteResource(`/admin/vehicles/${vehicle.id}`)}>Xóa</ActionButton>
                     </div>
                   </div>
                 </div>
               ))}
-              {vehicles.length === 0 && <p className="p-5 text-sm text-slate-500">No vehicle listings yet.</p>}
+              {vehicles.length === 0 && <p className="p-5 text-sm text-on-surface-variant">Chưa có tin bán xe.</p>}
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+          <div className="rounded-lg border border-white/10 bg-surface-container-low shadow-lg">
+            <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
               <div>
-                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-700">Garage Vehicles</h2>
-                <p className="mt-1 text-xs text-slate-500">Personal garage assets owned by users.</p>
+                <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface">Xe trong Garage</h2>
+                <p className="mt-1 text-xs text-on-surface-variant">Tài sản xe cá nhân của người dùng.</p>
               </div>
-              <Gauge className="h-5 w-5 text-slate-400" />
+              <Gauge className="h-5 w-5 text-on-surface-variant" />
             </div>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-white/10">
               {garageVehicles.slice(0, 8).map((vehicle) => (
                 <div key={vehicle.id} className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p className="font-semibold text-slate-900">{vehicle.title}</p>
-                    <p className="mt-1 text-xs text-slate-500">Owner: {vehicle.owner.name} - {vehicle.condition} - {vehicle.status}</p>
+                    <p className="font-semibold text-on-surface">{vehicle.title}</p>
+                    <p className="mt-1 text-xs text-on-surface-variant">Chủ xe: {vehicle.owner.name} - {vehicle.condition} - {vehicle.status}</p>
                   </div>
                   <div className="flex gap-2">
                     <ActionButton onClick={() => updateStatus(`/admin/garage-vehicles/${vehicle.id}/status`, vehicle.status === 'Hidden' ? 'In Garage' : 'Hidden')}>
-                      {vehicle.status === 'Hidden' ? 'Show' : 'Hide'}
+                      {vehicle.status === 'Hidden' ? 'Hiện' : 'Ẩn'}
                     </ActionButton>
-                    <ActionButton danger onClick={() => deleteResource(`/admin/garage-vehicles/${vehicle.id}`)}>Delete</ActionButton>
+                    <ActionButton danger onClick={() => deleteResource(`/admin/garage-vehicles/${vehicle.id}`)}>Xóa</ActionButton>
                   </div>
                 </div>
               ))}
-              {garageVehicles.length === 0 && <p className="p-5 text-sm text-slate-500">No garage vehicles yet.</p>}
+              {garageVehicles.length === 0 && <p className="p-5 text-sm text-on-surface-variant">Chưa có xe trong Garage.</p>}
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+          <div className="rounded-lg border border-white/10 bg-surface-container-low shadow-lg">
+            <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
               <div>
-                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-700">Articles</h2>
-                <p className="mt-1 text-xs text-slate-500">Editorial content moderation.</p>
+                <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface">Bài chuyên đề</h2>
+                <p className="mt-1 text-xs text-on-surface-variant">Kiểm duyệt nội dung biên tập.</p>
               </div>
-              <Newspaper className="h-5 w-5 text-slate-400" />
+              <Newspaper className="h-5 w-5 text-on-surface-variant" />
             </div>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-white/10">
               {articles.map((article) => (
                 <div key={article.id} className="p-5">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
-                      <p className="truncate font-semibold text-slate-900">{article.title}</p>
-                      <p className="mt-1 text-xs text-slate-500">{article.author} - {article.category} - {article.status}</p>
-                      <p className="mt-2 line-clamp-2 text-sm text-slate-500">{article.excerpt}</p>
+                      <p className="truncate font-semibold text-on-surface">{article.title}</p>
+                      <p className="mt-1 text-xs text-on-surface-variant">{article.author} - {article.category} - {article.status}</p>
+                      <p className="mt-2 line-clamp-2 text-sm text-on-surface-variant">{article.excerpt}</p>
                     </div>
                     <div className="flex shrink-0 gap-2">
                       <ActionButton onClick={() => updateStatus(`/admin/articles/${article.id}/status`, article.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED')}>
-                        {article.status === 'PUBLISHED' ? 'Hide' : 'Publish'}
+                        {article.status === 'PUBLISHED' ? 'Ẩn' : 'Đăng'}
                       </ActionButton>
-                      <ActionButton danger onClick={() => deleteResource(`/admin/articles/${article.id}`)}>Delete</ActionButton>
+                      <ActionButton danger onClick={() => deleteResource(`/admin/articles/${article.id}`)}>Xóa</ActionButton>
                     </div>
                   </div>
                 </div>
@@ -643,46 +679,46 @@ export default function Admin() {
         </section>
 
         <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
-          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-700">
-              <MessageSquare className="h-4 w-4" /> Comments
+          <div className="rounded-lg border border-white/10 bg-surface-container-low p-6 shadow-lg">
+            <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-on-surface">
+              <MessageSquare className="h-4 w-4" /> Bình luận
             </h2>
             <div className="space-y-3">
               {comments.slice(0, 6).map((comment) => (
-                <div key={comment.id} className="rounded-md bg-slate-50 p-3">
-                  <p className="line-clamp-2 text-sm text-slate-700">{comment.content}</p>
+                <div key={comment.id} className="rounded-md bg-white/5 p-3">
+                  <p className="line-clamp-2 text-sm text-on-surface">{comment.content}</p>
                   <div className="mt-2 flex items-center justify-between gap-2">
-                    <p className="text-[10px] uppercase tracking-widest text-slate-400">{comment.user.name}</p>
-                    <button onClick={() => deleteResource(`/admin/comments/${comment.id}`)} className="text-[10px] font-bold uppercase text-red-500">Delete</button>
+                    <p className="text-[10px] uppercase tracking-widest text-on-surface-variant">{comment.user.name}</p>
+                    <button onClick={() => deleteResource(`/admin/comments/${comment.id}`)} className="text-[10px] font-bold uppercase text-red-400">Xóa</button>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-700">
-              <Star className="h-4 w-4" /> Ratings
+          <div className="rounded-lg border border-white/10 bg-surface-container-low p-6 shadow-lg">
+            <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-on-surface">
+              <Star className="h-4 w-4" /> Đánh giá
             </h2>
             <div className="space-y-3">
               {ratings.slice(0, 6).map((rating) => (
-                <div key={rating.id} className="flex items-center justify-between rounded-md bg-slate-50 p-3">
-                  <p className="text-sm text-slate-700">{rating.rater.name} rated {rating.targetUser.name}: {rating.score}/5</p>
-                  <button onClick={() => deleteResource(`/admin/ratings/${rating.id}`)} className="text-[10px] font-bold uppercase text-red-500">Delete</button>
+                <div key={rating.id} className="flex items-center justify-between rounded-md bg-white/5 p-3">
+                  <p className="text-sm text-on-surface">{rating.rater.name} đánh giá {rating.targetUser.name}: {rating.score}/5</p>
+                  <button onClick={() => deleteResource(`/admin/ratings/${rating.id}`)} className="text-[10px] font-bold uppercase text-red-400">Xóa</button>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-700">
-              <Users className="h-4 w-4" /> Follows
+          <div className="rounded-lg border border-white/10 bg-surface-container-low p-6 shadow-lg">
+            <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-on-surface">
+              <Users className="h-4 w-4" /> Theo dõi
             </h2>
             <div className="space-y-3">
               {follows.slice(0, 6).map((follow) => (
-                <div key={follow.id} className="flex items-center justify-between rounded-md bg-slate-50 p-3">
-                  <p className="text-sm text-slate-700">{follow.follower.name} follows {follow.following.name}</p>
-                  <button onClick={() => deleteResource(`/admin/follows/${follow.id}`)} className="text-[10px] font-bold uppercase text-red-500">Delete</button>
+                <div key={follow.id} className="flex items-center justify-between rounded-md bg-white/5 p-3">
+                  <p className="text-sm text-on-surface">{follow.follower.name} theo dõi {follow.following.name}</p>
+                  <button onClick={() => deleteResource(`/admin/follows/${follow.id}`)} className="text-[10px] font-bold uppercase text-red-400">Xóa</button>
                 </div>
               ))}
             </div>

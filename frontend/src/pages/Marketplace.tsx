@@ -167,7 +167,7 @@ export default function Marketplace() {
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
             <section className="lg:col-span-8">
               <div className="mb-5 flex items-center justify-between">
-                <h2 className="font-display text-xl font-bold">{data?.pagination.total ?? 0} tin đăng</h2>
+                <h2 className="font-display text-xl font-bold">Xe đang được rao bán</h2>
                 {sort === 'trending' && <span className="flex items-center gap-2 text-xs text-primary"><TrendingUp className="h-4 w-4" /> Nhiều lượt lưu và bình luận</span>}
               </div>
               {isLoading ? (
