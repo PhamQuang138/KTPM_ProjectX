@@ -37,6 +37,7 @@ model User {
   postLikes PostLike[]
   postComments PostComment[]
   postShares PostShare[]
+  postBookmarks PostBookmark[]
   passwordResetTokens PasswordResetToken[]
   ratingsGiven UserRating[] @relation("RatingsGiven")
   ratingsReceived UserRating[] @relation("RatingsReceived")
@@ -48,6 +49,10 @@ model User {
   conversationsAsBuyer Conversation[] @relation("ConversationBuyer")
   conversationsAsSeller Conversation[] @relation("ConversationSeller")
   sentMessages Message[]
+  listingFavorites ListingFavorite[]
+  listingComments ListingComment[]
+  notifications Notification[] @relation("NotificationRecipient")
+  notificationActions Notification[] @relation("NotificationActor")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -108,12 +113,26 @@ model Post {
   likes     PostLike[]
   comments  PostComment[]
   shares    PostShare[]
+  bookmarks PostBookmark[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
   @@index([authorId])
   @@index([status])
   @@map("posts")
+}
+
+model PostBookmark {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@index([userId, createdAt])
+  @@map("post_bookmarks")
 }
 
 model PostLike {
@@ -199,6 +218,13 @@ model GarageVehicle {
   image       String
   images      String[] @default([])
   condition   String   @default("Used")
+  make        String?
+  model       String?
+  year        Int?
+  mileage     Int?
+  bodyType    String?
+  fuelType    String?
+  transmission String?
   specs       String[] @default([])
   status      String   @default("In Garage")
   ownerId     String
@@ -224,6 +250,8 @@ model VehicleListing {
   vehicleId   String?
   vehicle     GarageVehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
   conversations Conversation[]
+  favorites   ListingFavorite[]
+  comments    ListingComment[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -233,12 +261,41 @@ model VehicleListing {
   @@map("vehicle_listings")
 }
 
-model Conversation {
+model ListingFavorite {
   id        String         @id @default(uuid())
   listingId String
+  userId    String
+  listing   VehicleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+
+  @@unique([listingId, userId])
+  @@index([userId, createdAt])
+  @@map("listing_favorites")
+}
+
+model ListingComment {
+  id        String         @id @default(uuid())
+  listingId String
+  userId    String
+  content   String         @db.Text
+  listing   VehicleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([listingId, createdAt])
+  @@index([userId])
+  @@map("listing_comments")
+}
+
+model Conversation {
+  id        String         @id @default(uuid())
+  listingId String?
+  directKey String?        @unique
   buyerId   String
   sellerId  String
-  listing   VehicleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listing   VehicleListing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
   buyer     User           @relation("ConversationBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
   seller    User           @relation("ConversationSeller", fields: [sellerId], references: [id], onDelete: Cascade)
   messages  Message[]
@@ -264,6 +321,23 @@ model Message {
   @@index([conversationId, createdAt])
   @@index([senderId])
   @@map("messages")
+}
+
+model Notification {
+  id          String    @id @default(uuid())
+  recipientId String
+  actorId     String?
+  type        String
+  title       String
+  message     String
+  link        String?
+  readAt      DateTime?
+  recipient   User      @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  actor       User?     @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt   DateTime  @default(now())
+
+  @@index([recipientId, readAt, createdAt])
+  @@map("notifications")
 }
 
 model Article {

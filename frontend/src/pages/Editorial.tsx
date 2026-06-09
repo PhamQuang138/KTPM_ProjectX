@@ -43,10 +43,12 @@ export default function Editorial() {
   const [postImages, setPostImages] = useState<string[]>([]);
   const [isUploadingPostImage, setIsUploadingPostImage] = useState(false);
   const [posts, setPosts] = useState<SocialPostProps[]>([]);
+  const [visiblePostCount, setVisiblePostCount] = useState(10);
   const [overview, setOverview] = useState<CommunityOverview | null>(null);
   const [isSubmittingPost, setIsSubmittingPost] = useState(false);
   const [postError, setPostError] = useState('');
   const postInputRef = useRef<HTMLTextAreaElement>(null);
+  const feedEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { isOpen } = useSidebarStore();
@@ -137,6 +139,18 @@ export default function Editorial() {
     nextParams.delete('compose');
     setSearchParams(nextParams, {replace: true});
   }, [isAuthenticated, navigate, searchParams, setSearchParams]);
+
+  useEffect(() => {
+    const target = feedEndRef.current;
+    if (!target) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) {
+        setVisiblePostCount((count) => Math.min(posts.length, count + 10));
+      }
+    }, {rootMargin: '300px'});
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [posts.length]);
 
   useEffect(() => {
     let isMounted = true;
@@ -350,7 +364,7 @@ export default function Editorial() {
 
             {/* Post Feed */}
             <div className="space-y-6">
-              {posts.map((post) => (
+              {posts.slice(0, visiblePostCount).map((post) => (
                 <SocialPost key={post.id} {...post} />
               ))}
               {posts.length === 0 && (
@@ -360,12 +374,14 @@ export default function Editorial() {
               )}
             </div>
 
+            <div ref={feedEndRef} className="h-2" />
+
             {/* End of Feed Message */}
-            <div className="py-20 text-center opacity-40">
+            {visiblePostCount >= posts.length && <div className="py-20 text-center opacity-40">
               <Sparkles className="w-8 h-8 mx-auto mb-4 text-primary animate-pulse" />
               <p className="font-display text-lg font-bold mb-1">Bạn đã xem hết bài mới!</p>
               <p className="text-xs font-mono uppercase tracking-[0.25em]">Luồng tin đã cập nhật</p>
-            </div>
+            </div>}
           </section>
 
           {/* Right Sidebar: Contextual Content */}

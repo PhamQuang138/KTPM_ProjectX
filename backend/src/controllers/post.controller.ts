@@ -68,8 +68,8 @@ const mapCommunityPost = (post: Awaited<ReturnType<typeof postDbService.list>>[n
     name: post.author.name,
     handle: post.author.email.split('@')[0],
     avatar: post.author.avatar ?? `https://i.pravatar.cc/200?u=${encodeURIComponent(post.author.email)}`,
-    isVerified: true,
-    isProUser: false,
+    isVerified: post.author.isVerifiedProfessional,
+    isProUser: post.author.isVerifiedProfessional,
   },
   content: post.content,
   image: post.images[0]?.url,
@@ -83,6 +83,7 @@ const mapCommunityPost = (post: Awaited<ReturnType<typeof postDbService.list>>[n
   comments: post._count.comments,
   shares: post._count.shares,
   isLikedInitial: post.likes.length > 0,
+  isBookmarkedInitial: post.bookmarks.length > 0,
   commentItems: post.comments.map((comment) => ({
     id: comment.id,
     content: comment.content,
@@ -130,6 +131,11 @@ export const postController = {
     return res.json({
       data: posts.map(mapCommunityPost),
     });
+  },
+
+  async listBookmarked(req: AuthenticatedRequest, res: Response) {
+    const posts = await postDbService.listBookmarked(req.user!.id);
+    return res.json({data: posts.map(mapCommunityPost)});
   },
 
   async communityOverview(_req: Request, res: Response) {
@@ -229,5 +235,11 @@ export const postController = {
     if (!post) return res.status(404).json({message: 'Không tìm thấy bài viết'});
 
     return res.status(201).json({data: await postDbService.addShare(post.id, req.user!.id)});
+  },
+
+  async toggleBookmark(req: AuthenticatedRequest, res: Response) {
+    const post = await postDbService.getById(req.params.id);
+    if (!post) return res.status(404).json({message: 'Không tìm thấy bài viết'});
+    return res.json({data: await postDbService.toggleBookmark(post.id, req.user!.id)});
   },
 };

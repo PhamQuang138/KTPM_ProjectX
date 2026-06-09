@@ -4,7 +4,10 @@ import {AuthenticatedRequest} from '../middlewares/auth';
 import {messageService} from '../services/message.service';
 
 export const startConversationSchema = z.object({
-  listingId: z.string().uuid(),
+  listingId: z.string().uuid().optional(),
+  userId: z.string().uuid().optional(),
+}).refine((input) => Boolean(input.listingId || input.userId), {
+  message: 'Cần có tin đăng hoặc người nhận',
 });
 
 export const sendMessageSchema = z.object({
@@ -18,7 +21,9 @@ export const messageController = {
 
   async startConversation(req: AuthenticatedRequest, res: Response) {
     try {
-      const conversation = await messageService.startConversation(req.body.listingId, req.user!.id);
+      const conversation = req.body.listingId
+        ? await messageService.startConversation(req.body.listingId, req.user!.id)
+        : await messageService.startDirectConversation(req.body.userId, req.user!.id);
       if (!conversation) return res.status(404).json({message: 'Không tìm thấy tin đăng'});
       return res.status(201).json({data: conversation});
     } catch (error) {

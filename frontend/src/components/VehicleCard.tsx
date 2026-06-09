@@ -1,127 +1,92 @@
-import { Heart, MessageCircle, Share2, MapPin, CheckCircle2 } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useState } from 'react';
+import {Heart, MapPin, MessageCircle, CheckCircle2} from 'lucide-react';
+import {motion} from 'motion/react';
+import {Link} from 'react-router-dom';
 
 export interface VehicleCardProps {
-  id?: string;
-  key?: any;
+  id: string;
   image: string;
   price: string;
   title: string;
   location: string;
   seller: {
+    id: string;
     name: string;
     avatar?: string | null;
-    isVerified?: boolean;
+    isVerifiedProfessional?: boolean;
   };
   condition: string;
-  timestamp: string;
   specs: string[];
+  favoriteCount?: number;
+  commentCount?: number;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
 }
 
-export default function VehicleCard({ 
-  image, 
-  price, 
-  title, 
-  location, 
-  seller, 
-  condition, 
-  timestamp, 
-  specs 
+export default function VehicleCard({
+  id,
+  image,
+  price,
+  title,
+  location,
+  seller,
+  condition,
+  specs,
+  favoriteCount = 0,
+  commentCount = 0,
+  isFavorite = false,
+  onToggleFavorite,
 }: VehicleCardProps) {
-  const [isLiked, setIsLiked] = useState(false);
-
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="glass-card rounded-2xl overflow-hidden group flex flex-col h-full"
+    <motion.article
+      initial={{opacity: 0, y: 16}}
+      whileInView={{opacity: 1, y: 0}}
+      viewport={{once: true}}
+      className="glass-card flex h-full flex-col overflow-hidden rounded-2xl"
     >
-      {/* Image Container */}
       <div className="relative aspect-[4/3] overflow-hidden">
-        <img 
-          src={image} 
-          alt={title}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />
-        
-        {/* Badges */}
-        <div className="absolute top-4 left-4 flex flex-col gap-2">
-          <span className={`badge ${condition === 'New' ? 'badge-primary' : 'badge-secondary'}`}>
-            {condition}
-          </span >
-        </div>
-
-        {/* Favorite Button */}
-        <button 
-          onClick={(e) => { e.preventDefault(); setIsLiked(!isLiked); }}
-          className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md border border-white/10 transition-all ${
-            isLiked ? 'bg-red-500 text-white' : 'bg-black/20 text-white hover:bg-black/40'
+        <Link to={`/market/${id}`}>
+          <img src={image} alt={title} className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" />
+        </Link>
+        <span className="badge badge-secondary absolute left-4 top-4">{condition}</span>
+        <button
+          type="button"
+          onClick={onToggleFavorite}
+          className={`absolute right-4 top-4 rounded-full border border-white/10 p-2.5 backdrop-blur-md ${
+            isFavorite ? 'bg-red-500 text-white' : 'bg-black/40 text-white'
           }`}
+          title={isFavorite ? 'Bỏ lưu tin xe' : 'Lưu tin xe'}
         >
-          <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
+          <Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
         </button>
-
-        {/* Quick Preview Overlay */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-          <button className="bg-white text-black font-mono text-[10px] px-6 py-2.5 rounded-full uppercase tracking-widest font-bold hover:scale-105 transition-transform">
-            Quick View
-          </button>
-        </div>
       </div>
 
-      {/* Content */}
-      <div className="p-5 flex flex-col flex-grow bg-surface-container-low/50">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-display text-lg font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">
-            {title}
-          </h3>
-          <p className="font-mono text-primary font-bold">{price}</p>
-        </div>
-
-        <div className="flex items-center gap-2 text-on-surface-variant text-[11px] mb-4">
-          <MapPin className="w-3 h-3" />
-          <span className="font-sans">{location}</span>
-          <span className="opacity-30">•</span>
-          <span className="font-mono uppercase">{timestamp}</span>
-        </div>
-
-        <div className="flex flex-wrap gap-2 mb-6">
-          {specs.slice(0, 3).map(spec => (
-            <span key={spec} className="font-mono text-[9px] px-2 py-1 bg-surface-container-high rounded border border-white/5 uppercase text-on-surface-variant">
+      <div className="flex flex-1 flex-col p-5">
+        <Link to={`/market/${id}`} className="flex items-start justify-between gap-4">
+          <h3 className="font-display text-lg font-bold hover:text-primary">{title}</h3>
+          <p className="shrink-0 font-mono font-bold text-primary">{price}</p>
+        </Link>
+        <p className="mt-2 flex items-center gap-2 text-xs text-on-surface-variant">
+          <MapPin className="h-3.5 w-3.5" /> {location}
+        </p>
+        <div className="my-5 flex flex-wrap gap-2">
+          {specs.slice(0, 3).map((spec) => (
+            <span key={spec} className="rounded border border-white/5 bg-surface-container-high px-2 py-1 text-[9px] uppercase text-on-surface-variant">
               {spec}
             </span>
           ))}
         </div>
-
-        {/* Seller Info & Footer */}
-        <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 relative">
-              <img src={seller.avatar ?? 'https://i.pravatar.cc/100?u=seller'} alt={seller.name} className="w-full h-full object-cover" />
-              {seller.isVerified && (
-                <div className="absolute -bottom-0.5 -right-0.5 bg-background p-0.5 rounded-full">
-                  <CheckCircle2 className="w-2.5 h-2.5 text-blue-400 fill-current" />
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-bold text-on-surface">{seller.name}</span>
-              <span className="text-[9px] font-mono uppercase text-on-surface-variant tracking-wider">Trusted Seller</span>
-            </div>
-          </div>
-          
-          <div className="flex gap-1">
-            <button className="p-2 text-on-surface-variant hover:text-primary transition-colors">
-              <MessageCircle className="w-4 h-4" />
-            </button>
-            <button className="p-2 text-on-surface-variant hover:text-primary transition-colors">
-              <Share2 className="w-4 h-4" />
-            </button>
+        <div className="mt-auto flex items-center justify-between border-t border-white/5 pt-4">
+          <Link to={`/profile/${seller.id}`} className="flex min-w-0 items-center gap-2.5 hover:text-primary">
+            <img src={seller.avatar ?? `https://i.pravatar.cc/100?u=${seller.id}`} alt={seller.name} className="h-8 w-8 rounded-full object-cover" />
+            <span className="truncate text-xs font-bold">{seller.name}</span>
+            {seller.isVerifiedProfessional && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-blue-400" />}
+          </Link>
+          <div className="flex items-center gap-3 text-xs text-on-surface-variant">
+            <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5" /> {favoriteCount}</span>
+            <span className="flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" /> {commentCount}</span>
           </div>
         </div>
       </div>
-    </motion.div>
+    </motion.article>
   );
 }

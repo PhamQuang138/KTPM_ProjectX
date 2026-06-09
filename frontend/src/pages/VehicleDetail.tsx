@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {Link, Navigate, useParams} from 'react-router-dom';
-import {ArrowLeft, CheckCircle2, MapPin, MessageCircle, Share2, Star} from 'lucide-react';
+import {ArrowLeft, CheckCircle2, Heart, MapPin, MessageCircle, Star} from 'lucide-react';
 import TopNav from '../components/TopNav';
 import MobileNav from '../components/MobileNav';
 import {apiRequest} from '../lib/api';
@@ -31,6 +31,13 @@ interface VehicleDetailData {
     avatar?: string | null;
   };
   createdAt: string;
+  comments: {
+    id: string;
+    content: string;
+    createdAt: string;
+    user: {id: string; name: string; email: string; avatar?: string | null};
+  }[];
+  _count: {favorites: number; comments: number};
 }
 
 interface UserRating {
@@ -48,6 +55,9 @@ export default function VehicleDetail() {
   const [selectedImage, setSelectedImage] = useState('');
   const [sellerRating, setSellerRating] = useState<UserRating | null>(null);
   const [ratingError, setRatingError] = useState('');
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteCount, setFavoriteCount] = useState(0);
+  const [commentContent, setCommentContent] = useState('');
 
   useEffect(() => {
     if (!id) return;
@@ -56,6 +66,7 @@ export default function VehicleDetail() {
       .then((data) => {
         setVehicle(data);
         setSelectedImage(data.vehicle?.image ?? '');
+        setFavoriteCount(data._count.favorites);
       })
       .finally(() => setIsLoading(false));
   }, [id]);
@@ -81,6 +92,23 @@ export default function VehicleDetail() {
     } catch (error) {
       setRatingError(error instanceof Error ? error.message : 'Unable to rate seller.');
     }
+  };
+
+  const toggleFavorite = async () => {
+    if (!vehicle) return;
+    const result = await apiRequest<{favorite: boolean; count: number}>(`/vehicles/${vehicle.id}/favorite`, {method: 'POST'});
+    setIsFavorite(result.favorite);
+    setFavoriteCount(result.count);
+  };
+
+  const addComment = async () => {
+    if (!vehicle || !commentContent.trim()) return;
+    const result = await apiRequest<{comment: VehicleDetailData['comments'][number]; count: number}>(`/vehicles/${vehicle.id}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({content: commentContent.trim()}),
+    });
+    setVehicle({...vehicle, comments: [...vehicle.comments, result.comment], _count: {...vehicle._count, comments: result.count}});
+    setCommentContent('');
   };
 
   if (!id) return <Navigate to="/market" replace />;
@@ -177,9 +205,9 @@ export default function VehicleDetail() {
                     <MessageCircle className="w-4 h-4" />
                     Liên hệ
                   </button>
-                  <button className="btn-secondary py-4 rounded-xl flex items-center justify-center gap-2">
-                    <Share2 className="w-4 h-4" />
-                    Share
+                  <button onClick={toggleFavorite} className="btn-secondary py-4 rounded-xl flex items-center justify-center gap-2">
+                    <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current text-red-400' : ''}`} />
+                    Lưu ({favoriteCount})
                   </button>
                 </div>
                 <div className="mt-8 pt-6 border-t border-white/10">
@@ -214,6 +242,27 @@ export default function VehicleDetail() {
                     <p className="text-xs text-on-surface-variant mt-3">This is your listing, so you cannot rate yourself.</p>
                   )}
                   {ratingError && <p className="text-xs text-red-300 mt-3">{ratingError}</p>}
+                </div>
+              </div>
+
+              <div className="border border-white/10 bg-white/[0.03] rounded-[2rem] p-8">
+                <h2 className="font-display text-xl font-bold">Trao đổi về xe ({vehicle._count.comments})</h2>
+                <div className="mt-5 space-y-4">
+                  {vehicle.comments.map((comment) => (
+                    <div key={comment.id} className="flex gap-3">
+                      <Link to={`/profile/${comment.user.id}`}>
+                        <img src={comment.user.avatar ?? `https://i.pravatar.cc/80?u=${comment.user.email}`} className="h-9 w-9 rounded-full object-cover" alt={comment.user.name} />
+                      </Link>
+                      <div className="flex-1 rounded-xl bg-surface-container p-3">
+                        <Link to={`/profile/${comment.user.id}`} className="text-xs font-bold hover:text-primary">{comment.user.name}</Link>
+                        <p className="mt-1 text-sm">{comment.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 flex gap-2">
+                  <input value={commentContent} onChange={(event) => setCommentContent(event.target.value)} placeholder="Hỏi người bán hoặc trao đổi về xe..." className="min-w-0 flex-1 rounded-xl border border-white/10 bg-background px-4 py-3 text-sm" />
+                  <button onClick={() => void addComment()} disabled={!commentContent.trim()} className="btn-primary px-5 disabled:opacity-50">Gửi</button>
                 </div>
               </div>
             </aside>

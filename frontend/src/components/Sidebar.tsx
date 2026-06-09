@@ -15,7 +15,7 @@ const navItems = [
   { icon: Newspaper, label: 'Cộng đồng', path: '/feed' },
   { icon: ShoppingBag, label: 'Chợ xe', path: '/market' },
   { icon: Car, label: 'Garage của tôi', path: '/garage' },
-  { icon: Heart, label: 'Đã thích', path: '/favorites' },
+  { icon: Heart, label: 'Đã thích & lưu', path: '/favorites' },
   { icon: Settings, label: 'Cài đặt', path: '#' },
 ];
 

@@ -1,5 +1,6 @@
 import {Prisma} from '@prisma/client';
 import {prisma} from '../config/prisma';
+import {notificationService} from './notification.service';
 
 const participantSelect = {
   id: true,
@@ -64,6 +65,21 @@ export const messageService = {
     });
   },
 
+  async startDirectConversation(userId: string, currentUserId: string) {
+    if (userId === currentUserId) throw new Error('SELF_CONVERSATION');
+    const target = await prisma.user.findUnique({where: {id: userId}, select: {id: true}});
+    if (!target) return null;
+
+    const [buyerId, sellerId] = [currentUserId, userId].sort();
+    const directKey = `${buyerId}:${sellerId}`;
+    return prisma.conversation.upsert({
+      where: {directKey},
+      create: {directKey, buyerId, sellerId},
+      update: {},
+      include: conversationInclude,
+    });
+  },
+
   getConversation(id: string, userId: string) {
     return prisma.conversation.findFirst({
       where: {id, OR: [{buyerId: userId}, {sellerId: userId}]},
@@ -94,7 +110,7 @@ export const messageService = {
   async sendMessage(conversationId: string, senderId: string, content: string) {
     const conversation = await prisma.conversation.findFirst({
       where: {id: conversationId, OR: [{buyerId: senderId}, {sellerId: senderId}]},
-      select: {id: true},
+      select: {id: true, buyerId: true, sellerId: true, listingId: true},
     });
     if (!conversation) return null;
 
@@ -106,6 +122,15 @@ export const messageService = {
       await tx.conversation.update({
         where: {id: conversationId},
         data: {updatedAt: new Date()},
+      });
+      const recipientId = conversation.buyerId === senderId ? conversation.sellerId : conversation.buyerId;
+      await notificationService.create({
+        recipientId,
+        actorId: senderId,
+        type: 'message',
+        title: 'Tin nhắn mới',
+        message: conversation.listingId ? 'Đã gửi tin nhắn về một tin chợ xe' : 'Đã gửi cho bạn một tin nhắn',
+        link: `/profile/${senderId}`,
       });
       return message;
     });

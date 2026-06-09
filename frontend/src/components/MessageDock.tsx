@@ -24,7 +24,7 @@ interface Conversation {
   id: string;
   buyer: Participant;
   seller: Participant;
-  listing: {
+  listing?: {
     id: string;
     title: string;
     price: string;
@@ -74,11 +74,11 @@ export default function MessageDock() {
     setIsLoading(true);
     apiRequest<Conversation>('/messages', {
       method: 'POST',
-      body: JSON.stringify({listingId: contactTarget.listingId}),
+      body: JSON.stringify(contactTarget.listingId ? {listingId: contactTarget.listingId} : {userId: contactTarget.userId}),
     })
       .then(async (conversation) => {
         await loadConversations();
-        if (!conversation.messages.length) {
+        if (!conversation.messages.length && contactTarget.listingId) {
           setContent(
             `Chào ${contactTarget.sellerName}, tôi muốn trao đổi thêm về ${contactTarget.listingTitle} (${contactTarget.listingPrice}).`,
           );
@@ -162,7 +162,7 @@ export default function MessageDock() {
             />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold">{otherParticipant.name}</p>
-              <p className="truncate text-[10px] text-on-surface-variant">{activeConversation?.listing.title}</p>
+              <p className="truncate text-[10px] text-on-surface-variant">{activeConversation?.listing?.title ?? 'Trò chuyện trực tiếp'}</p>
             </div>
           </>
         ) : (
@@ -207,7 +207,7 @@ export default function MessageDock() {
                       {new Date(conversation.updatedAt).toLocaleDateString('vi-VN')}
                     </span>
                   </div>
-                  <p className="truncate text-xs text-primary">{conversation.listing.title}</p>
+                  <p className="truncate text-xs text-primary">{conversation.listing?.title ?? 'Trò chuyện trực tiếp'}</p>
                   <p className="truncate text-xs text-on-surface-variant">
                     {latestMessage?.content ?? 'Bắt đầu cuộc trò chuyện'}
                   </p>
@@ -226,7 +226,7 @@ export default function MessageDock() {
 
       {!isLoading && activeConversationId && (
         <>
-          {activeConversation && (
+          {activeConversation?.listing && (
             <Link
               to={`/market/${activeConversation.listing.id}`}
               className="mx-3 mt-3 flex shrink-0 items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3 hover:bg-primary/10"

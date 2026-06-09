@@ -22,6 +22,13 @@ export default function Login() {
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const passwordRules = [
+    {label: 'Trên 8 ký tự', valid: password.length > 8},
+    {label: 'Có chữ in hoa', valid: /[A-Z]/.test(password)},
+    {label: 'Có chữ thường', valid: /[a-z]/.test(password)},
+    {label: 'Có chữ số', valid: /\d/.test(password)},
+    {label: 'Có ký tự đặc biệt', valid: /[^A-Za-z0-9]/.test(password)},
+  ];
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -223,7 +230,7 @@ export default function Login() {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
-                    minLength={mode === 'signup' || mode === 'reset' ? 8 : undefined}
+                    minLength={mode === 'signup' || mode === 'reset' ? 9 : undefined}
                     maxLength={128}
                     required
                   />
@@ -236,6 +243,18 @@ export default function Login() {
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
+                {(mode === 'signup' || mode === 'reset') && (
+                  <div className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                    {passwordRules.map((rule) => (
+                      <span
+                        key={rule.label}
+                        className={`text-xs ${rule.valid ? 'text-green-400' : 'text-on-surface-variant'}`}
+                      >
+                        {rule.valid ? '✓' : '○'} {rule.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               )}
               {mode === 'reset' && (
@@ -247,7 +266,7 @@ export default function Login() {
                     type={showPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(event) => setConfirmPassword(event.target.value)}
-                    minLength={8}
+                    minLength={9}
                     maxLength={128}
                     required
                   />

@@ -1,5 +1,6 @@
 import {PostStatus, Prisma} from '@prisma/client';
 import {prisma} from '../config/prisma';
+import {notificationService} from './notification.service';
 
 export interface CreatePostImageInput {
   url: string;
@@ -29,6 +30,7 @@ const postInclude = {
       email: true,
       name: true,
       avatar: true,
+      isVerifiedProfessional: true,
     },
   },
   images: {
@@ -90,6 +92,7 @@ export const postDbService = {
         },
         _count: {select: {likes: true, comments: true, shares: true}},
         likes: input.viewerId ? {where: {userId: input.viewerId}, select: {id: true}} : false,
+        bookmarks: input.viewerId ? {where: {userId: input.viewerId}, select: {id: true}} : false,
       },
       orderBy: {
         createdAt: 'desc',
@@ -115,10 +118,28 @@ export const postDbService = {
         },
         _count: {select: {likes: true, comments: true, shares: true}},
         likes: {where: {userId}},
+        bookmarks: {where: {userId}},
       },
       orderBy: {
         createdAt: 'desc',
       },
+    });
+  },
+
+  listBookmarked(userId: string) {
+    return prisma.post.findMany({
+      where: {status: PostStatus.PUBLISHED, bookmarks: {some: {userId}}},
+      include: {
+        ...postInclude,
+        comments: {
+          include: {user: {select: {id: true, name: true, email: true, avatar: true}}},
+          orderBy: {createdAt: 'asc'},
+        },
+        _count: {select: {likes: true, comments: true, shares: true}},
+        likes: {where: {userId}},
+        bookmarks: {where: {userId}},
+      },
+      orderBy: {bookmarks: {_count: 'desc'}},
     });
   },
 
@@ -191,6 +212,10 @@ export const postDbService = {
   },
 
   async toggleLike(postId: string, userId: string) {
+    const post = await prisma.post.findUnique({
+      where: {id: postId},
+      select: {authorId: true, title: true},
+    });
     const existing = await prisma.postLike.findUnique({
       where: {postId_userId: {postId, userId}},
     });
@@ -199,6 +224,16 @@ export const postDbService = {
       await prisma.postLike.delete({where: {id: existing.id}});
     } else {
       await prisma.postLike.create({data: {postId, userId}});
+      if (post) {
+        await notificationService.create({
+          recipientId: post.authorId,
+          actorId: userId,
+          type: 'like',
+          title: 'Lượt thích mới',
+          message: `Đã thích bài viết "${post.title}"`,
+          link: `/feed#post-${postId}`,
+        });
+      }
     }
 
     return {
@@ -215,7 +250,30 @@ export const postDbService = {
       },
     });
     const count = await prisma.postComment.count({where: {postId}});
+    const post = await prisma.post.findUnique({where: {id: postId}, select: {authorId: true, title: true}});
+    if (post) {
+      await notificationService.create({
+        recipientId: post.authorId,
+        actorId: userId,
+        type: 'comment',
+        title: 'Bình luận mới',
+        message: `Đã bình luận bài viết "${post.title}"`,
+        link: `/feed#post-${postId}`,
+      });
+    }
     return {comment, count};
+  },
+
+  async toggleBookmark(postId: string, userId: string) {
+    const existing = await prisma.postBookmark.findUnique({
+      where: {postId_userId: {postId, userId}},
+    });
+    if (existing) {
+      await prisma.postBookmark.delete({where: {id: existing.id}});
+    } else {
+      await prisma.postBookmark.create({data: {postId, userId}});
+    }
+    return {bookmarked: !existing};
   },
 
   async addShare(postId: string, userId: string) {

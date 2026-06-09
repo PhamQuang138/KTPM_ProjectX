@@ -1,11 +1,13 @@
 import {create} from 'zustand';
 
 interface ContactTarget {
-  listingId: string;
-  listingTitle: string;
-  listingPrice: string;
+  listingId?: string;
+  listingTitle?: string;
+  listingPrice?: string;
   listingImage?: string;
-  sellerName: string;
+  sellerName?: string;
+  userId?: string;
+  userName?: string;
 }
 
 interface MessageState {
@@ -14,6 +16,7 @@ interface MessageState {
   activeConversationId: string | null;
   openInbox: () => void;
   startContact: (target: ContactTarget) => void;
+  startDirect: (target: {userId: string; userName: string}) => void;
   selectConversation: (id: string) => void;
   close: () => void;
 }
@@ -24,6 +27,8 @@ export const useMessageStore = create<MessageState>((set) => ({
   activeConversationId: null,
   openInbox: () => set({isOpen: true, contactTarget: null}),
   startContact: (contactTarget) =>
+    set({isOpen: true, contactTarget, activeConversationId: null}),
+  startDirect: (contactTarget) =>
     set({isOpen: true, contactTarget, activeConversationId: null}),
   selectConversation: (activeConversationId) =>
     set({isOpen: true, activeConversationId, contactTarget: null}),

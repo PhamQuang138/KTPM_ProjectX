@@ -28,6 +28,13 @@ interface DbVehicle {
   title: string;
   description?: string;
   condition: string;
+  make?: string;
+  model?: string;
+  year?: number;
+  mileage?: number;
+  bodyType?: string;
+  fuelType?: string;
+  transmission?: string;
   status: string;
   specs: string[];
   listings?: DbListing[];
@@ -139,6 +146,13 @@ export default function Garage() {
     location: '',
     images: [] as string[],
     condition: 'Used',
+    make: '',
+    model: '',
+    year: '',
+    mileage: '',
+    bodyType: 'Coupe',
+    fuelType: 'Gasoline',
+    transmission: 'Automatic',
     category: 'Daily',
     specs: '',
   });
@@ -181,8 +195,8 @@ export default function Garage() {
       .then(setMyVehicles)
       .catch(() => undefined);
 
-    apiRequest<DbListing[]>(`/vehicles?sellerId=${user.id}`)
-      .then(setMyListings)
+    apiRequest<{items: DbListing[]}>(`/vehicles?sellerId=${user.id}&limit=50`)
+      .then((result) => setMyListings(result.items))
       .catch(() => undefined);
 
     apiRequest<UserRating>(`/users/${user.id}/rating`)
@@ -322,6 +336,13 @@ export default function Garage() {
           image: vehicleForm.images[0],
           images: vehicleForm.images,
           condition: vehicleForm.condition,
+          make: vehicleForm.make || undefined,
+          model: vehicleForm.model || undefined,
+          year: vehicleForm.year ? Number(vehicleForm.year) : undefined,
+          mileage: vehicleForm.mileage ? Number(vehicleForm.mileage) : undefined,
+          bodyType: vehicleForm.bodyType || undefined,
+          fuelType: vehicleForm.fuelType || undefined,
+          transmission: vehicleForm.transmission || undefined,
           specs: vehicleForm.specs
             .split(',')
             .map((spec) => spec.trim())
@@ -354,6 +375,13 @@ export default function Garage() {
         location: '',
         images: [],
         condition: 'Used',
+        make: '',
+        model: '',
+        year: '',
+        mileage: '',
+        bodyType: 'Coupe',
+        fuelType: 'Gasoline',
+        transmission: 'Automatic',
         category: 'Daily',
         specs: '',
       });
@@ -789,6 +817,21 @@ export default function Garage() {
                 <option>Project</option>
               </select>
               <input placeholder="Specs, comma separated" value={vehicleForm.specs} onChange={(event) => setVehicleForm({...vehicleForm, specs: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
+            </div>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <input required placeholder="Hãng xe" value={vehicleForm.make} onChange={(event) => setVehicleForm({...vehicleForm, make: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
+              <input required placeholder="Mẫu xe" value={vehicleForm.model} onChange={(event) => setVehicleForm({...vehicleForm, model: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
+              <input required type="number" min="1886" max={new Date().getFullYear() + 1} placeholder="Năm sản xuất" value={vehicleForm.year} onChange={(event) => setVehicleForm({...vehicleForm, year: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
+              <input type="number" min="0" placeholder="Số km đã đi" value={vehicleForm.mileage} onChange={(event) => setVehicleForm({...vehicleForm, mileage: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
+              <select value={vehicleForm.bodyType} onChange={(event) => setVehicleForm({...vehicleForm, bodyType: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
+                <option>Coupe</option><option>Sedan</option><option>SUV</option><option>Convertible</option><option>Hatchback</option><option>Pickup</option>
+              </select>
+              <select value={vehicleForm.fuelType} onChange={(event) => setVehicleForm({...vehicleForm, fuelType: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
+                <option>Gasoline</option><option>Diesel</option><option>Hybrid</option><option>Electric</option>
+              </select>
+              <select value={vehicleForm.transmission} onChange={(event) => setVehicleForm({...vehicleForm, transmission: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
+                <option>Automatic</option><option>Manual</option>
+              </select>
             </div>
 
             <textarea required placeholder="Mô tả xe trong Garage" value={vehicleForm.description} onChange={(event) => setVehicleForm({...vehicleForm, description: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 min-h-24" />

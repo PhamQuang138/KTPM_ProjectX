@@ -1,95 +1,87 @@
-import { motion, AnimatePresence } from 'motion/react';
-import { Bell, MessageCircle, Heart, UserPlus, ShoppingBag, X } from 'lucide-react';
+import {useEffect, useState} from 'react';
+import {AnimatePresence, motion} from 'motion/react';
+import {Bell, CheckCheck, Heart, MessageCircle, ShoppingBag, UserPlus, X} from 'lucide-react';
+import {Link} from 'react-router-dom';
+import {apiRequest} from '../lib/api';
 
-interface Notification {
+interface NotificationItem {
   id: string;
-  type: 'comment' | 'like' | 'follow' | 'marketplace' | 'system';
-  title: string;
+  type: string;
   message: string;
-  time: string;
-  isRead: boolean;
-  avatar?: string;
+  link?: string | null;
+  readAt?: string | null;
+  createdAt: string;
+  actor?: {name: string; email: string; avatar?: string | null} | null;
 }
 
-const notifications: Notification[] = [];
+interface NotificationResponse {
+  items: NotificationItem[];
+  unreadCount: number;
+}
 
-export default function NotificationsTray({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
+export default function NotificationsTray({
+  isOpen,
+  onClose,
+  onUnreadChange,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onUnreadChange: (count: number) => void;
+}) {
+  const [data, setData] = useState<NotificationResponse>({items: [], unreadCount: 0});
+
+  useEffect(() => {
+    if (!isOpen) return;
+    apiRequest<NotificationResponse>('/notifications').then((result) => {
+      setData(result);
+      onUnreadChange(result.unreadCount);
+    });
+  }, [isOpen, onUnreadChange]);
+
+  const markAllRead = async () => {
+    await apiRequest('/notifications/read-all', {method: 'POST'});
+    setData((current) => ({items: current.items.map((item) => ({...item, readAt: new Date().toISOString()})), unreadCount: 0}));
+    onUnreadChange(0);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
-          />
-          <motion.div 
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-surface-container border-l border-white/10 z-[70] shadow-2xl p-6"
-          >
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-2">
-                <Bell className="w-5 h-5 text-primary" />
-                <h2 className="font-display text-xl font-bold tracking-tight">Thông báo</h2>
-              </div>
-              <button 
-                onClick={onClose}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {notifications.map((n) => (
-                <div 
-                  key={n.id}
-                  className={`p-4 rounded-2xl border transition-all duration-300 relative group cursor-pointer ${
-                    n.isRead ? 'bg-white/[0.02] border-white/5 opacity-60' : 'bg-primary/5 border-primary/20 shadow-lg shadow-primary/5'
-                  }`}
-                >
-                  {!n.isRead && <span className="absolute top-4 right-4 w-2 h-2 bg-primary rounded-full" />}
-                  <div className="flex gap-4">
-                    <div className="relative shrink-0">
-                       <img src={n.avatar} className="w-10 h-10 rounded-full border border-white/10 shadow-lg" alt="Người dùng" />
-                       <div className="absolute -bottom-1 -right-1 p-1 bg-background rounded-full border border-white/5">
-                          {n.type === 'comment' && <MessageCircle className="w-2.5 h-2.5 text-blue-400" />}
-                          {n.type === 'like' && <Heart className="w-2.5 h-2.5 text-red-400 fill-current" />}
-                          {n.type === 'marketplace' && <ShoppingBag className="w-2.5 h-2.5 text-primary" />}
-                          {n.type === 'follow' && <UserPlus className="w-2.5 h-2.5 text-green-400" />}
-                       </div>
+          <motion.button initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} onClick={onClose} className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm" aria-label="Đóng thông báo" />
+          <motion.aside initial={{x: '100%'}} animate={{x: 0}} exit={{x: '100%'}} className="fixed bottom-0 right-0 top-0 z-[70] w-full max-w-sm overflow-y-auto border-l border-white/10 bg-surface-container p-6 shadow-2xl">
+            <header className="mb-7 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 font-display text-xl font-bold"><Bell className="h-5 w-5 text-primary" /> Thông báo</h2>
+              <button onClick={onClose} className="interactive-icon"><X className="h-5 w-5" /></button>
+            </header>
+            <div className="space-y-3">
+              {data.items.map((item) => {
+                const content = (
+                  <div className={`relative flex gap-3 rounded-xl border p-4 ${item.readAt ? 'border-white/5 bg-white/[0.02]' : 'border-primary/20 bg-primary/5'}`}>
+                    {!item.readAt && <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-red-500" />}
+                    <img src={item.actor?.avatar ?? `https://i.pravatar.cc/80?u=${item.actor?.email ?? item.id}`} className="h-10 w-10 rounded-full object-cover" alt="" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm"><strong>{item.actor?.name ?? 'CarHub'}</strong> {item.message}</p>
+                      <p className="mt-1 text-[10px] text-on-surface-variant">{new Date(item.createdAt).toLocaleString('vi-VN')}</p>
                     </div>
-                    <div className="flex-grow">
-                      <p className={`text-sm leading-snug mb-1 ${n.isRead ? 'text-on-surface-variant' : 'text-on-surface font-medium'}`}>
-                        {n.message}
-                      </p>
-                      <p className="text-[10px] font-mono text-on-surface-variant uppercase tracking-widest">{n.time}</p>
-                    </div>
+                    <NotificationIcon type={item.type} />
                   </div>
-                </div>
-              ))}
-              {notifications.length === 0 && (
-                <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-8 text-center">
-                  <Bell className="mx-auto mb-3 h-7 w-7 text-on-surface-variant" />
-                  <p className="text-sm font-bold">Chưa có thông báo</p>
-                  <p className="mt-1 text-xs text-on-surface-variant">Thông báo mới sẽ xuất hiện tại đây.</p>
-                </div>
-              )}
+                );
+                return item.link ? <Link key={item.id} to={item.link} onClick={onClose}>{content}</Link> : <div key={item.id}>{content}</div>;
+              })}
+              {!data.items.length && <div className="py-16 text-center text-sm text-on-surface-variant"><Bell className="mx-auto mb-3 h-8 w-8" />Chưa có thông báo.</div>}
             </div>
-
-            {notifications.length > 0 && (
-              <button className="w-full mt-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-xs font-mono uppercase tracking-[0.2em] font-bold hover:bg-white/10 transition-all">
-                Đánh dấu đã đọc
-              </button>
-            )}
-          </motion.div>
+            {data.unreadCount > 0 && <button onClick={() => void markAllRead()} className="btn-secondary mt-6 flex w-full items-center justify-center gap-2 py-3"><CheckCheck className="h-4 w-4" /> Đánh dấu đã đọc</button>}
+          </motion.aside>
         </>
       )}
     </AnimatePresence>
   );
+}
+
+function NotificationIcon({type}: {type: string}) {
+  if (type === 'like') return <Heart className="h-4 w-4 shrink-0 text-red-400" />;
+  if (type === 'follow') return <UserPlus className="h-4 w-4 shrink-0 text-green-400" />;
+  if (type === 'marketplace') return <ShoppingBag className="h-4 w-4 shrink-0 text-primary" />;
+  return <MessageCircle className="h-4 w-4 shrink-0 text-blue-400" />;
 }

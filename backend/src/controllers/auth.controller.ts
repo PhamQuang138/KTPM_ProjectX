@@ -11,11 +11,12 @@ export const signupSchema = z.object({
   email: z.string().trim().email().max(254),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
+    .min(9, 'Password must be longer than 8 characters')
     .max(128)
     .regex(/[a-z]/, 'Password must include a lowercase letter')
     .regex(/[A-Z]/, 'Password must include an uppercase letter')
-    .regex(/[0-9]/, 'Password must include a number'),
+    .regex(/[0-9]/, 'Password must include a number')
+    .regex(/[^A-Za-z0-9]/, 'Password must include a special character'),
   name: z.string().trim().min(2).max(120),
   avatar: z.string().url().optional(),
 });
@@ -29,11 +30,12 @@ export const resetPasswordSchema = z.object({
   code: z.string().trim().regex(/^\d{6}$/, 'Code must be 6 digits'),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
+    .min(9, 'Password must be longer than 8 characters')
     .max(128)
     .regex(/[a-z]/, 'Password must include a lowercase letter')
     .regex(/[A-Z]/, 'Password must include an uppercase letter')
-    .regex(/[0-9]/, 'Password must include a number'),
+    .regex(/[0-9]/, 'Password must include a number')
+    .regex(/[^A-Za-z0-9]/, 'Password must include a special character'),
 });
 
 export const authController = {

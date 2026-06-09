@@ -1,4 +1,4 @@
-import { Heart, MessageSquare, Share2, Bookmark, MoreHorizontal, CheckCircle2, ChevronDown, Repeat2 } from 'lucide-react';
+import { Heart, MessageSquare, Bookmark, MoreHorizontal, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FormEvent, ReactNode, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -69,7 +69,6 @@ export default function SocialPost({
   timestamp,
   likes: initialLikes,
   comments,
-  shares: initialShares = 0,
   category,
   tags = [],
   isLikedInitial = false,
@@ -80,7 +79,6 @@ export default function SocialPost({
   const navigate = useNavigate();
   const [likes, setLikes] = useState(initialLikes);
   const [commentCount, setCommentCount] = useState(comments);
-  const [shareCount, setShareCount] = useState(initialShares);
   const [isLiked, setIsLiked] = useState(isLikedInitial);
   const [isBookmarked, setIsBookmarked] = useState(isBookmarkedInitial);
   const [showComments, setShowComments] = useState(false);
@@ -158,19 +156,17 @@ export default function SocialPost({
     }
   };
 
-  const sharePost = async () => {
+  const toggleBookmark = async () => {
     if (!requireLogin()) return;
-    setInteractionError('');
+    if (!id) {
+      setIsBookmarked((current) => !current);
+      return;
+    }
     try {
-      if (id) {
-        const result = await apiRequest<{count: number}>(`/posts/${id}/share`, {method: 'POST'});
-        setShareCount(result.count);
-      } else {
-        setShareCount((current) => current + 1);
-      }
-      await navigator.clipboard?.writeText(`${window.location.origin}/feed${id ? `#post-${id}` : ''}`);
+      const result = await apiRequest<{bookmarked: boolean}>(`/posts/${id}/bookmark`, {method: 'POST'});
+      setIsBookmarked(result.bookmarked);
     } catch (error) {
-      setInteractionError(error instanceof Error ? error.message : 'Không thể chia sẻ bài viết.');
+      setInteractionError(error instanceof Error ? error.message : 'Không thể lưu bài viết.');
     }
   };
 
@@ -323,21 +319,15 @@ export default function SocialPost({
             <span className="text-xs font-medium">{commentCount}</span>
           </button>
 
-          <button onClick={sharePost} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-on-surface-variant hover:bg-white/5 transition-all hidden md:flex">
-            <Repeat2 className="w-4 h-4" />
-            <span className="text-xs font-medium">{shareCount}</span>
-          </button>
         </div>
 
         <div className="flex items-center gap-2">
           <button 
-            onClick={() => setIsBookmarked(!isBookmarked)}
+            onClick={toggleBookmark}
             className={`interactive-icon ${isBookmarked ? 'text-primary' : 'text-on-surface-variant'}`}
+            title={isBookmarked ? 'Bỏ lưu' : 'Lưu bài viết'}
           >
             <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
-          </button>
-          <button onClick={sharePost} className="interactive-icon" aria-label="Chia sẻ bài viết">
-            <Share2 className="w-4 h-4 text-on-surface-variant" />
           </button>
         </div>
       </div>

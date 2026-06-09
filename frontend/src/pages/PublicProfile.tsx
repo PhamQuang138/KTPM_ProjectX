@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {Link, Navigate, useParams} from 'react-router-dom';
-import {ArrowLeft, Globe, Grid3X3, List, MapPin, PenTool, Star} from 'lucide-react';
+import {ArrowLeft, Globe, Grid3X3, List, MapPin, MessageCircle, PenTool, Star} from 'lucide-react';
 import {AnimatePresence, motion} from 'motion/react';
 import TopNav from '../components/TopNav';
 import MobileNav from '../components/MobileNav';
@@ -9,6 +9,7 @@ import SocialPost, {SocialPostProps} from '../components/SocialPost';
 import {apiRequest} from '../lib/api';
 import {useAuthStore} from '../store/useAuthStore';
 import {useSidebarStore} from '../store/useSidebarStore';
+import {useMessageStore} from '../store/useMessageStore';
 
 interface PublicPost {
   id: string;
@@ -69,6 +70,7 @@ export default function PublicProfile() {
   const {id} = useParams();
   const currentUser = useAuthStore((state) => state.user);
   const {isOpen} = useSidebarStore();
+  const startDirect = useMessageStore((state) => state.startDirect);
   const [profile, setProfile] = useState<PublicProfileData | null>(null);
   const [posts, setPosts] = useState<PublicPost[]>([]);
   const [activeTab, setActiveTab] = useState('garage');
@@ -155,7 +157,7 @@ export default function PublicProfile() {
           name: profile.name,
           handle,
           avatar,
-          isVerified: true,
+          isVerified: profile.isVerifiedProfessional,
           isProUser: profile.isVerifiedProfessional,
         },
         type: 'story' as const,
@@ -236,14 +238,19 @@ export default function PublicProfile() {
                       </div>
                       {currentUser?.id !== profile.id && (
                         <div className="mt-5 flex flex-col items-center md:items-start">
-                          <button
-                            type="button"
-                            disabled={isFollowLoading}
-                            onClick={handleToggleFollow}
-                            className={profile.social.isFollowing ? 'btn-secondary px-8 py-3 rounded-2xl' : 'btn-primary px-8 py-3 rounded-2xl'}
-                          >
-                            {isFollowLoading ? 'Vui lòng chờ...' : profile.social.isFollowing ? 'Đang theo dõi' : 'Theo dõi'}
-                          </button>
+                          <div className="flex flex-wrap gap-3">
+                            <button
+                              type="button"
+                              disabled={isFollowLoading}
+                              onClick={handleToggleFollow}
+                              className={profile.social.isFollowing ? 'btn-secondary px-8 py-3 rounded-2xl' : 'btn-primary px-8 py-3 rounded-2xl'}
+                            >
+                              {isFollowLoading ? 'Vui lòng chờ...' : profile.social.isFollowing ? 'Đang theo dõi' : 'Theo dõi'}
+                            </button>
+                            <button type="button" onClick={() => startDirect({userId: profile.id, userName: profile.name})} className="btn-secondary flex items-center gap-2 px-6 py-3 rounded-2xl">
+                              <MessageCircle className="h-4 w-4" /> Nhắn tin
+                            </button>
+                          </div>
                           {followError && <p className="text-xs text-red-300 mt-3">{followError}</p>}
                         </div>
                       )}

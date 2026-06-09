@@ -18,7 +18,7 @@ export default function MobileNav() {
       ? [
           { icon: ShoppingBag, label: 'Chợ xe', path: '/market' },
           { icon: PlusSquare, label: 'Đăng', path: '/feed?compose=1' },
-          { icon: Heart, label: 'Đã thích', path: '/favorites' },
+          { icon: Heart, label: 'Đã lưu', path: '/favorites' },
           { icon: User, label: 'Garage', path: '/garage' },
         ]
       : []),

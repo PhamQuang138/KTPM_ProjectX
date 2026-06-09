@@ -3,11 +3,12 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import NotificationsTray from './NotificationsTray';
 import { useSidebarStore } from '../store/useSidebarStore';
 import { useAuthStore } from '../store/useAuthStore';
 import {useMessageStore} from '../store/useMessageStore';
+import {apiRequest} from '../lib/api';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -17,9 +18,21 @@ export default function TopNav({ title }: { title?: string }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const { isOpen, toggle } = useSidebarStore();
   const { isAuthenticated, user, logout } = useAuthStore();
   const openInbox = useMessageStore((state) => state.openInbox);
+  const updateUnreadNotifications = useCallback((count: number) => setUnreadNotifications(count), []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const load = () => apiRequest<{unreadCount: number}>('/notifications')
+      .then((result) => setUnreadNotifications(result.unreadCount))
+      .catch(() => undefined);
+    void load();
+    const timer = window.setInterval(load, 30000);
+    return () => window.clearInterval(timer);
+  }, [isAuthenticated]);
 
   const handleLogout = async () => {
     await logout();
@@ -37,7 +50,7 @@ export default function TopNav({ title }: { title?: string }) {
       case '/feed': return 'Cộng đồng';
       case '/market': return 'Chợ xe';
       case '/garage': return 'Hồ sơ của tôi';
-      case '/favorites': return 'Đã thích';
+      case '/favorites': return 'Đã thích & lưu';
       case '/admin': return 'Quản trị';
       default: return 'CarHub';
     }
@@ -79,7 +92,7 @@ export default function TopNav({ title }: { title?: string }) {
                     { label: 'Cộng đồng', path: '/feed' },
                     { label: 'Chợ xe', path: '/market' },
                     { label: 'Garage', path: '/garage' },
-                    { label: 'Đã thích', path: '/favorites' },
+                    { label: 'Đã thích & lưu', path: '/favorites' },
                   ]
                 : []),
               ...(user?.role === 'ADMIN' ? [{ label: 'Quản trị', path: '/admin' }] : []),
@@ -114,7 +127,7 @@ export default function TopNav({ title }: { title?: string }) {
                   className="relative p-2 text-on-surface hover:text-primary transition-all hover:scale-110"
                 >
                   <Bell className="w-5 h-5" />
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background"></span>
+                  {unreadNotifications > 0 && <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background" />}
                 </button>
                 <button
                   type="button"
@@ -174,6 +187,7 @@ export default function TopNav({ title }: { title?: string }) {
       <NotificationsTray 
         isOpen={isNotificationsOpen} 
         onClose={() => setIsNotificationsOpen(false)} 
+        onUnreadChange={updateUnreadNotifications}
       />
     </>
   );

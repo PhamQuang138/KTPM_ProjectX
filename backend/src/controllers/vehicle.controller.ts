@@ -9,6 +9,13 @@ export const createGarageVehicleSchema = z.object({
   image: z.string().url(),
   images: z.array(z.string().url()).max(12).optional(),
   condition: z.enum(['New', 'Used', 'Project']).optional(),
+  make: z.string().trim().max(80).optional(),
+  model: z.string().trim().max(80).optional(),
+  year: z.number().int().min(1886).max(new Date().getFullYear() + 1).optional(),
+  mileage: z.number().int().min(0).max(5000000).optional(),
+  bodyType: z.string().trim().max(80).optional(),
+  fuelType: z.string().trim().max(80).optional(),
+  transmission: z.string().trim().max(80).optional(),
   specs: z.array(z.string().min(1).max(80)).max(12).optional(),
   status: z.string().min(1).max(80).optional(),
 });
@@ -32,9 +39,24 @@ export const updateListingSchema = createListingSchema.partial().refine((input) 
 });
 
 export const vehicleController = {
-  async listListings(req: Request, res: Response) {
-    const listings = await vehicleService.listListings(req.query.category?.toString(), req.query.search?.toString(), req.query.sellerId?.toString());
-    return res.json({data: listings});
+  async listListings(req: AuthenticatedRequest, res: Response) {
+    const result = await vehicleService.listListings({
+      category: req.query.category?.toString(),
+      search: req.query.search?.toString(),
+      sellerId: req.query.sellerId?.toString(),
+      condition: req.query.condition?.toString(),
+      make: req.query.make?.toString(),
+      bodyType: req.query.bodyType?.toString(),
+      fuelType: req.query.fuelType?.toString(),
+      transmission: req.query.transmission?.toString(),
+      minYear: Number(req.query.minYear) || undefined,
+      maxYear: Number(req.query.maxYear) || undefined,
+      page: Math.max(1, Number(req.query.page) || 1),
+      limit: Math.min(50, Math.max(1, Number(req.query.limit) || 10)),
+      sort: req.query.sort?.toString(),
+      viewerId: req.user?.id,
+    });
+    return res.json({data: result});
   },
 
   async getListingById(req: Request, res: Response) {
@@ -128,4 +150,22 @@ export const vehicleController = {
   listVehicleImages(_req: Request, res: Response) {
     return res.json({data: vehicleService.listVehicleImages()});
   },
+
+  async toggleFavorite(req: AuthenticatedRequest, res: Response) {
+    const listing = await vehicleService.getListingById(req.params.id);
+    if (!listing) return res.status(404).json({message: 'Không tìm thấy tin đăng'});
+    return res.json({data: await vehicleService.toggleFavorite(req.params.id, req.user!.id)});
+  },
+
+  async addComment(req: AuthenticatedRequest, res: Response) {
+    const listing = await vehicleService.getListingById(req.params.id);
+    if (!listing) return res.status(404).json({message: 'Không tìm thấy tin đăng'});
+    return res.status(201).json({
+      data: await vehicleService.addComment(req.params.id, req.user!.id, req.body.content),
+    });
+  },
 };
+
+export const listingCommentSchema = z.object({
+  content: z.string().trim().min(1).max(2000),
+});

@@ -1,4 +1,5 @@
 import {prisma} from '../config/prisma';
+import {notificationService} from './notification.service';
 
 const getRating = async (targetUserId: string, viewerId?: string) => {
   const [targetUser, aggregate, myRating] = await Promise.all([
@@ -111,6 +112,14 @@ export const userService = {
       where: {followerId_followingId: {followerId, followingId: targetUserId}},
       update: {},
       create: {followerId, followingId: targetUserId},
+    });
+    await notificationService.create({
+      recipientId: targetUserId,
+      actorId: followerId,
+      type: 'follow',
+      title: 'Người theo dõi mới',
+      message: 'Đã bắt đầu theo dõi bạn',
+      link: `/profile/${followerId}`,
     });
 
     const [followers, following] = await Promise.all([

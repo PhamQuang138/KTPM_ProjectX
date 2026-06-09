@@ -50,6 +50,7 @@ export const authService = {
         email: user.email,
         avatar: user.avatar,
         role: user.role,
+        isVerifiedProfessional: user.isVerifiedProfessional,
       },
     };
   },
@@ -85,6 +86,7 @@ export const authService = {
         email: user.email,
         avatar: user.avatar,
         role: user.role,
+        isVerifiedProfessional: user.isVerifiedProfessional,
       },
     };
   },

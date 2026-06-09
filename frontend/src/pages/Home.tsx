@@ -64,6 +64,10 @@ interface HomeVehicle {
   } | null;
 }
 
+interface HomeMarketplaceResponse {
+  items: HomeVehicle[];
+}
+
 interface HomeArticle {
   id: string;
   title: string;
@@ -86,12 +90,12 @@ export default function Home() {
   useEffect(() => {
     Promise.all([
       apiRequest<HomeOverview>('/posts/community-overview'),
-      apiRequest<HomeVehicle[]>('/vehicles'),
+      apiRequest<HomeMarketplaceResponse>('/vehicles?limit=4&sort=trending'),
       apiRequest<HomeArticle[]>('/articles'),
     ])
       .then(([overviewData, vehicleData, articleData]) => {
         setOverview(overviewData);
-        setVehicles(vehicleData.slice(0, 4));
+        setVehicles(vehicleData.items.slice(0, 4));
         setArticles(articleData.slice(0, 3));
       })
       .catch(() => undefined);

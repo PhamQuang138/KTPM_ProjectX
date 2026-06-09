@@ -7,6 +7,7 @@ interface AuthUser {
   name: string;
   avatar?: string | null;
   role: 'USER' | 'ADMIN';
+  isVerifiedProfessional: boolean;
 }
 
 interface LoginResponse {

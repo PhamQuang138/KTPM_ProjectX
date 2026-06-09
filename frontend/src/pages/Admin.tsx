@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import TopNav from '../components/TopNav';
 import {apiRequest} from '../lib/api';
+import {Link} from 'react-router-dom';
 
 interface Dashboard {
   users: number;
@@ -414,8 +415,8 @@ export default function Admin() {
           <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-700">Traffic Proxy</h2>
-                <p className="mt-1 text-xs text-slate-500">Activity-based visits estimate from comments, follows, ratings, likes, and shares.</p>
+                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-700">Community Activity</h2>
+                <p className="mt-1 text-xs text-slate-500">Actual comments, follows, ratings and post reactions recorded by the system.</p>
               </div>
               <Activity className="h-5 w-5 text-slate-400" />
             </div>
@@ -466,7 +467,9 @@ export default function Admin() {
                     <tr key={user.id} className="hover:bg-slate-50">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <img src={user.avatar ?? `https://i.pravatar.cc/120?u=${encodeURIComponent(user.email)}`} alt={user.name} className="h-10 w-10 rounded-full object-cover" />
+                          <Link to={`/profile/${user.id}`} title="Xem hồ sơ người dùng">
+                            <img src={user.avatar ?? `https://i.pravatar.cc/120?u=${encodeURIComponent(user.email)}`} alt={user.name} className="h-10 w-10 rounded-full object-cover ring-2 ring-transparent transition hover:ring-blue-500" />
+                          </Link>
                           <div>
                             <p className="font-semibold text-slate-900">{user.name}</p>
                             <p className="text-xs text-slate-500">{user.email}</p>

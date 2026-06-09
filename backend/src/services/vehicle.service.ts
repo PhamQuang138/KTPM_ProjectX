@@ -1,5 +1,6 @@
 import {vehicleImageSeeds} from '../data/vehicleImages';
 import {prisma} from '../config/prisma';
+import {notificationService} from './notification.service';
 
 export interface CreateGarageVehicleInput {
   title: string;
@@ -7,6 +8,13 @@ export interface CreateGarageVehicleInput {
   image: string;
   images?: string[];
   condition?: string;
+  make?: string;
+  model?: string;
+  year?: number;
+  mileage?: number;
+  bodyType?: string;
+  fuelType?: string;
+  transmission?: string;
   specs?: string[];
   status?: string;
   ownerId: string;
@@ -27,8 +35,13 @@ export type UpdateGarageVehicleInput = Partial<Omit<CreateGarageVehicleInput, 'o
 export type UpdateVehicleListingInput = Partial<Omit<CreateVehicleListingInput, 'sellerId'>>;
 
 const listingInclude = {
-  seller: {select: {id: true, name: true, avatar: true, email: true}},
+  seller: {select: {id: true, name: true, avatar: true, email: true, isVerifiedProfessional: true}},
   vehicle: true,
+  comments: {
+    include: {user: {select: {id: true, name: true, email: true, avatar: true}}},
+    orderBy: {createdAt: 'asc' as const},
+  },
+  _count: {select: {favorites: true, comments: true}},
 };
 
 const garageInclude = {
@@ -68,6 +81,13 @@ export const vehicleService = {
         image: input.image,
         images: input.images ?? [input.image],
         condition: input.condition ?? 'Used',
+        make: input.make,
+        model: input.model,
+        year: input.year,
+        mileage: input.mileage,
+        bodyType: input.bodyType,
+        fuelType: input.fuelType,
+        transmission: input.transmission,
         specs: input.specs ?? [],
         status: input.status ?? 'In Garage',
         ownerId: input.ownerId,
@@ -84,17 +104,102 @@ export const vehicleService = {
     return prisma.garageVehicle.delete({where: {id}});
   },
 
-  listListings(category?: string, search?: string, sellerId?: string) {
-    return prisma.vehicleListing.findMany({
-      where: {
-        ...(category ? {category: {equals: category, mode: 'insensitive' as const}} : {}),
-        ...(search ? {title: {contains: search, mode: 'insensitive' as const}} : {}),
-        ...(sellerId ? {sellerId} : {}),
-        ...(!sellerId ? {status: {not: 'Hidden'}} : {}),
-      },
-      include: listingInclude,
-      orderBy: {createdAt: 'desc'},
+  async listListings(input: {
+    category?: string;
+    search?: string;
+    sellerId?: string;
+    condition?: string;
+    make?: string;
+    bodyType?: string;
+    fuelType?: string;
+    transmission?: string;
+    minYear?: number;
+    maxYear?: number;
+    page: number;
+    limit: number;
+    sort?: string;
+    viewerId?: string;
+  }) {
+    const vehicleWhere = {
+      ...(input.condition ? {condition: input.condition} : {}),
+      ...(input.make ? {make: {equals: input.make, mode: 'insensitive' as const}} : {}),
+      ...(input.bodyType ? {bodyType: {equals: input.bodyType, mode: 'insensitive' as const}} : {}),
+      ...(input.fuelType ? {fuelType: {equals: input.fuelType, mode: 'insensitive' as const}} : {}),
+      ...(input.transmission ? {transmission: {equals: input.transmission, mode: 'insensitive' as const}} : {}),
+      ...(input.minYear || input.maxYear
+        ? {year: {gte: input.minYear, lte: input.maxYear}}
+        : {}),
+    };
+    const hasVehicleFilter = Object.keys(vehicleWhere).length > 0;
+    const where = {
+      ...(input.category ? {category: {equals: input.category, mode: 'insensitive' as const}} : {}),
+      ...(input.search
+        ? {
+            OR: [
+              {title: {contains: input.search, mode: 'insensitive' as const}},
+              {description: {contains: input.search, mode: 'insensitive' as const}},
+              {location: {contains: input.search, mode: 'insensitive' as const}},
+              {vehicle: {is: {OR: [
+                {make: {contains: input.search, mode: 'insensitive' as const}},
+                {model: {contains: input.search, mode: 'insensitive' as const}},
+              ]}}},
+            ],
+          }
+        : {}),
+      ...(input.sellerId ? {sellerId: input.sellerId} : {}),
+      ...(!input.sellerId ? {status: {not: 'Hidden'}} : {}),
+      ...(hasVehicleFilter ? {vehicle: {is: vehicleWhere}} : {}),
+    };
+    const orderBy =
+      input.sort === 'trending'
+        ? [{favorites: {_count: 'desc' as const}}, {comments: {_count: 'desc' as const}}, {createdAt: 'desc' as const}]
+        : input.sort === 'oldest'
+          ? [{createdAt: 'asc' as const}]
+          : [{createdAt: 'desc' as const}];
+    const sevenDaysAgo = new Date(Date.now() - 7 * 86400000);
+    const [items, total, activeCount, newThisWeek, verifiedSellers, dailyRows] = await Promise.all([
+      prisma.vehicleListing.findMany({
+        where,
+        include: {
+          ...listingInclude,
+          favorites: input.viewerId ? {where: {userId: input.viewerId}, select: {id: true}} : false,
+        },
+        orderBy,
+        skip: (input.page - 1) * input.limit,
+        take: input.limit,
+      }),
+      prisma.vehicleListing.count({where}),
+      prisma.vehicleListing.count({where: {status: 'Active Listing'}}),
+      prisma.vehicleListing.count({where: {status: 'Active Listing', createdAt: {gte: sevenDaysAgo}}}),
+      prisma.user.count({where: {isVerifiedProfessional: true, vehicleListings: {some: {status: 'Active Listing'}}}}),
+      prisma.vehicleListing.findMany({
+        where: {status: 'Active Listing', createdAt: {gte: sevenDaysAgo}},
+        select: {createdAt: true},
+      }),
+    ]);
+    const daily = Array.from({length: 7}, (_, index) => {
+      const date = new Date();
+      date.setHours(0, 0, 0, 0);
+      date.setDate(date.getDate() - (6 - index));
+      const key = date.toISOString().slice(0, 10);
+      return {
+        date: key,
+        count: dailyRows.filter((row) => row.createdAt.toISOString().slice(0, 10) === key).length,
+      };
     });
+    return {
+      items: items.map((item) => ({
+        ...item,
+        isFavorite: Array.isArray(item.favorites) && item.favorites.length > 0,
+      })),
+      pagination: {
+        page: input.page,
+        limit: input.limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / input.limit)),
+      },
+      stats: {activeCount, newThisWeek, verifiedSellers, daily},
+    };
   },
 
   getListingById(id: string) {
@@ -127,5 +232,59 @@ export const vehicleService = {
 
   listVehicleImages() {
     return vehicleImageSeeds;
+  },
+
+  async toggleFavorite(listingId: string, userId: string) {
+    const existing = await prisma.listingFavorite.findUnique({
+      where: {listingId_userId: {listingId, userId}},
+    });
+    if (existing) {
+      await prisma.listingFavorite.delete({where: {id: existing.id}});
+    } else {
+      await prisma.listingFavorite.create({data: {listingId, userId}});
+      const listing = await prisma.vehicleListing.findUnique({
+        where: {id: listingId},
+        select: {sellerId: true, title: true},
+      });
+      if (listing) {
+        await notificationService.create({
+          recipientId: listing.sellerId,
+          actorId: userId,
+          type: 'marketplace',
+          title: 'Tin xe được quan tâm',
+          message: `Đã lưu tin "${listing.title}"`,
+          link: `/market/${listingId}`,
+        });
+      }
+    }
+    return {
+      favorite: !existing,
+      count: await prisma.listingFavorite.count({where: {listingId}}),
+    };
+  },
+
+  async addComment(listingId: string, userId: string, content: string) {
+    const comment = await prisma.listingComment.create({
+      data: {listingId, userId, content},
+      include: {user: {select: {id: true, name: true, email: true, avatar: true}}},
+    });
+    const listing = await prisma.vehicleListing.findUnique({
+      where: {id: listingId},
+      select: {sellerId: true, title: true},
+    });
+    if (listing) {
+      await notificationService.create({
+        recipientId: listing.sellerId,
+        actorId: userId,
+        type: 'marketplace',
+        title: 'Trao đổi mới về xe',
+        message: `Đã bình luận tin "${listing.title}"`,
+        link: `/market/${listingId}`,
+      });
+    }
+    return {
+      comment,
+      count: await prisma.listingComment.count({where: {listingId}}),
+    };
   },
 };
