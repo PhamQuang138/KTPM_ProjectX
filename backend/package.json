@@ -23,6 +23,7 @@
     "db:ensure-articles": "ts-node-dev --transpile-only --exit-child scripts/ensure-articles.ts",
     "db:migrate-images": "ts-node-dev --transpile-only --exit-child scripts/migrate-images-to-blob.ts",
     "db:seed-marketplace": "ts-node --transpile-only scripts/seed-marketplace-catalog.ts",
+    "db:seed-marketplace-asia": "ts-node --transpile-only scripts/seed-marketplace-asia.ts",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio"
   },
