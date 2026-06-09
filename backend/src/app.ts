@@ -72,16 +72,21 @@ if (!isProduction) {
     }),
   );
 }
-app.get('/api/health', (_req: Request, res: Response) => {
+const healthHandler = (_req: Request, res: Response) => {
   res.status(200).json({
     status: 'ok',
     service: 'ktpm-backend',
     environment: process.env.NODE_ENV ?? 'development',
     timestamp: new Date().toISOString(),
   });
-});
+};
 
+app.get('/api/health', healthHandler);
 app.use('/api', apiRouter);
+
+// Vercel Services can remove the service route prefix before invoking Express.
+app.get('/health', healthHandler);
+app.use('/', apiRouter);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({message: 'Route not found'});
@@ -89,6 +94,14 @@ app.use((_req: Request, res: Response) => {
 
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error(error);
+  if (
+    error instanceof SyntaxError &&
+    'status' in error &&
+    (error as SyntaxError & {status?: number}).status === 400
+  ) {
+    return res.status(400).json({message: 'JSON không hợp lệ'});
+  }
+
   if (error instanceof multer.MulterError) {
     return res.status(400).json({
       message: error.code === 'LIMIT_FILE_SIZE' ? 'Ảnh phải có dung lượng tối đa 4MB' : error.message,
