@@ -1,10 +1,12 @@
-import {Heart, MapPin, MessageCircle, CheckCircle2} from 'lucide-react';
+import {Heart, MapPin, MessageCircle, CheckCircle2, ChevronLeft, ChevronRight} from 'lucide-react';
 import {motion} from 'motion/react';
 import {Link} from 'react-router-dom';
+import {useMemo, useState} from 'react';
 
 export interface VehicleCardProps {
   id: string;
   image: string;
+  images?: string[];
   price: string;
   title: string;
   location: string;
@@ -13,6 +15,7 @@ export interface VehicleCardProps {
     name: string;
     avatar?: string | null;
     isVerifiedProfessional?: boolean;
+    role?: 'USER' | 'ADMIN';
   };
   condition: string;
   specs: string[];
@@ -25,6 +28,7 @@ export interface VehicleCardProps {
 export default function VehicleCard({
   id,
   image,
+  images = [],
   price,
   title,
   location,
@@ -36,6 +40,11 @@ export default function VehicleCard({
   isFavorite = false,
   onToggleFavorite,
 }: VehicleCardProps) {
+  const gallery = useMemo(() => [...new Set([image, ...images].filter(Boolean))], [image, images]);
+  const [activeImage, setActiveImage] = useState(0);
+  const changeImage = (direction: number) => {
+    setActiveImage((current) => (current + direction + gallery.length) % gallery.length);
+  };
   return (
     <motion.article
       initial={{opacity: 0, y: 16}}
@@ -45,8 +54,15 @@ export default function VehicleCard({
     >
       <div className="relative aspect-[4/3] overflow-hidden">
         <Link to={`/market/${id}`}>
-          <img src={image} alt={title} className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" />
+          <img src={gallery[activeImage] ?? image} alt={title} className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" />
         </Link>
+        {gallery.length > 1 && (
+          <>
+            <button type="button" onClick={() => changeImage(-1)} className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white hover:bg-black/75" title="Ảnh trước"><ChevronLeft className="h-4 w-4" /></button>
+            <button type="button" onClick={() => changeImage(1)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/55 p-2 text-white hover:bg-black/75" title="Ảnh sau"><ChevronRight className="h-4 w-4" /></button>
+            <span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-2 py-1 text-[10px] text-white">{activeImage + 1}/{gallery.length}</span>
+          </>
+        )}
         <span className="badge badge-secondary absolute left-4 top-4">{condition}</span>
         <button
           type="button"
@@ -79,7 +95,7 @@ export default function VehicleCard({
           <Link to={`/profile/${seller.id}`} className="flex min-w-0 items-center gap-2.5 hover:text-primary">
             <img src={seller.avatar ?? `https://i.pravatar.cc/100?u=${seller.id}`} alt={seller.name} className="h-8 w-8 rounded-full object-cover" />
             <span className="truncate text-xs font-bold">{seller.name}</span>
-            {seller.isVerifiedProfessional && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-blue-400" />}
+            {(seller.role === 'ADMIN' || seller.isVerifiedProfessional) && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-blue-400" />}
           </Link>
           <div className="flex items-center gap-3 text-xs text-on-surface-variant">
             <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5" /> {favoriteCount}</span>

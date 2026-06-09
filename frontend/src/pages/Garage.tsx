@@ -573,15 +573,15 @@ export default function Garage() {
                 <div className="md:mb-4">
                   <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
                     <h1 className="font-display text-4xl font-bold tracking-tight">{displayName}</h1>
-                    <span className="badge-primary">Legacy Collector</span>
-                    {isVerifiedProfessional && <span className="badge-success">Verified Pro</span>}
+                    <span className="badge-primary">{user?.role === 'ADMIN' ? 'Admin' : 'Thành viên'}</span>
+                    {(isVerifiedProfessional || user?.role === 'ADMIN') && <span className="badge-success">Tích xanh</span>}
                   </div>
                   <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 text-xs text-on-surface-variant font-mono uppercase tracking-widest">
                     <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {profileLocation || 'Chưa có địa điểm'}</span>
                     <span className="opacity-30">•</span>
                     <span className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5" /> @{handle}</span>
                     <span className="opacity-30">•</span>
-                    {isVerifiedProfessional && <span className="text-primary font-bold">Verified Professional</span>}
+                    {(isVerifiedProfessional || user?.role === 'ADMIN') && <span className="text-primary font-bold">Tài khoản đã xác thực</span>}
                   </div>
                 </div>
               </div>
@@ -746,8 +746,9 @@ export default function Garage() {
                         name: displayName,
                         handle,
                         avatar,
-                        isVerified: true,
-                        isProUser: true,
+                        isVerified: Boolean(isVerifiedProfessional || user?.role === 'ADMIN'),
+                        isProUser: Boolean(isVerifiedProfessional || user?.role === 'ADMIN'),
+                        role: user?.role,
                       },
                       type: 'story' as const,
                       content: post.content,

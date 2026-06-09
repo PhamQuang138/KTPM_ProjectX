@@ -6,6 +6,7 @@ import {validateBody} from '../middlewares/validateRequest';
 export const userRouter = Router();
 
 userRouter.patch('/me/profile', requireAuth, validateBody(updateProfileSchema), userController.updateOwnProfile);
+userRouter.get('/search/accounts', requireAuth, userController.searchUsers);
 userRouter.get('/:id', optionalAuth, userController.getPublicProfile);
 userRouter.get('/:id/rating', optionalAuth, userController.getRating);
 userRouter.post('/:id/follow', requireAuth, userController.followUser);

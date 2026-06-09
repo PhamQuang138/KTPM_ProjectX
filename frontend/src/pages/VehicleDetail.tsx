@@ -1,11 +1,12 @@
 import {useEffect, useState} from 'react';
 import {Link, Navigate, useParams} from 'react-router-dom';
-import {ArrowLeft, CheckCircle2, Heart, MapPin, MessageCircle, Star} from 'lucide-react';
+import {ArrowLeft, CheckCircle2, Heart, MapPin, MessageCircle, Star, ZoomIn} from 'lucide-react';
 import TopNav from '../components/TopNav';
 import MobileNav from '../components/MobileNav';
 import {apiRequest} from '../lib/api';
 import {useAuthStore} from '../store/useAuthStore';
 import {useMessageStore} from '../store/useMessageStore';
+import ImageLightbox from '../components/ImageLightbox';
 
 interface VehicleDetailData {
   id: string;
@@ -29,6 +30,8 @@ interface VehicleDetailData {
     name: string;
     email: string;
     avatar?: string | null;
+    role?: 'USER' | 'ADMIN';
+    isVerifiedProfessional?: boolean;
   };
   createdAt: string;
   comments: {
@@ -58,6 +61,7 @@ export default function VehicleDetail() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteCount, setFavoriteCount] = useState(0);
   const [commentContent, setCommentContent] = useState('');
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -112,6 +116,10 @@ export default function VehicleDetail() {
   };
 
   if (!id) return <Navigate to="/market" replace />;
+  const gallery = vehicle
+    ? [...new Set([vehicle.vehicle?.image, ...(vehicle.vehicle?.images ?? [])].filter((image): image is string => Boolean(image)))]
+    : [];
+  const selectedIndex = Math.max(0, gallery.indexOf(selectedImage));
 
   return (
     <div className="min-h-screen bg-background text-on-background">
@@ -133,11 +141,12 @@ export default function VehicleDetail() {
         {vehicle && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             <section className="lg:col-span-7 space-y-4">
-              <div className="rounded-[2rem] overflow-hidden border border-white/10 bg-surface-container">
-                    <img src={selectedImage || vehicle.vehicle?.image} alt={vehicle.title} className="w-full aspect-[4/3] object-cover" />
-              </div>
+              <button type="button" onClick={() => setLightboxIndex(selectedIndex)} className="group relative block w-full overflow-hidden rounded-[2rem] border border-white/10 bg-surface-container">
+                <img src={selectedImage || vehicle.vehicle?.image} alt={vehicle.title} className="w-full aspect-[4/3] object-cover" />
+                <span className="absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-black/60 px-3 py-2 text-xs text-white opacity-0 transition group-hover:opacity-100"><ZoomIn className="h-4 w-4" /> Phóng to</span>
+              </button>
               <div className="grid grid-cols-4 gap-3">
-                {[vehicle.vehicle?.image, ...(vehicle.vehicle?.images ?? [])].filter(Boolean).slice(0, 8).map((image, index) => (
+                {gallery.slice(0, 12).map((image, index) => (
                   <button
                     key={`${image}-${index}`}
                     onClick={() => setSelectedImage(image)}
@@ -182,7 +191,7 @@ export default function VehicleDetail() {
                   <div>
                     <p className="font-bold flex items-center gap-2 group-hover:text-primary transition-colors">
                       {vehicle.seller.name}
-                      <CheckCircle2 className="w-4 h-4 text-blue-400" />
+                      {(vehicle.seller.role === 'ADMIN' || vehicle.seller.isVerifiedProfessional) && <CheckCircle2 className="w-4 h-4 text-blue-400" />}
                     </p>
                     <p className="text-xs text-on-surface-variant">{vehicle.seller.email}</p>
                   </div>
@@ -269,6 +278,7 @@ export default function VehicleDetail() {
           </div>
         )}
       </main>
+      <ImageLightbox images={gallery} activeIndex={lightboxIndex} onChange={(index) => {setLightboxIndex(index); setSelectedImage(gallery[index] ?? '');}} onClose={() => setLightboxIndex(null)} alt={vehicle?.title ?? 'Ảnh xe'} />
       <MobileNav />
     </div>
   );

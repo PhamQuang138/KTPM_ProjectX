@@ -20,7 +20,9 @@ export default function App() {
         <Route path="/market" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
         <Route path="/market/:id" element={<ProtectedRoute><VehicleDetail /></ProtectedRoute>} />
         <Route path="/garage" element={<ProtectedRoute><Garage /></ProtectedRoute>} />
-        <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
+        <Route path="/liked" element={<ProtectedRoute><Favorites mode="liked" /></ProtectedRoute>} />
+        <Route path="/saved" element={<ProtectedRoute><Favorites mode="saved" /></ProtectedRoute>} />
+        <Route path="/favorites" element={<Navigate to="/liked" replace />} />
         <Route path="/profile/:id" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />

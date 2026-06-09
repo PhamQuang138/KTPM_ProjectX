@@ -16,6 +16,11 @@ export const updateProfileSchema = z.object({
 });
 
 export const userController = {
+  async searchUsers(req: AuthenticatedRequest, res: Response) {
+    const query = req.query.q?.toString() ?? '';
+    return res.json({data: await userService.searchUsers(query, req.user!.id)});
+  },
+
   async getPublicProfile(req: AuthenticatedRequest, res: Response) {
     const profile = await userService.getPublicProfile(req.params.id, req.user?.id);
     if (!profile) return res.status(404).json({message: 'User not found'});

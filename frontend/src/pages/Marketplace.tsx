@@ -19,9 +19,11 @@ interface Listing {
     name: string;
     avatar?: string | null;
     isVerifiedProfessional?: boolean;
+    role?: 'USER' | 'ADMIN';
   };
   vehicle?: {
     image: string;
+    images: string[];
     condition: string;
     specs: string[];
     make?: string;
@@ -179,6 +181,7 @@ export default function Marketplace() {
                       key={listing.id}
                       id={listing.id}
                       image={listing.vehicle?.image ?? ''}
+                      images={listing.vehicle?.images ?? []}
                       price={listing.price}
                       title={listing.title}
                       location={listing.location}

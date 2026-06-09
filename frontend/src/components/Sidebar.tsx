@@ -1,4 +1,4 @@
-import { Newspaper, ShoppingBag, Car, Heart, Settings, Zap, Home, ChevronLeft, LogOut } from 'lucide-react';
+import { Newspaper, ShoppingBag, Car, Heart, Bookmark, Settings, Zap, Home, ChevronLeft, LogOut, BadgeCheck } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -15,7 +15,8 @@ const navItems = [
   { icon: Newspaper, label: 'Cộng đồng', path: '/feed' },
   { icon: ShoppingBag, label: 'Chợ xe', path: '/market' },
   { icon: Car, label: 'Garage của tôi', path: '/garage' },
-  { icon: Heart, label: 'Đã thích & lưu', path: '/favorites' },
+  { icon: Heart, label: 'Đã thích', path: '/liked' },
+  { icon: Bookmark, label: 'Đã lưu', path: '/saved' },
   { icon: Settings, label: 'Cài đặt', path: '#' },
 ];
 
@@ -67,8 +68,9 @@ export default function Sidebar() {
               </div>
               <div>
                 <p className="font-sans text-sm text-on-surface font-bold leading-tight">{user?.name ?? 'Khách'}</p>
-                <p className="text-[10px] text-on-surface-variant font-mono uppercase tracking-wider">
-                  {isAuthenticated ? 'Thành viên' : 'Đăng nhập'}
+                <p className="flex items-center gap-1 text-[10px] text-on-surface-variant font-mono uppercase tracking-wider">
+                  {isAuthenticated ? (user?.role === 'ADMIN' ? 'Admin' : 'Thành viên') : 'Đăng nhập'}
+                  {isAuthenticated && (user?.role === 'ADMIN' || user?.isVerifiedProfessional) && <BadgeCheck className="h-3 w-3 text-blue-400" />}
                 </p>
               </div>
             </Link>

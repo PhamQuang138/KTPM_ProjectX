@@ -35,7 +35,7 @@ export type UpdateGarageVehicleInput = Partial<Omit<CreateGarageVehicleInput, 'o
 export type UpdateVehicleListingInput = Partial<Omit<CreateVehicleListingInput, 'sellerId'>>;
 
 const listingInclude = {
-  seller: {select: {id: true, name: true, avatar: true, email: true, isVerifiedProfessional: true}},
+  seller: {select: {id: true, name: true, avatar: true, email: true, role: true, isVerifiedProfessional: true}},
   vehicle: true,
   comments: {
     include: {user: {select: {id: true, name: true, email: true, avatar: true}}},

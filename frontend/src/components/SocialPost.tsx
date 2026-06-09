@@ -4,6 +4,7 @@ import { FormEvent, ReactNode, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { apiRequest } from '../lib/api';
+import ImageLightbox from './ImageLightbox';
 
 interface PostComment {
   id: string;
@@ -37,6 +38,7 @@ export interface SocialPostProps {
     avatar: string;
     isVerified?: boolean;
     isProUser?: boolean;
+    role?: 'USER' | 'ADMIN';
   };
   content: string;
   image?: string;
@@ -87,6 +89,7 @@ export default function SocialPost({
   const [interactionError, setInteractionError] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const currentUser = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const currentUserAvatar = currentUser?.avatar ?? `https://i.pravatar.cc/100?u=${encodeURIComponent(currentUser?.email ?? 'guest')}`;
@@ -217,7 +220,7 @@ export default function SocialPost({
               <span>{timestamp}</span>
               <span>•</span>
               <span className={`px-2 py-0.5 rounded-full border ${getBadgeColor()}`}>
-                {type.replace('_', ' ')}
+                {author.role === 'ADMIN' ? 'Admin' : author.isVerified ? 'Đã xác thực' : 'Thành viên'}
               </span>
             </div>
           </div>
@@ -241,15 +244,15 @@ export default function SocialPost({
                      Ảnh không khả dụng
                    </div>
                  ) : (
+                   <button type="button" key={img} onClick={() => setLightboxIndex(idx)} className="overflow-hidden">
                    <img
-                     key={img}
                      src={img}
                      alt={`post content ${idx + 1}`}
                      loading="lazy"
                      decoding="async"
                      onError={() => markImageFailed(img)}
                      className="w-full h-full object-cover aspect-square hover:scale-105 transition-transform duration-700 cursor-zoom-in"
-                   />
+                   /></button>
                  )
                ))
              ) : (
@@ -258,6 +261,7 @@ export default function SocialPost({
                    Ảnh không khả dụng
                  </div>
                ) : (
+                 <button type="button" onClick={() => setLightboxIndex(0)} className="block w-full overflow-hidden">
                  <img
                    src={imageSources[0]}
                    alt="post content"
@@ -265,7 +269,7 @@ export default function SocialPost({
                    decoding="async"
                    onError={() => markImageFailed(imageSources[0])}
                    className="w-full h-auto max-h-[500px] object-cover hover:scale-[1.02] transition-transform duration-700 cursor-zoom-in"
-                 />
+                 /></button>
                )
              )}
           </div>
@@ -383,6 +387,7 @@ export default function SocialPost({
           </motion.div>
         )}
       </AnimatePresence>
+      <ImageLightbox images={imageSources} activeIndex={lightboxIndex} onChange={setLightboxIndex} onClose={() => setLightboxIndex(null)} alt="Ảnh bài viết" />
     </motion.div>
   );
 }

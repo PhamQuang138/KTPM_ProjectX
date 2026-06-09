@@ -21,6 +21,7 @@ export interface ListPostInput {
   status?: PostStatus;
   authorId?: string;
   viewerId?: string;
+  prioritizeTrustedAuthors?: boolean;
 }
 
 const postInclude = {
@@ -31,6 +32,7 @@ const postInclude = {
       name: true,
       avatar: true,
       isVerifiedProfessional: true,
+      role: true,
     },
   },
   images: {
@@ -76,8 +78,8 @@ export const postDbService = {
     });
   },
 
-  list(input: ListPostInput = {}) {
-    return prisma.post.findMany({
+  async list(input: ListPostInput = {}) {
+    const posts = await prisma.post.findMany({
       where: {
         ...(input.status ? {status: input.status} : {}),
         ...(input.authorId ? {authorId: input.authorId} : {}),
@@ -97,6 +99,12 @@ export const postDbService = {
       orderBy: {
         createdAt: 'desc',
       },
+    });
+    if (!input.prioritizeTrustedAuthors) return posts;
+    return posts.sort((left, right) => {
+      const leftPriority = left.author.role === 'ADMIN' ? 2 : left.author.isVerifiedProfessional ? 1 : 0;
+      const rightPriority = right.author.role === 'ADMIN' ? 2 : right.author.isVerifiedProfessional ? 1 : 0;
+      return rightPriority - leftPriority || right.createdAt.getTime() - left.createdAt.getTime();
     });
   },
 

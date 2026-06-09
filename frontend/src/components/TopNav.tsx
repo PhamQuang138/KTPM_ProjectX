@@ -1,4 +1,4 @@
-import { Search, User, Bell, PlusCircle, Zap, Menu, LogOut, MessageCircle } from 'lucide-react';
+import { Search, User, Bell, PlusCircle, Zap, Menu, LogOut, MessageCircle, BadgeCheck, X } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -19,6 +19,17 @@ export default function TopNav({ title }: { title?: string }) {
   const navigate = useNavigate();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [accountQuery, setAccountQuery] = useState('');
+  const [accountResults, setAccountResults] = useState<Array<{
+    id: string;
+    name: string;
+    email: string;
+    avatar?: string | null;
+    role: 'USER' | 'ADMIN';
+    isVerifiedProfessional: boolean;
+  }>>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const { isOpen, toggle } = useSidebarStore();
   const { isAuthenticated, user, logout } = useAuthStore();
   const openInbox = useMessageStore((state) => state.openInbox);
@@ -33,6 +44,23 @@ export default function TopNav({ title }: { title?: string }) {
     const timer = window.setInterval(load, 30000);
     return () => window.clearInterval(timer);
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    const query = accountQuery.trim();
+    if (!isSearchOpen || query.length < 2) {
+      setAccountResults([]);
+      setIsSearching(false);
+      return;
+    }
+    setIsSearching(true);
+    const timer = window.setTimeout(() => {
+      apiRequest<typeof accountResults>(`/users/search/accounts?q=${encodeURIComponent(query)}`)
+        .then(setAccountResults)
+        .catch(() => setAccountResults([]))
+        .finally(() => setIsSearching(false));
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [accountQuery, isSearchOpen]);
 
   const handleLogout = async () => {
     await logout();
@@ -50,7 +78,8 @@ export default function TopNav({ title }: { title?: string }) {
       case '/feed': return 'Cộng đồng';
       case '/market': return 'Chợ xe';
       case '/garage': return 'Hồ sơ của tôi';
-      case '/favorites': return 'Đã thích & lưu';
+      case '/liked': return 'Đã thích';
+      case '/saved': return 'Đã lưu';
       case '/admin': return 'Quản trị';
       default: return 'CarHub';
     }
@@ -92,7 +121,6 @@ export default function TopNav({ title }: { title?: string }) {
                     { label: 'Cộng đồng', path: '/feed' },
                     { label: 'Chợ xe', path: '/market' },
                     { label: 'Garage', path: '/garage' },
-                    { label: 'Đã thích & lưu', path: '/favorites' },
                   ]
                 : []),
               ...(user?.role === 'ADMIN' ? [{ label: 'Quản trị', path: '/admin' }] : []),
@@ -118,7 +146,7 @@ export default function TopNav({ title }: { title?: string }) {
           <div className="flex items-center space-x-2 md:space-x-4 border-l border-white/10 pl-6">
             {isAuthenticated && (
               <>
-                <button className="hidden md:flex p-2 text-on-surface hover:text-primary transition-all hover:scale-110">
+                <button onClick={() => setIsSearchOpen(true)} className="hidden md:flex p-2 text-on-surface hover:text-primary transition-all hover:scale-110" title="Tìm tài khoản">
                   <Search className="w-5 h-5" />
                 </button>
 
@@ -183,6 +211,47 @@ export default function TopNav({ title }: { title?: string }) {
           </div>
         </div>
       </header>
+
+      {isSearchOpen && (
+        <div className="fixed inset-0 z-[80] bg-black/65 p-4 pt-24 backdrop-blur-sm" onClick={() => setIsSearchOpen(false)}>
+          <div className="mx-auto max-w-xl rounded-2xl border border-white/10 bg-surface-container p-4 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <Search className="h-5 w-5 text-on-surface-variant" />
+              <input
+                autoFocus
+                value={accountQuery}
+                onChange={(event) => setAccountQuery(event.target.value)}
+                placeholder="Tìm theo tên hoặc email..."
+                className="h-11 min-w-0 flex-1 bg-transparent text-sm outline-none"
+              />
+              <button onClick={() => setIsSearchOpen(false)} className="interactive-icon" title="Đóng"><X className="h-5 w-5" /></button>
+            </div>
+            <div className="mt-3 border-t border-white/10 pt-3">
+              {accountQuery.trim().length < 2 && <p className="px-2 py-6 text-center text-sm text-on-surface-variant">Nhập ít nhất 2 ký tự để tìm tài khoản.</p>}
+              {isSearching && <p className="px-2 py-6 text-center text-sm text-on-surface-variant">Đang tìm...</p>}
+              {!isSearching && accountQuery.trim().length >= 2 && accountResults.length === 0 && <p className="px-2 py-6 text-center text-sm text-on-surface-variant">Không tìm thấy tài khoản phù hợp.</p>}
+              {!isSearching && accountResults.map((account) => (
+                <Link
+                  key={account.id}
+                  to={`/profile/${account.id}`}
+                  onClick={() => {setIsSearchOpen(false); setAccountQuery('');}}
+                  className="flex items-center gap-3 rounded-xl p-3 hover:bg-white/5"
+                >
+                  <img src={account.avatar ?? `https://i.pravatar.cc/100?u=${encodeURIComponent(account.email)}`} alt={account.name} className="h-11 w-11 rounded-full object-cover" />
+                  <div className="min-w-0 flex-1">
+                    <p className="flex items-center gap-1.5 truncate text-sm font-bold">
+                      {account.name}
+                      {(account.role === 'ADMIN' || account.isVerifiedProfessional) && <BadgeCheck className="h-4 w-4 shrink-0 text-blue-400" />}
+                    </p>
+                    <p className="truncate text-xs text-on-surface-variant">{account.email}</p>
+                  </div>
+                  <span className="badge-secondary">{account.role === 'ADMIN' ? 'Admin' : 'Thành viên'}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <NotificationsTray 
         isOpen={isNotificationsOpen} 

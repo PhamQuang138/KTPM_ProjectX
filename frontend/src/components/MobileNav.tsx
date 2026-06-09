@@ -1,4 +1,4 @@
-import { Heart, LayoutGrid, PlusSquare, ShoppingBag, User } from 'lucide-react';
+import { LayoutGrid, PlusSquare, ShoppingBag, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -18,7 +18,6 @@ export default function MobileNav() {
       ? [
           { icon: ShoppingBag, label: 'Chợ xe', path: '/market' },
           { icon: PlusSquare, label: 'Đăng', path: '/feed?compose=1' },
-          { icon: Heart, label: 'Đã lưu', path: '/favorites' },
           { icon: User, label: 'Garage', path: '/garage' },
         ]
       : []),

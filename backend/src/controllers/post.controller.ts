@@ -68,8 +68,9 @@ const mapCommunityPost = (post: Awaited<ReturnType<typeof postDbService.list>>[n
     name: post.author.name,
     handle: post.author.email.split('@')[0],
     avatar: post.author.avatar ?? `https://i.pravatar.cc/200?u=${encodeURIComponent(post.author.email)}`,
-    isVerified: post.author.isVerifiedProfessional,
-    isProUser: post.author.isVerifiedProfessional,
+    isVerified: post.author.isVerifiedProfessional || post.author.role === 'ADMIN',
+    isProUser: post.author.isVerifiedProfessional || post.author.role === 'ADMIN',
+    role: post.author.role,
   },
   content: post.content,
   image: post.images[0]?.url,
@@ -118,6 +119,7 @@ export const postController = {
       status: PostStatus.PUBLISHED,
       authorId: req.query.authorId?.toString(),
       viewerId: req.user?.id,
+      prioritizeTrustedAuthors: !req.query.authorId,
     });
 
     return res.json({
@@ -179,8 +181,9 @@ export const postController = {
           name: post.author.name,
           handle: post.author.email.split('@')[0],
           avatar: post.author.avatar ?? 'https://i.pravatar.cc/200?u=community',
-          isVerified: true,
-          isProUser: false,
+          isVerified: post.author.isVerifiedProfessional || post.author.role === 'ADMIN',
+          isProUser: post.author.isVerifiedProfessional || post.author.role === 'ADMIN',
+          role: post.author.role,
         },
         content: post.content,
         image: post.images[0]?.url,

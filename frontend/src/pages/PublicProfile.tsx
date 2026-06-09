@@ -32,6 +32,7 @@ interface PublicProfileData {
   location?: string | null;
   focusBrands: string[];
   isVerifiedProfessional: boolean;
+  role: 'USER' | 'ADMIN';
   createdAt: string;
   rating: {
     averageRating: number;
@@ -188,8 +189,9 @@ export default function PublicProfile() {
           name: profile.name,
           handle,
           avatar,
-          isVerified: profile.isVerifiedProfessional,
-          isProUser: profile.isVerifiedProfessional,
+          isVerified: profile.isVerifiedProfessional || profile.role === 'ADMIN',
+          isProUser: profile.isVerifiedProfessional || profile.role === 'ADMIN',
+          role: profile.role,
         },
         type: 'story' as const,
         content: post.content,
@@ -278,8 +280,8 @@ export default function PublicProfile() {
                     <div className="md:mb-4 min-w-0">
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-2 min-w-0">
                         <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight break-words min-w-0">{profile.name}</h1>
-                        <span className="badge-primary">Legacy Collector</span>
-                        {profile.isVerifiedProfessional && <span className="badge-success">Verified Pro</span>}
+                        <span className="badge-primary">{profile.role === 'ADMIN' ? 'Admin' : 'Thành viên'}</span>
+                        {(profile.isVerifiedProfessional || profile.role === 'ADMIN') && <span className="badge-success">Tích xanh</span>}
                       </div>
                       <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 text-xs text-on-surface-variant font-mono uppercase tracking-widest">
                         <span className="flex items-center gap-1.5 min-w-0">
@@ -291,7 +293,7 @@ export default function PublicProfile() {
                           <Globe className="w-3.5 h-3.5 shrink-0" />
                           <span className="break-all">@{handle}</span>
                         </span>
-                        {profile.isVerifiedProfessional && <span className="text-primary font-bold">Verified Professional</span>}
+                        {(profile.isVerifiedProfessional || profile.role === 'ADMIN') && <span className="text-primary font-bold">Tài khoản đã xác thực</span>}
                       </div>
                       {currentUser?.id !== profile.id && (
                         <div className="mt-5 flex flex-col items-center md:items-start">

@@ -30,6 +30,34 @@ const getRating = async (targetUserId: string, viewerId?: string) => {
 };
 
 export const userService = {
+  searchUsers(query: string, viewerId: string) {
+    const search = query.trim();
+    if (search.length < 2) return Promise.resolve([]);
+    return prisma.user.findMany({
+      where: {
+        id: {not: viewerId},
+        OR: [
+          {name: {contains: search, mode: 'insensitive'}},
+          {email: {contains: search, mode: 'insensitive'}},
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        avatar: true,
+        role: true,
+        isVerifiedProfessional: true,
+      },
+      orderBy: [
+        {role: 'desc'},
+        {isVerifiedProfessional: 'desc'},
+        {name: 'asc'},
+      ],
+      take: 8,
+    });
+  },
+
   async getPublicProfile(userId: string, viewerId?: string) {
     const [user, rating, followersCount, followingCount, isFollowing] = await Promise.all([
       prisma.user.findUnique({
