@@ -88,6 +88,7 @@ export default function SocialPost({
   const [commentContent, setCommentContent] = useState('');
   const [interactionError, setInteractionError] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const currentUser = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const currentUserAvatar = currentUser?.avatar ?? `https://i.pravatar.cc/100?u=${encodeURIComponent(currentUser?.email ?? 'guest')}`;
@@ -114,7 +115,7 @@ export default function SocialPost({
       setIsLiked(result.liked);
       setLikes(result.count);
     } catch (error) {
-      setInteractionError(error instanceof Error ? error.message : 'Unable to update reaction.');
+      setInteractionError(error instanceof Error ? error.message : 'Không thể cập nhật lượt thích.');
     }
   };
 
@@ -134,7 +135,7 @@ export default function SocialPost({
           createdAt: new Date().toISOString(),
           author: {
             id: currentUser?.id ?? 'local',
-            name: currentUser?.name ?? 'User',
+            name: currentUser?.name ?? 'Người dùng',
             handle: currentUser?.email.split('@')[0] ?? 'user',
             avatar: currentUserAvatar,
           },
@@ -151,7 +152,7 @@ export default function SocialPost({
       }
       setCommentContent('');
     } catch (error) {
-      setInteractionError(error instanceof Error ? error.message : 'Unable to add comment.');
+      setInteractionError(error instanceof Error ? error.message : 'Không thể thêm bình luận.');
     } finally {
       setIsSubmittingComment(false);
     }
@@ -169,7 +170,7 @@ export default function SocialPost({
       }
       await navigator.clipboard?.writeText(`${window.location.origin}/feed${id ? `#post-${id}` : ''}`);
     } catch (error) {
-      setInteractionError(error instanceof Error ? error.message : 'Unable to share post.');
+      setInteractionError(error instanceof Error ? error.message : 'Không thể chia sẻ bài viết.');
     }
   };
 
@@ -183,6 +184,11 @@ export default function SocialPost({
       case 'marketplace': return 'bg-primary/10 text-primary border-primary/20';
       default: return 'bg-white/5 text-on-surface-variant border-white/10';
     }
+  };
+
+  const imageSources = (images?.length ? images : image ? [image] : []).filter(Boolean);
+  const markImageFailed = (source: string) => {
+    setFailedImages((current) => new Set(current).add(source));
   };
 
   return (
@@ -230,14 +236,41 @@ export default function SocialPost({
         <p className="text-post whitespace-pre-wrap">{content}</p>
         
         {/* Images */}
-        {(image || (images && images.length > 0)) && (
-          <div className={`rounded-2xl overflow-hidden border border-white/5 bg-surface-container ${images && images.length > 1 ? 'grid grid-cols-2 gap-2' : ''}`}>
-             {images && images.length > 1 ? (
-               images.map((img, idx) => (
-                 <img key={idx} src={img} alt="post content" className="w-full h-full object-cover aspect-square hover:scale-105 transition-transform duration-700 cursor-zoom-in" />
+        {imageSources.length > 0 && (
+          <div className={`rounded-2xl overflow-hidden border border-white/5 bg-surface-container ${imageSources.length > 1 ? 'grid grid-cols-2 gap-2' : ''}`}>
+             {imageSources.length > 1 ? (
+               imageSources.map((img, idx) => (
+                 failedImages.has(img) ? (
+                   <div key={img} className="aspect-square w-full bg-white/[0.03] flex items-center justify-center px-4 text-center text-xs text-on-surface-variant">
+                     Ảnh không khả dụng
+                   </div>
+                 ) : (
+                   <img
+                     key={img}
+                     src={img}
+                     alt={`post content ${idx + 1}`}
+                     loading="lazy"
+                     decoding="async"
+                     onError={() => markImageFailed(img)}
+                     className="w-full h-full object-cover aspect-square hover:scale-105 transition-transform duration-700 cursor-zoom-in"
+                   />
+                 )
                ))
              ) : (
-               <img src={image || (images ? images[0] : '')} alt="post content" className="w-full h-auto max-h-[500px] object-cover hover:scale-[1.02] transition-transform duration-700 cursor-zoom-in" />
+               failedImages.has(imageSources[0]) ? (
+                 <div className="min-h-64 w-full bg-white/[0.03] flex items-center justify-center px-4 text-center text-sm text-on-surface-variant">
+                   Ảnh không khả dụng
+                 </div>
+               ) : (
+                 <img
+                   src={imageSources[0]}
+                   alt="post content"
+                   loading="lazy"
+                   decoding="async"
+                   onError={() => markImageFailed(imageSources[0])}
+                   className="w-full h-auto max-h-[500px] object-cover hover:scale-[1.02] transition-transform duration-700 cursor-zoom-in"
+                 />
+               )
              )}
           </div>
         )}
@@ -248,12 +281,12 @@ export default function SocialPost({
             <div className="flex items-center gap-4">
               <img src={marketplaceListing.image} alt={marketplaceListing.title} className="w-16 h-16 rounded-xl object-cover border border-white/10" />
               <div>
-                <span className="text-[9px] font-mono uppercase text-primary font-bold">Recommended Listing</span>
+                <span className="text-[9px] font-mono uppercase text-primary font-bold">Tin bán xe gợi ý</span>
                 <h4 className="font-bold text-sm group-hover/link:text-primary transition-colors">{marketplaceListing.title}</h4>
                 <p className="text-xs text-on-surface-variant font-mono">{marketplaceListing.price}</p>
               </div>
             </div>
-            <button className="btn-secondary py-2 px-4 text-[10px]">View Car</button>
+            <button className="btn-secondary py-2 px-4 text-[10px]">Xem xe</button>
           </div>
         )}
 
@@ -303,7 +336,7 @@ export default function SocialPost({
           >
             <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
           </button>
-          <button onClick={sharePost} className="interactive-icon" aria-label="Share post">
+          <button onClick={sharePost} className="interactive-icon" aria-label="Chia sẻ bài viết">
             <Share2 className="w-4 h-4 text-on-surface-variant" />
           </button>
         </div>
@@ -336,11 +369,11 @@ export default function SocialPost({
                 </div>
               ))}
               <form onSubmit={submitComment} className="flex gap-3 px-2">
-                <img src={currentUserAvatar} className="w-8 h-8 rounded-full border border-white/10 object-cover" alt={currentUser?.name ?? 'Guest'} />
+                <img src={currentUserAvatar} className="w-8 h-8 rounded-full border border-white/10 object-cover" alt={currentUser?.name ?? 'Khách'} />
                 <div className="flex-grow flex gap-2">
                   <input 
                     type="text" 
-                    placeholder="Write a reply..." 
+                    placeholder="Viết bình luận..." 
                     value={commentContent}
                     onChange={(event) => setCommentContent(event.target.value)}
                     maxLength={2000}
@@ -351,7 +384,7 @@ export default function SocialPost({
                     disabled={!commentContent.trim() || isSubmittingComment}
                     className="btn-primary px-4 py-2 disabled:opacity-50"
                   >
-                    {isSubmittingComment ? '...' : 'Send'}
+                    {isSubmittingComment ? '...' : 'Gửi'}
                   </button>
                 </div>
               </form>

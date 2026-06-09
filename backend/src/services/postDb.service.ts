@@ -97,6 +97,92 @@ export const postDbService = {
     });
   },
 
+  listLiked(userId: string) {
+    return prisma.post.findMany({
+      where: {
+        status: PostStatus.PUBLISHED,
+        likes: {
+          some: {userId},
+        },
+      },
+      include: {
+        ...postInclude,
+        comments: {
+          include: {
+            user: {select: {id: true, name: true, email: true, avatar: true}},
+          },
+          orderBy: {createdAt: 'asc'},
+        },
+        _count: {select: {likes: true, comments: true, shares: true}},
+        likes: {where: {userId}},
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  },
+
+  async getCommunityOverview() {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const [members, publishedPosts, recentPosts, likes, comments, shares, topMembers] = await Promise.all([
+      prisma.user.count(),
+      prisma.post.count({where: {status: PostStatus.PUBLISHED}}),
+      prisma.post.count({
+        where: {
+          status: PostStatus.PUBLISHED,
+          createdAt: {gte: sevenDaysAgo},
+        },
+      }),
+      prisma.postLike.count({
+        where: {post: {status: PostStatus.PUBLISHED}},
+      }),
+      prisma.postComment.count({
+        where: {post: {status: PostStatus.PUBLISHED}},
+      }),
+      prisma.postShare.count({
+        where: {post: {status: PostStatus.PUBLISHED}},
+      }),
+      prisma.user.findMany({
+        where: {
+          posts: {some: {status: PostStatus.PUBLISHED}},
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatar: true,
+          _count: {
+            select: {
+              posts: {where: {status: PostStatus.PUBLISHED}},
+            },
+          },
+        },
+        orderBy: {
+          posts: {_count: 'desc'},
+        },
+        take: 5,
+      }),
+    ]);
+
+    return {
+      stats: {
+        members,
+        publishedPosts,
+        recentPosts,
+        interactions: likes + comments + shares,
+      },
+      topMembers: topMembers.map((member) => ({
+        id: member.id,
+        name: member.name,
+        handle: member.email.split('@')[0],
+        avatar: member.avatar,
+        postCount: member._count.posts,
+      })),
+    };
+  },
+
   getById(id: string) {
     return prisma.post.findUnique({
       where: {id},

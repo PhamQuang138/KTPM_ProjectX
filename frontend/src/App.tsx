@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Admin from './pages/Admin';
 import VehicleDetail from './pages/VehicleDetail';
 import PublicProfile from './pages/PublicProfile';
+import Favorites from './pages/Favorites';
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/market" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
         <Route path="/market/:id" element={<ProtectedRoute><VehicleDetail /></ProtectedRoute>} />
         <Route path="/garage" element={<ProtectedRoute><Garage /></ProtectedRoute>} />
+        <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
         <Route path="/profile/:id" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />

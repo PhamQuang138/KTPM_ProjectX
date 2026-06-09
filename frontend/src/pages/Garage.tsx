@@ -1,9 +1,9 @@
 import Sidebar from '../components/Sidebar';
 import TopNav from '../components/TopNav';
 import MobileNav from '../components/MobileNav';
-import SocialPost, { SocialPostProps } from '../components/SocialPost';
+import SocialPost from '../components/SocialPost';
 import { Link } from 'react-router-dom';
-import { Eye, MessageCircle, TrendingUp, Plus, ChevronRight, Star, Heart, Users, MapPin, Globe, Grid3X3, List, PenTool, Newspaper, Camera } from 'lucide-react';
+import { Eye, MessageCircle, TrendingUp, Plus, Star, Heart, Users, MapPin, Globe, Grid3X3, List, PenTool, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FormEvent, useEffect, useState } from 'react';
 import { useSidebarStore } from '../store/useSidebarStore';
@@ -126,16 +126,6 @@ const createListingForm = (listing?: DbListing, vehicle?: DbVehicle): ListingFor
   status: listing?.status ?? 'Active Listing',
 });
 
-const userArticles = [
-  {
-    title: 'The Art of the Air-Cooled 911 Restoration',
-    excerpt: 'A deep dive into why these machines still capture the heart of every true enthusiast.',
-    date: 'Oct 24, 2026',
-    readTime: '12 min',
-    image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800'
-  }
-];
-
 export default function Garage() {
   const [activeTab, setActiveTab] = useState('garage');
   const [isAddingVehicle, setIsAddingVehicle] = useState(false);
@@ -164,9 +154,9 @@ export default function Garage() {
   const [isSavingListing, setIsSavingListing] = useState(false);
   const [profileRating, setProfileRating] = useState<UserRating | null>(null);
   const [profileStats, setProfileStats] = useState([
-    {label: 'Followers', value: '0'},
-    {label: 'Following', value: '0'},
-    {label: 'Posts', value: '0'},
+    {label: 'Người theo dõi', value: '0'},
+    {label: 'Đang theo dõi', value: '0'},
+    {label: 'Bài viết', value: '0'},
   ]);
   const [profileBio, setProfileBio] = useState('');
   const [profileBannerImage, setProfileBannerImage] = useState('');
@@ -182,29 +172,9 @@ export default function Garage() {
   const { isOpen } = useSidebarStore();
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
-  const displayName = user?.name ?? 'Guest Driver';
+  const displayName = user?.name ?? 'Khách';
   const avatar = user?.avatar ?? `https://i.pravatar.cc/200?u=${encodeURIComponent(user?.email ?? 'guest')}`;
   const handle = user?.email.split('@')[0] ?? 'guest';
-  const currentUserPosts: SocialPostProps[] = [
-    {
-      author: {
-        name: displayName,
-        handle,
-        avatar,
-        isVerified: true,
-        isProUser: true,
-      },
-      type: 'garage',
-      content: "Golden hour with the Vanguard. Still can't believe the engineering that went into this aero package. #Vanguard #Supercar",
-      image: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=800",
-      timestamp: "2d ago",
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      category: "Photography",
-    },
-  ];
-
   useEffect(() => {
     if (!user) return;
 
@@ -234,9 +204,9 @@ export default function Garage() {
         setIsVerifiedProfessional(profile.isVerifiedProfessional);
         setFollowersCount(profile.social.followers);
         setProfileStats([
-          {label: 'Followers', value: profile.social.followers.toString()},
-          {label: 'Following', value: profile.social.following.toString()},
-          {label: 'Posts', value: profile.social.posts.toString()},
+          {label: 'Người theo dõi', value: profile.social.followers.toString()},
+          {label: 'Đang theo dõi', value: profile.social.following.toString()},
+          {label: 'Bài viết', value: profile.social.posts.toString()},
         ]);
       })
       .catch(() => undefined);
@@ -275,7 +245,7 @@ export default function Garage() {
       setProfileFocusBrands(updatedProfile.focusBrands ?? []);
       setIsEditingProfile(false);
     } catch (error) {
-      setProfileFormError(error instanceof Error ? error.message : 'Unable to update profile.');
+      setProfileFormError(error instanceof Error ? error.message : 'Không thể cập nhật hồ sơ.');
     } finally {
       setIsSavingProfile(false);
     }
@@ -284,17 +254,17 @@ export default function Garage() {
   const readImageAsDataUrl = (file: File) =>
     new Promise<string>((resolve, reject) => {
       if (!file.type.startsWith('image/')) {
-        reject(new Error('Please choose an image file.'));
+        reject(new Error('Vui lòng chọn một file ảnh.'));
         return;
       }
       if (file.size > 2 * 1024 * 1024) {
-        reject(new Error('Image must be 2MB or smaller.'));
+        reject(new Error('Ảnh phải có dung lượng tối đa 2MB.'));
         return;
       }
 
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result?.toString() ?? '');
-      reader.onerror = () => reject(new Error('Unable to read this image.'));
+      reader.onerror = () => reject(new Error('Không thể đọc ảnh này.'));
       reader.readAsDataURL(file);
     });
 
@@ -315,7 +285,7 @@ export default function Garage() {
         setProfileBannerImage(updatedProfile.bannerImage ?? dataUrl);
       }
     } catch (error) {
-      setProfileMediaError(error instanceof Error ? error.message : 'Unable to upload image.');
+      setProfileMediaError(error instanceof Error ? error.message : 'Không thể tải ảnh lên.');
     }
   };
 
@@ -324,11 +294,11 @@ export default function Garage() {
 
     setVehicleFormError('');
     if (!file.type.startsWith('image/')) {
-      setVehicleFormError('Please choose an image file.');
+      setVehicleFormError('Vui lòng chọn một file ảnh.');
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setVehicleFormError('Vehicle image must be 5MB or smaller.');
+    if (file.size > 4 * 1024 * 1024) {
+      setVehicleFormError('Ảnh xe phải có dung lượng tối đa 4MB.');
       return;
     }
 
@@ -343,7 +313,7 @@ export default function Garage() {
 
       setVehicleForm((current) => ({...current, image: uploaded.url}));
     } catch (error) {
-      setVehicleFormError(error instanceof Error ? error.message : 'Unable to upload vehicle image.');
+      setVehicleFormError(error instanceof Error ? error.message : 'Không thể tải ảnh xe lên.');
     } finally {
       setIsUploadingVehicleImage(false);
     }
@@ -356,12 +326,12 @@ export default function Garage() {
     setVehicleFormError('');
 
     if (!vehicleForm.image) {
-      setVehicleFormError('Please upload a vehicle image before saving.');
+      setVehicleFormError('Vui lòng tải ảnh xe lên trước khi lưu.');
       return;
     }
 
     if (publishToMarketplace && (!vehicleForm.price.trim() || !vehicleForm.location.trim())) {
-      setVehicleFormError('Price and location are required when publishing to marketplace.');
+      setVehicleFormError('Giá bán và địa điểm là bắt buộc khi đăng lên chợ xe.');
       return;
     }
 
@@ -413,7 +383,7 @@ export default function Garage() {
       setIsAddingVehicle(false);
       setActiveTab(publishToMarketplace ? 'marketplace' : 'garage');
     } catch (error) {
-      setVehicleFormError(error instanceof Error ? error.message : 'Unable to save vehicle listing.');
+      setVehicleFormError(error instanceof Error ? error.message : 'Không thể lưu xe hoặc tin đăng.');
     } finally {
       setIsSavingVehicle(false);
     }
@@ -489,7 +459,7 @@ export default function Garage() {
 
       closeListingModal();
     } catch (error) {
-      setListingFormError(error instanceof Error ? error.message : 'Unable to save marketplace listing.');
+      setListingFormError(error instanceof Error ? error.message : 'Không thể lưu tin đăng chợ xe.');
     } finally {
       setIsSavingListing(false);
     }
@@ -521,7 +491,7 @@ export default function Garage() {
         animate={{ marginLeft: isOpen ? '16rem' : '0rem' }}
         className="pb-24 transition-all duration-300"
       >
-        <TopNav title="Profile" />
+        <TopNav title="Hồ sơ của tôi" />
         
         <section className="max-w-container-max mx-auto px-6 md:px-margin-desktop py-4">
           
@@ -581,7 +551,7 @@ export default function Garage() {
                     {isVerifiedProfessional && <span className="badge-success">Verified Pro</span>}
                   </div>
                   <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 text-xs text-on-surface-variant font-mono uppercase tracking-widest">
-                    <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {profileLocation || 'No location yet'}</span>
+                    <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {profileLocation || 'Chưa có địa điểm'}</span>
                     <span className="opacity-30">•</span>
                     <span className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5" /> @{handle}</span>
                     <span className="opacity-30">•</span>
@@ -625,7 +595,7 @@ export default function Garage() {
                     onClick={openEditProfile}
                     className="text-[10px] font-mono uppercase tracking-widest text-primary hover:underline"
                   >
-                    Edit
+                    Chỉnh sửa
                   </button>
                 </div>
                 <p className="text-sm text-on-surface leading-loose mb-8">
@@ -633,7 +603,7 @@ export default function Garage() {
                 </p>
                 
                 <div className="space-y-4 pt-6 border-t border-white/5">
-                   <h4 className="text-[10px] font-mono uppercase text-on-surface-variant tracking-widest mb-4">Focus Brands</h4>
+                   <h4 className="text-[10px] font-mono uppercase text-on-surface-variant tracking-widest mb-4">Hãng quan tâm</h4>
                    <div className="flex flex-wrap gap-2">
                       {(profileFocusBrands.length ? profileFocusBrands : ['Add your brands']).map(b => (
                         <span key={b} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] font-bold">{b}</span>
@@ -674,9 +644,8 @@ export default function Garage() {
               <div className="flex gap-8 border-b border-white/10 pb-4 overflow-x-auto scrollbar-hide">
                 {[
                   { id: 'garage', label: 'Garage', icon: Grid3X3 },
-                  { id: 'posts', label: 'Social Feed', icon: PenTool },
-                  { id: 'blogs', label: 'Blog Posts', icon: Newspaper },
-                  { id: 'marketplace', label: 'Marketplace', icon: List },
+                  { id: 'posts', label: 'Bài viết', icon: PenTool },
+                  { id: 'marketplace', label: 'Chợ xe', icon: List },
                 ].map(tab => (
                   <button 
                     key={tab.id}
@@ -695,36 +664,6 @@ export default function Garage() {
               </div>
 
               <AnimatePresence mode="wait">
-                {activeTab === 'blogs' && (
-                  <motion.div 
-                    key="blogs"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="grid grid-cols-1 gap-6"
-                  >
-                    {userArticles.map((article, i) => (
-                      <div key={i} className="group relative bg-white/[0.03] border border-white/5 rounded-[2rem] overflow-hidden flex flex-col md:flex-row hover:border-primary/30 transition-all duration-500">
-                        <div className="md:w-1/3 aspect-video md:aspect-square overflow-hidden shrink-0">
-                           <img src={article.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={article.title} />
-                        </div>
-                        <div className="p-8 flex flex-col justify-center">
-                           <div className="flex items-center gap-4 text-[10px] font-mono text-on-surface-variant uppercase tracking-widest mb-4">
-                             <span>{article.date}</span>
-                             <span>•</span>
-                             <span>{article.readTime} read</span>
-                           </div>
-                           <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">{article.title}</h3>
-                           <p className="text-sm text-on-surface-variant opacity-70 mb-6 line-clamp-2">{article.excerpt}</p>
-                           <button className="text-[10px] font-mono text-primary font-bold uppercase tracking-widest flex items-center gap-2 group-hover:gap-4 transition-all">
-                             Read More <ChevronRight className="w-4 h-4" />
-                           </button>
-                        </div>
-                      </div>
-                    ))}
-                  </motion.div>
-                )}
-
                 {activeTab === 'garage' && (
                   <motion.div 
                     key="garage"
@@ -755,7 +694,7 @@ export default function Garage() {
                     {myVehicles.length === 0 && (
                       <div className="aspect-[4/3] rounded-[2rem] border border-white/10 bg-white/[0.03] p-8 flex flex-col justify-center text-on-surface-variant">
                         <p className="font-display text-xl font-bold text-on-surface">Your garage is empty</p>
-                        <p className="text-sm mt-2">Add your first vehicle, then publish it to Marketplace when you are ready to sell.</p>
+                        <p className="text-sm mt-2">Thêm chiếc xe đầu tiên, sau đó đăng lên chợ xe khi bạn sẵn sàng bán.</p>
                       </div>
                     )}
                     <button
@@ -763,7 +702,7 @@ export default function Garage() {
                       className="aspect-[4/3] border-2 border-dashed border-white/10 rounded-[2rem] flex flex-col items-center justify-center gap-3 text-on-surface-variant hover:border-primary/40 hover:text-primary transition-all"
                     >
                       <Plus className="w-8 h-8" />
-                      <span className="text-[10px] font-mono uppercase tracking-widest">Add Vehicle</span>
+                      <span className="text-[10px] font-mono uppercase tracking-widest">Thêm xe</span>
                     </button>
                   </motion.div>
                 )}
@@ -776,7 +715,7 @@ export default function Garage() {
                     exit={{ opacity: 0, y: -10 }}
                     className="space-y-6"
                   >
-                    {[...myPosts.map((post) => ({
+                    {myPosts.map((post) => ({
                       author: {
                         name: displayName,
                         handle,
@@ -792,9 +731,14 @@ export default function Garage() {
                       likes: 0,
                       comments: 0,
                       category: post.status,
-                    })), ...currentUserPosts].map((post, i) => (
-                      <SocialPost key={i} {...post} />
+                    })).map((post, i) => (
+                      <SocialPost key={myPosts[i]?.id ?? i} {...post} />
                     ))}
+                    {myPosts.length === 0 && (
+                      <div className="glass-card rounded-[2rem] border-white/5 p-10 text-center text-on-surface-variant">
+                        Bạn chưa đăng bài viết nào.
+                      </div>
+                    )}
                   </motion.div>
                 )}
 
@@ -818,15 +762,15 @@ export default function Garage() {
                                <p className="text-xs text-on-surface-variant mt-2">{listing.location}</p>
                                {listing.description && <p className="text-xs text-on-surface-variant mt-3 line-clamp-2">{listing.description}</p>}
                                <div className="flex flex-wrap gap-2 mt-5">
-                                 <Link to={`/market/${listing.id}`} className="btn-secondary px-4 py-2 text-[10px]">View</Link>
+                                 <Link to={`/market/${listing.id}`} className="btn-secondary px-4 py-2 text-[10px]">Xem</Link>
                                  <button onClick={() => openEditListingModal(listing)} className="btn-secondary px-4 py-2 text-[10px]">
-                                   Edit
+                                   Sửa
                                  </button>
                                  <button onClick={() => handleToggleListingStatus(listing)} className="btn-secondary px-4 py-2 text-[10px]">
-                                   {listing.status === 'Sold' ? 'Relist' : 'Mark Sold'}
+                                   {listing.status === 'Sold' ? 'Đăng lại' : 'Đánh dấu đã bán'}
                                  </button>
                                  <button onClick={() => handleDeleteListing(listing.id)} className="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-red-300 border border-red-500/20 hover:bg-red-500/10">
-                                   Delete
+                                   Xóa
                                  </button>
                                </div>
                              </div>
@@ -836,9 +780,9 @@ export default function Garage() {
                      ) : (
                      <div className="glass-card p-12 text-center rounded-[2.5rem] border-white/5 opacity-40">
                         <List className="w-8 h-8 mx-auto mb-4" />
-                        <p className="font-display text-lg font-bold">No Active Listings</p>
-                        <p className="text-xs text-on-surface-variant font-mono uppercase tracking-widest mt-2">Check back soon for upcoming auctions</p>
-                        <button onClick={() => setIsAddingVehicle(true)} className="mt-8 btn-secondary px-8">Add Listing</button>
+                        <p className="font-display text-lg font-bold">Chưa có tin đang bán</p>
+                        <p className="text-xs text-on-surface-variant font-mono uppercase tracking-widest mt-2">Thêm xe vào Garage để bắt đầu đăng bán</p>
+                        <button onClick={() => setIsAddingVehicle(true)} className="mt-8 btn-secondary px-8">Thêm tin đăng</button>
                      </div>
                      )}
                   </motion.div>
@@ -854,14 +798,14 @@ export default function Garage() {
           <form onSubmit={handleCreateVehicle} className="mx-auto my-0 md:my-6 w-full max-w-2xl bg-surface-container border border-white/10 rounded-[2rem] p-5 md:p-8 shadow-2xl space-y-5">
             <div className="flex items-start justify-between gap-6">
               <div>
-                <h2 className="font-display text-2xl font-bold">Add Vehicle</h2>
-                <p className="text-sm text-on-surface-variant mt-1">Save the vehicle to Garage, then optionally publish it to Marketplace.</p>
+                <h2 className="font-display text-2xl font-bold">Thêm xe</h2>
+                <p className="text-sm text-on-surface-variant mt-1">Lưu xe vào Garage, sau đó có thể đăng lên chợ xe.</p>
               </div>
-              <button type="button" onClick={() => setIsAddingVehicle(false)} className="text-on-surface-variant hover:text-on-surface">Cancel</button>
+              <button type="button" onClick={() => setIsAddingVehicle(false)} className="text-on-surface-variant hover:text-on-surface">Hủy</button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input required placeholder="Vehicle title" value={vehicleForm.title} onChange={(event) => setVehicleForm({...vehicleForm, title: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
+              <input required placeholder="Tên xe" value={vehicleForm.title} onChange={(event) => setVehicleForm({...vehicleForm, title: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
               <select value={vehicleForm.condition} onChange={(event) => setVehicleForm({...vehicleForm, condition: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
                 <option>New</option>
                 <option>Used</option>
@@ -870,7 +814,7 @@ export default function Garage() {
               <input placeholder="Specs, comma separated" value={vehicleForm.specs} onChange={(event) => setVehicleForm({...vehicleForm, specs: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
             </div>
 
-            <textarea required placeholder="Garage description" value={vehicleForm.description} onChange={(event) => setVehicleForm({...vehicleForm, description: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 min-h-24" />
+            <textarea required placeholder="Mô tả xe trong Garage" value={vehicleForm.description} onChange={(event) => setVehicleForm({...vehicleForm, description: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 min-h-24" />
             <div className="rounded-2xl border border-white/10 bg-background p-4">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="aspect-[4/3] md:w-48 rounded-xl overflow-hidden border border-white/10 bg-white/[0.03] flex items-center justify-center">
@@ -881,10 +825,10 @@ export default function Garage() {
                   )}
                 </div>
                 <div className="flex-1 flex flex-col justify-center gap-3">
-                  <p className="text-sm font-bold">Vehicle image</p>
-                  <p className="text-xs text-on-surface-variant">Upload a JPG, PNG, or WebP image. Maximum size is 5MB.</p>
+                  <p className="text-sm font-bold">Ảnh xe</p>
+                  <p className="text-xs text-on-surface-variant">Tải lên ảnh JPG, PNG hoặc WebP. Dung lượng tối đa 4MB.</p>
                   <label className="btn-secondary w-fit px-5 py-3 text-[10px] cursor-pointer">
-                    {isUploadingVehicleImage ? 'Uploading...' : vehicleForm.image ? 'Replace Image' : 'Choose Image'}
+                    {isUploadingVehicleImage ? 'Đang tải...' : vehicleForm.image ? 'Đổi ảnh' : 'Chọn ảnh'}
                     <input
                       type="file"
                       accept="image/*"
@@ -904,14 +848,14 @@ export default function Garage() {
                 onChange={(event) => setPublishToMarketplace(event.target.checked)}
                 className="w-4 h-4"
               />
-              <span className="text-sm font-bold">Publish to Marketplace</span>
+              <span className="text-sm font-bold">Đăng lên chợ xe</span>
             </label>
 
             {publishToMarketplace && (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <input required placeholder="Sale price, e.g. $65,000" value={vehicleForm.price} onChange={(event) => setVehicleForm({...vehicleForm, price: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
-                  <input required placeholder="Marketplace location" value={vehicleForm.location} onChange={(event) => setVehicleForm({...vehicleForm, location: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
+                  <input required placeholder="Giá bán, ví dụ $65,000" value={vehicleForm.price} onChange={(event) => setVehicleForm({...vehicleForm, price: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
+                  <input required placeholder="Địa điểm bán" value={vehicleForm.location} onChange={(event) => setVehicleForm({...vehicleForm, location: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
                   <select value={vehicleForm.category} onChange={(event) => setVehicleForm({...vehicleForm, category: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
                     <option>Daily</option>
                     <option>Classics</option>
@@ -919,7 +863,7 @@ export default function Garage() {
                     <option>Projects</option>
                   </select>
                 </div>
-                <textarea placeholder="Marketplace description, optional" value={vehicleForm.listingDescription} onChange={(event) => setVehicleForm({...vehicleForm, listingDescription: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 min-h-24" />
+                <textarea placeholder="Mô tả tin đăng, không bắt buộc" value={vehicleForm.listingDescription} onChange={(event) => setVehicleForm({...vehicleForm, listingDescription: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 min-h-24" />
               </div>
             )}
 
@@ -930,7 +874,7 @@ export default function Garage() {
             )}
 
             <button disabled={isSavingVehicle || isUploadingVehicleImage} type="submit" className="btn-primary w-full py-4 rounded-xl disabled:opacity-60 disabled:cursor-not-allowed">
-              {isUploadingVehicleImage ? 'Uploading image...' : isSavingVehicle ? 'Saving...' : publishToMarketplace ? 'Save and Publish Listing' : 'Save to Garage'}
+              {isUploadingVehicleImage ? 'Đang tải ảnh...' : isSavingVehicle ? 'Đang lưu...' : publishToMarketplace ? 'Lưu và đăng bán' : 'Lưu vào Garage'}
             </button>
           </form>
         </div>
@@ -941,26 +885,26 @@ export default function Garage() {
             <div className="flex items-start justify-between gap-6">
               <div>
                 <h2 className="font-display text-2xl font-bold">
-                  {editingListing ? 'Edit Marketplace Listing' : `List ${listingVehicle?.title} for Sale`}
+                  {editingListing ? 'Sửa tin đăng chợ xe' : `Đăng bán ${listingVehicle?.title}`}
                 </h2>
                 <p className="text-sm text-on-surface-variant mt-1">
-                  Price, location, category, and description will be shown on Marketplace.
+                  Giá, địa điểm, danh mục và mô tả sẽ hiển thị trên chợ xe.
                 </p>
               </div>
-              <button type="button" onClick={closeListingModal} className="text-on-surface-variant hover:text-on-surface">Cancel</button>
+              <button type="button" onClick={closeListingModal} className="text-on-surface-variant hover:text-on-surface">Hủy</button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <input
                 required
-                placeholder="Sale price, e.g. $65,000"
+                placeholder="Giá bán, ví dụ $65,000"
                 value={listingForm.price}
                 onChange={(event) => setListingForm({...listingForm, price: event.target.value})}
                 className="bg-background border border-white/10 rounded-xl px-4 py-3"
               />
               <input
                 required
-                placeholder="Location"
+                placeholder="Địa điểm"
                 value={listingForm.location}
                 onChange={(event) => setListingForm({...listingForm, location: event.target.value})}
                 className="bg-background border border-white/10 rounded-xl px-4 py-3"
@@ -990,7 +934,7 @@ export default function Garage() {
             )}
 
             <textarea
-              placeholder="Marketplace description"
+              placeholder="Mô tả tin đăng"
               value={listingForm.description}
               onChange={(event) => setListingForm({...listingForm, description: event.target.value})}
               className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 min-h-28"
@@ -1003,7 +947,7 @@ export default function Garage() {
             )}
 
             <button disabled={isSavingListing} type="submit" className="btn-primary w-full py-4 rounded-xl disabled:opacity-60 disabled:cursor-not-allowed">
-              {isSavingListing ? 'Saving...' : editingListing ? 'Save Listing Changes' : 'Publish to Marketplace'}
+              {isSavingListing ? 'Đang lưu...' : editingListing ? 'Lưu thay đổi tin đăng' : 'Đăng lên chợ xe'}
             </button>
           </form>
         </div>
@@ -1013,14 +957,14 @@ export default function Garage() {
           <form onSubmit={handleSaveProfile} className="mx-auto my-0 md:my-6 w-full max-w-2xl bg-surface-container border border-white/10 rounded-[2rem] p-5 md:p-8 shadow-2xl space-y-5">
             <div className="flex items-start justify-between gap-6">
               <div>
-                <h2 className="font-display text-2xl font-bold">Edit About Collector</h2>
-                <p className="text-sm text-on-surface-variant mt-1">This information is shown on your public profile.</p>
+                <h2 className="font-display text-2xl font-bold">Chỉnh sửa giới thiệu</h2>
+                <p className="text-sm text-on-surface-variant mt-1">Thông tin này sẽ hiển thị trên hồ sơ công khai của bạn.</p>
               </div>
-              <button type="button" onClick={() => setIsEditingProfile(false)} className="text-on-surface-variant hover:text-on-surface">Cancel</button>
+              <button type="button" onClick={() => setIsEditingProfile(false)} className="text-on-surface-variant hover:text-on-surface">Hủy</button>
             </div>
 
             <textarea
-              placeholder="Tell the community about yourself..."
+              placeholder="Giới thiệu bản thân với cộng đồng..."
               value={profileForm.bio}
               onChange={(event) => setProfileForm({...profileForm, bio: event.target.value})}
               maxLength={1000}
@@ -1029,14 +973,14 @@ export default function Garage() {
 
             <div>
               <label className="mb-2 block text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">
-                Location
+                Địa điểm
               </label>
               <select
                 value={profileForm.location}
                 onChange={(event) => setProfileForm({...profileForm, location: event.target.value})}
                 className="w-full bg-background border border-white/10 rounded-xl px-4 py-3"
               >
-                <option value="">Choose your location</option>
+                <option value="">Chọn địa điểm của bạn</option>
                 {profileLocations.map((location) => (
                   <option key={location} value={location}>
                     {location}
@@ -1047,7 +991,7 @@ export default function Garage() {
 
             <div>
               <label className="mb-3 block text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">
-                Focus Brands
+                Hãng quan tâm
               </label>
               <div className="flex flex-wrap gap-2">
                 {popularCarBrands.map((brand) => {
@@ -1076,7 +1020,7 @@ export default function Garage() {
                 })}
               </div>
               <p className="mt-3 text-xs text-on-surface-variant">
-                Selected: {profileForm.focusBrands.length ? profileForm.focusBrands.join(', ') : 'None'}
+                Đã chọn: {profileForm.focusBrands.length ? profileForm.focusBrands.join(', ') : 'Chưa chọn'}
               </p>
             </div>
 
@@ -1087,7 +1031,7 @@ export default function Garage() {
             )}
 
             <button disabled={isSavingProfile} type="submit" className="btn-primary w-full py-4 rounded-xl disabled:opacity-60 disabled:cursor-not-allowed">
-              {isSavingProfile ? 'Saving...' : 'Save Profile'}
+              {isSavingProfile ? 'Đang lưu...' : 'Lưu hồ sơ'}
             </button>
           </form>
         </div>
@@ -1096,3 +1040,4 @@ export default function Garage() {
     </div>
   );
 }
+

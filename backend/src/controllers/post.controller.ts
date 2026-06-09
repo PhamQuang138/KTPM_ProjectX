@@ -75,7 +75,7 @@ const mapCommunityPost = (post: Awaited<ReturnType<typeof postDbService.list>>[n
   image: post.images[0]?.url,
   images: post.images.map((image) => image.url),
   type: 'story',
-  timestamp: new Intl.RelativeTimeFormat('en', {numeric: 'auto'}).format(
+  timestamp: new Intl.RelativeTimeFormat('vi', {numeric: 'auto'}).format(
     Math.round((post.createdAt.getTime() - Date.now()) / 86400000),
     'day',
   ),
@@ -95,7 +95,7 @@ const mapCommunityPost = (post: Awaited<ReturnType<typeof postDbService.list>>[n
         comment.user.avatar ?? `https://i.pravatar.cc/100?u=${encodeURIComponent(comment.user.email)}`,
     },
   })),
-  category: post.status === PostStatus.PUBLISHED ? 'Published' : 'Draft',
+  category: post.status === PostStatus.PUBLISHED ? 'Đã đăng' : 'Bản nháp',
   tags: [],
 });
 
@@ -124,10 +124,24 @@ export const postController = {
     });
   },
 
+  async listLiked(req: AuthenticatedRequest, res: Response) {
+    const posts = await postDbService.listLiked(req.user!.id);
+
+    return res.json({
+      data: posts.map(mapCommunityPost),
+    });
+  },
+
+  async communityOverview(_req: Request, res: Response) {
+    return res.json({
+      data: await postDbService.getCommunityOverview(),
+    });
+  },
+
   async getById(req: Request, res: Response) {
     const post = await postDbService.getById(req.params.id);
     if (!post) {
-      return res.status(404).json({message: 'Post not found'});
+      return res.status(404).json({message: 'Không tìm thấy bài viết'});
     }
 
     return res.json({data: post});
@@ -166,13 +180,13 @@ export const postController = {
         image: post.images[0]?.url,
         images: post.images.map((image) => image.url),
         type: 'story',
-        timestamp: 'Just now',
+        timestamp: 'Vừa xong',
         likes: 0,
         comments: 0,
         shares: 0,
         isLikedInitial: false,
         commentItems: [],
-        category: 'Community',
+        category: 'Cộng đồng',
         tags: [],
       },
     });
@@ -180,14 +194,14 @@ export const postController = {
 
   async toggleLike(req: AuthenticatedRequest, res: Response) {
     const post = await postDbService.getById(req.params.id);
-    if (!post) return res.status(404).json({message: 'Post not found'});
+    if (!post) return res.status(404).json({message: 'Không tìm thấy bài viết'});
 
     return res.json({data: await postDbService.toggleLike(post.id, req.user!.id)});
   },
 
   async addComment(req: AuthenticatedRequest, res: Response) {
     const post = await postDbService.getById(req.params.id);
-    if (!post) return res.status(404).json({message: 'Post not found'});
+    if (!post) return res.status(404).json({message: 'Không tìm thấy bài viết'});
 
     const result = await postDbService.addComment(post.id, req.user!.id, req.body.content);
     return res.status(201).json({
@@ -212,7 +226,7 @@ export const postController = {
 
   async addShare(req: AuthenticatedRequest, res: Response) {
     const post = await postDbService.getById(req.params.id);
-    if (!post) return res.status(404).json({message: 'Post not found'});
+    if (!post) return res.status(404).json({message: 'Không tìm thấy bài viết'});
 
     return res.status(201).json({data: await postDbService.addShare(post.id, req.user!.id)});
   },

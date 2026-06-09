@@ -11,35 +11,7 @@ interface Notification {
   avatar?: string;
 }
 
-const notifications: Notification[] = [
-  {
-    id: '1',
-    type: 'comment',
-    title: 'New Comment',
-    message: 'Sarah J. commented on your 964 restoration story.',
-    time: '2m ago',
-    isRead: false,
-    avatar: 'https://i.pravatar.cc/100?u=1'
-  },
-  {
-    id: '2',
-    type: 'like',
-    title: 'New Like',
-    message: 'Marcus Thorne and 12 others liked your latest listing.',
-    time: '15m ago',
-    isRead: false,
-    avatar: 'https://i.pravatar.cc/100?u=2'
-  },
-  {
-    id: '3',
-    type: 'marketplace',
-    title: 'Price Alert',
-    message: 'The Porsche 911 (964) you watched has dropped by $5,000.',
-    time: '1h ago',
-    isRead: true,
-    avatar: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=100'
-  }
-];
+const notifications: Notification[] = [];
 
 export default function NotificationsTray({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   return (
@@ -63,7 +35,7 @@ export default function NotificationsTray({ isOpen, onClose }: { isOpen: boolean
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-2">
                 <Bell className="w-5 h-5 text-primary" />
-                <h2 className="font-display text-xl font-bold tracking-tight">Notifications</h2>
+                <h2 className="font-display text-xl font-bold tracking-tight">Thông báo</h2>
               </div>
               <button 
                 onClick={onClose}
@@ -84,7 +56,7 @@ export default function NotificationsTray({ isOpen, onClose }: { isOpen: boolean
                   {!n.isRead && <span className="absolute top-4 right-4 w-2 h-2 bg-primary rounded-full" />}
                   <div className="flex gap-4">
                     <div className="relative shrink-0">
-                       <img src={n.avatar} className="w-10 h-10 rounded-full border border-white/10 shadow-lg" alt="User" />
+                       <img src={n.avatar} className="w-10 h-10 rounded-full border border-white/10 shadow-lg" alt="Người dùng" />
                        <div className="absolute -bottom-1 -right-1 p-1 bg-background rounded-full border border-white/5">
                           {n.type === 'comment' && <MessageCircle className="w-2.5 h-2.5 text-blue-400" />}
                           {n.type === 'like' && <Heart className="w-2.5 h-2.5 text-red-400 fill-current" />}
@@ -101,11 +73,20 @@ export default function NotificationsTray({ isOpen, onClose }: { isOpen: boolean
                   </div>
                 </div>
               ))}
+              {notifications.length === 0 && (
+                <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-8 text-center">
+                  <Bell className="mx-auto mb-3 h-7 w-7 text-on-surface-variant" />
+                  <p className="text-sm font-bold">Chưa có thông báo</p>
+                  <p className="mt-1 text-xs text-on-surface-variant">Thông báo mới sẽ xuất hiện tại đây.</p>
+                </div>
+              )}
             </div>
 
-            <button className="w-full mt-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-xs font-mono uppercase tracking-[0.2em] font-bold hover:bg-white/10 transition-all">
-              Mark all as read
-            </button>
+            {notifications.length > 0 && (
+              <button className="w-full mt-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-xs font-mono uppercase tracking-[0.2em] font-bold hover:bg-white/10 transition-all">
+                Đánh dấu đã đọc
+              </button>
+            )}
           </motion.div>
         </>
       )}

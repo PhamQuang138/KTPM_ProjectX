@@ -31,10 +31,12 @@ export default function TopNav({ title }: { title?: string }) {
   const getPageTitle = () => {
     if (title) return title;
     switch (location.pathname) {
-      case '/': return 'Home';
-      case '/feed': return 'Community Hub';
-      case '/market': return 'Marketplace';
-      case '/garage': return 'My Profile';
+      case '/': return 'Trang chủ';
+      case '/feed': return 'Cộng đồng';
+      case '/market': return 'Chợ xe';
+      case '/garage': return 'Hồ sơ của tôi';
+      case '/favorites': return 'Đã thích';
+      case '/admin': return 'Quản trị';
       default: return 'CarHub';
     }
   };
@@ -61,7 +63,7 @@ export default function TopNav({ title }: { title?: string }) {
               <h2 className="font-display text-xl text-on-background font-bold tracking-tighter uppercase whitespace-nowrap leading-none">
                 CarHub
               </h2>
-              <span className="text-[8px] font-mono uppercase tracking-[0.3em] text-primary font-bold opacity-60">Enthusiast Network</span>
+              <span className="text-[8px] font-mono uppercase tracking-[0.3em] text-primary font-bold opacity-60">Mạng lưới xe</span>
             </div>
           </Link>
         </div>
@@ -69,15 +71,16 @@ export default function TopNav({ title }: { title?: string }) {
         <div className="flex items-center space-x-6">
           <nav className="hidden lg:flex space-x-8">
             {[
-              { label: 'Explore', path: '/' },
+              { label: 'Khám phá', path: '/' },
               ...(isAuthenticated
                 ? [
-                    { label: 'Community', path: '/feed' },
-                    { label: 'Market', path: '/market' },
+                    { label: 'Cộng đồng', path: '/feed' },
+                    { label: 'Chợ xe', path: '/market' },
                     { label: 'Garage', path: '/garage' },
+                    { label: 'Đã thích', path: '/favorites' },
                   ]
                 : []),
-              ...(user?.role === 'ADMIN' ? [{ label: 'Admin', path: '/admin' }] : []),
+              ...(user?.role === 'ADMIN' ? [{ label: 'Quản trị', path: '/admin' }] : []),
             ].map((item) => (
               <Link
                 key={item.label}
@@ -122,14 +125,14 @@ export default function TopNav({ title }: { title?: string }) {
                 <button
                   onClick={handleLogout}
                   className="hidden md:flex p-2 text-on-surface hover:text-primary transition-all hover:scale-110"
-                  aria-label="Log out"
+                  aria-label="Đăng xuất"
                 >
                   <LogOut className="w-5 h-5" />
                 </button>
               </>
             ) : (
               <Link to="/login" className="flex font-mono text-[10px] uppercase tracking-[0.2em] text-primary font-bold">
-                Login
+                Đăng nhập
               </Link>
             )}
 
@@ -141,14 +144,14 @@ export default function TopNav({ title }: { title?: string }) {
                   className="btn-primary py-2 px-4 text-[10px] hidden md:flex items-center gap-2"
                 >
                   <PlusCircle className="w-3.5 h-3.5" />
-                  Post
+                  Đăng bài
                 </button>
 
                 <button
                   type="button"
                   onClick={handleCreatePost}
                   className="p-2 text-on-surface hover:text-primary transition-colors md:hidden"
-                  aria-label="Create post"
+                  aria-label="Tạo bài viết"
                 >
                   <PlusCircle className="w-6 h-6" />
                 </button>

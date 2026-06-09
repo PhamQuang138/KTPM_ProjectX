@@ -6,4 +6,7 @@ coverage/
 *.log
 .env*
 !.env.example
+!.env.production.example
+!.env.*.example
 backend/uploads/
+.vercel/

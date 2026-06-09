@@ -4,110 +4,51 @@ import Footer from '../components/Footer';
 import SocialPost, { SocialPostProps } from '../components/SocialPost';
 import MobileNav from '../components/MobileNav';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Plus, TrendingUp, Hash, Users, Sparkles, MessageSquare, Heart, Clock, Bookmark, Camera, PenTool, LayoutGrid, Bell, ShoppingBag } from 'lucide-react';
+import { Search, Plus, Hash, Sparkles, MessageSquare, Camera, PenTool, LayoutGrid, Bell, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { useSidebarStore } from '../store/useSidebarStore';
 import { apiRequest } from '../lib/api';
 import { useAuthStore } from '../store/useAuthStore';
 
-// ... categories and trendingTags stay the same
-
 const categories = [
-  { label: 'All Feed', icon: LayoutGrid },
-  { label: 'Blog Posts', icon: PenTool },
-  { label: 'Discussions', icon: MessageSquare },
-  { label: 'Market Feed', icon: ShoppingBag },
-  { label: 'Official News', icon: Sparkles },
+  { label: 'Tất cả', icon: LayoutGrid },
+  { label: 'Bài viết', icon: PenTool },
+  { label: 'Thảo luận', icon: MessageSquare },
+  { label: 'Chợ xe', icon: ShoppingBag },
+  { label: 'Tin chính thức', icon: Sparkles },
 ];
 
-const trendingTags = ['CarHub2026', 'RestoDiary', 'DailyDriver', 'JDMClassic', 'EVTomorrow', 'PorschePass'];
+interface ImageUploadResponse {
+  url: string;
+  path: string;
+  filename: string;
+}
 
-const communityStats = [
-  { label: 'Active Now', value: '1,204' },
-  { label: 'New Stories', value: '42' },
-  { label: 'Listing Shares', value: '156' },
-];
-
-const hubPosts: SocialPostProps[] = [
-  {
-    author: {
-      name: "Marcus Thorne",
-      handle: "mthorne_rs",
-      avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuALrnP11mR5J3hDSTFCrB33JVno9FYrLSrWAVteCwwmYOrgn7oE-8h1e8jpF9OiIIAHcF3KREZjBg0gvlwkcyM49Gl0Bb18tpAaVmeQ7FerPdly7woocsNCYOCkHpOR9s99Y2z3JsxWu_QXAWiuSZzTYXo3sPhvWdNryUr9v3F2Nbb0GVJ8hFZzi8YgufHq01ZfBRYraaYgFKE1eMKMeHJCoe3vUX3Mss_2bb23Dfkg2PFpgYPvRrWN01U_zCLdiVUAbG2H5IrA8g",
-      isVerified: true,
-      isProUser: true
-    },
-    type: 'garage',
-    content: "The final piece of the puzzle arrived today for the 1974 2.7 RS project. These period-correct Fuchs wheels are everything. Restoration is 98% complete. \n\nWhat do you guys think of the silver-on-black finish?",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDQcQwnFFiEl1uaEzWESRhLrrSmtUEXLk_aTY5GsfuNE2ZwHKMzO0ApXtv6ZwPkBCSYd_iQj3wiCSo9X97Y1dWXHF59FzI8n6gUllE2SVFuTQWAbZepD1t14ugConVJCdPvFt0yCLq7s3c_6O6zt2ufeNM4fRDemBJHX7kram1oxbzUZGRbQN5WZo5cWxgIhSByeJr-7mFte6R4OxB46WfNkHE8ZcGttyVRyHhixX3bz2XEWQJmlJzSDhQKqVvcN4rpxg8kPDDnZw",
-    timestamp: "12m ago",
-    likes: 0,
-    comments: 0,
-    shares: 0,
-    category: "Restoration",
-    tags: ["Porsche911", "RestoMod", "Vintage"]
-  },
-  {
-    author: {
-      name: "Elena Rossi",
-      handle: "elena_f1",
-      avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuALrnP11mR5J3hDSTFCrB33JVno9FYrLSrWAVteCwwmYOrgn7oE-8h1e8jpF9OiIIAHcF3KREZjBg0gvlwkcyM49Gl0Bb18tpAaVmeQ7FerPdly7woocsNCYOCkHpOR9s99Y2z3JsxWu_QXAWiuSZzTYXo3sPhvWdNryUr9v3F2Nbb0GVJ8hFZzi8YgufHq01ZfBRYraaYgFKE1eMKMeHJCoe3vUX3Mss_2bb23Dfkg2PFpgYPvRrWN01U_zCLdiVUAbG2H5IrA8g",
-      isVerified: true
-    },
-    type: 'marketplace',
-    content: "Helping a friend move this beautiful Stingray. Honestly, the mid-engine layout change was the best thing to happen to this platform in decades. Handling is razor sharp.",
-    timestamp: "1h ago",
-    likes: 0,
-    comments: 0,
-    shares: 0,
-    category: "Hot Deals",
-    marketplaceListing: {
-      title: "Chevrolet Corvette Stingray Z51",
-      price: "$75,000",
-      image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=2070&auto=format&fit=crop"
-    }
-  },
-  {
-    author: {
-      name: "DriveDaily",
-      handle: "daily_alpha",
-      avatar: "https://i.pravatar.cc/100?u=dd",
-    },
-    type: 'story',
-    content: "Spent the weekend lost in the Cotswolds. No GPS, just a map and the internal combustion engine. Sometimes you need to disconnect to reconnect.",
-    images: [
-      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800"
-    ],
-    timestamp: "3h ago",
-    likes: 0,
-    comments: 0,
-    shares: 0,
-    category: "Road Trip",
-    tags: ["Exploring", "Cotswolds", "Escape"]
-  },
-  {
-    author: {
-      name: "Julian Vance",
-      handle: "jvance_auto",
-      avatar: "https://i.pravatar.cc/100?u=jv",
-    },
-    type: 'maintenance',
-    content: "Quick tip: If you're hearing a slight high-pitched whistle under acceleration in your E30, check the throttle body gasket. Super common vacuum leak point that often gets misdiagnosed as turbo whine (even if you don't have one 😂).",
-    timestamp: "5h ago",
-    likes: 0,
-    comments: 0,
-    shares: 0,
-    category: "Tech Help"
-  }
-];
+interface CommunityOverview {
+  stats: {
+    members: number;
+    publishedPosts: number;
+    recentPosts: number;
+    interactions: number;
+  };
+  topMembers: {
+    id: string;
+    name: string;
+    handle: string;
+    avatar?: string | null;
+    postCount: number;
+  }[];
+}
 
 export default function Editorial() {
-  const [activeCategory, setActiveCategory] = useState('All Feed');
+  const [activeCategory, setActiveCategory] = useState('Tất cả');
   const [isPosting, setIsPosting] = useState(false);
   const [postContent, setPostContent] = useState('');
-  const [posts, setPosts] = useState<SocialPostProps[]>(hubPosts);
+  const [postImages, setPostImages] = useState<string[]>([]);
+  const [isUploadingPostImage, setIsUploadingPostImage] = useState(false);
+  const [posts, setPosts] = useState<SocialPostProps[]>([]);
+  const [overview, setOverview] = useState<CommunityOverview | null>(null);
   const [isSubmittingPost, setIsSubmittingPost] = useState(false);
   const [postError, setPostError] = useState('');
   const postInputRef = useRef<HTMLTextAreaElement>(null);
@@ -116,7 +57,7 @@ export default function Editorial() {
   const { isOpen } = useSidebarStore();
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const displayName = user?.name ?? 'Guest Driver';
+  const displayName = user?.name ?? 'Khách';
   const avatar = user?.avatar ?? `https://i.pravatar.cc/200?u=${encodeURIComponent(user?.email ?? 'guest')}`;
   const handle = user?.email.split('@')[0] ?? 'guest';
 
@@ -137,16 +78,58 @@ export default function Editorial() {
           content,
           title: content.slice(0, 80),
           status: 'PUBLISHED',
+          images: postImages.map((url) => ({url})),
         }),
       });
 
       setPosts((currentPosts) => [createdPost, ...currentPosts]);
       setPostContent('');
+      setPostImages([]);
       setIsPosting(false);
     } catch (error) {
-      setPostError(error instanceof Error ? error.message : 'Unable to create the post.');
+      setPostError(error instanceof Error ? error.message : 'Không thể tạo bài viết.');
     } finally {
       setIsSubmittingPost(false);
+    }
+  };
+
+  const handlePostImageUpload = async (file: File | undefined) => {
+    if (!file) return;
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setPostError('Vui lòng chọn ảnh JPG, JPEG, PNG hoặc WEBP.');
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      setPostError('Ảnh phải có dung lượng tối đa 4MB.');
+      return;
+    }
+    if (postImages.length >= 4) {
+      setPostError('Bạn có thể đính kèm tối đa 4 ảnh cho mỗi bài viết.');
+      return;
+    }
+
+    setPostError('');
+    setIsUploadingPostImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const uploaded = await apiRequest<ImageUploadResponse>('/uploads/images', {
+        method: 'POST',
+        body: formData,
+      });
+
+      setPostImages((current) => [...current, uploaded.url]);
+      setIsPosting(true);
+    } catch (error) {
+      setPostError(error instanceof Error ? error.message : 'Không thể tải ảnh lên.');
+    } finally {
+      setIsUploadingPostImage(false);
     }
   };
 
@@ -168,11 +151,14 @@ export default function Editorial() {
   useEffect(() => {
     let isMounted = true;
 
-    apiRequest<SocialPostProps[]>('/posts/community')
-      .then((dbPosts) => {
-        if (isMounted) {
-          setPosts([...dbPosts, ...hubPosts]);
-        }
+    Promise.all([
+      apiRequest<SocialPostProps[]>('/posts/community'),
+      apiRequest<CommunityOverview>('/posts/community-overview'),
+    ])
+      .then(([dbPosts, communityOverview]) => {
+        if (!isMounted) return;
+        setPosts(dbPosts);
+        setOverview(communityOverview);
       })
       .catch(() => undefined);
 
@@ -203,28 +189,28 @@ export default function Editorial() {
                 <div>
                   <h3 className="font-bold text-sm">{displayName}</h3>
                   <p className="text-[10px] text-on-surface-variant font-mono uppercase tracking-widest">
-                    {isAuthenticated ? `@${handle}` : 'Community Guest'}
+                    {isAuthenticated ? `@${handle}` : 'Khách cộng đồng'}
                   </p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 py-4 border-y border-white/5">
                 <div className="text-center">
                   <p className="text-sm font-bold">12</p>
-                  <p className="text-[9px] text-on-surface-variant font-mono uppercase">Vehicles</p>
+                  <p className="text-[9px] text-on-surface-variant font-mono uppercase">Xe</p>
                 </div>
                 <div className="text-center border-l border-white/5">
                   <p className="text-sm font-bold">2.4k</p>
-                  <p className="text-[9px] text-on-surface-variant font-mono uppercase">Karma</p>
+                  <p className="text-[9px] text-on-surface-variant font-mono uppercase">Điểm</p>
                 </div>
               </div>
               <Link to="/garage" className="block w-full mt-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono uppercase tracking-widest transition-all text-center">
-                My Profile
+                Hồ sơ của tôi
               </Link>
             </div>
 
             {/* Hub Navigation */}
             <div className="glass-card rounded-[2rem] p-6 border-white/5">
-              <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] mb-4 text-on-surface-variant">Explore Hub</h3>
+              <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] mb-4 text-on-surface-variant">Khám phá cộng đồng</h3>
               <nav className="space-y-1">
                 {categories.map(cat => (
                   <button 
@@ -243,20 +229,6 @@ export default function Editorial() {
               </nav>
             </div>
 
-            {/* Trending Tags */}
-            <div className="glass-card rounded-[2rem] p-6 border-white/5">
-              <div className="flex items-center gap-2 mb-6">
-                <TrendingUp className="w-4 h-4 text-primary" />
-                <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant">Hot Topics</h3>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {trendingTags.map(tag => (
-                  <button key={tag} className="px-3 py-1.5 rounded-full bg-surface-container text-[10px] font-medium hover:text-primary hover:bg-primary/10 transition-colors">
-                    #{tag}
-                  </button>
-                ))}
-              </div>
-            </div>
           </aside>
 
           {/* Main Content: Social Feed */}
@@ -264,7 +236,7 @@ export default function Editorial() {
             
             {/* Feed Header (Mobile only) */}
             <div className="lg:hidden flex items-center justify-between mb-2">
-              <h1 className="font-display text-2xl font-bold tracking-tight">The Hub</h1>
+              <h1 className="font-display text-2xl font-bold tracking-tight">Cộng đồng</h1>
               <div className="flex items-center gap-3">
                 <Search className="w-5 h-5 text-on-surface-variant" />
                 <Bell className="w-5 h-5 text-on-surface-variant" />
@@ -284,13 +256,30 @@ export default function Editorial() {
                     onFocus={() => setIsPosting(true)}
                     value={postContent}
                     onChange={(event) => setPostContent(event.target.value)}
-                    placeholder="Share your car's latest adventure..." 
+                    placeholder="Chia sẻ câu chuyện mới nhất về chiếc xe của bạn..." 
                     className="w-full bg-transparent border-none focus:ring-0 text-base md:text-lg resize-none min-h-[60px] max-h-40 py-2"
                   />
 
                   {postError && (
                     <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
                       {postError}
+                    </div>
+                  )}
+
+                  {postImages.length > 0 && (
+                    <div className={`grid gap-2 ${postImages.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                      {postImages.map((imageUrl) => (
+                        <div key={imageUrl} className="relative overflow-hidden rounded-2xl border border-white/10 bg-surface-container">
+                          <img src={imageUrl} alt="Xem trước bài viết" className="aspect-video w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setPostImages((current) => current.filter((url) => url !== imageUrl))}
+                            className="absolute right-3 top-3 rounded-full bg-black/70 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-red-500"
+                          >
+                            Xóa ảnh
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
                   
@@ -303,17 +292,38 @@ export default function Editorial() {
                         className="flex items-center justify-between pt-4 border-t border-white/5"
                       >
                         <div className="flex gap-2">
-                          <button className="interactive-icon text-primary"><Camera className="w-5 h-5" /></button>
+                          <label className={`interactive-icon text-primary cursor-pointer ${isUploadingPostImage ? 'opacity-50 pointer-events-none' : ''}`}>
+                            <Camera className="w-5 h-5" />
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                              className="hidden"
+                              disabled={isUploadingPostImage}
+                              onChange={(event) => {
+                                void handlePostImageUpload(event.target.files?.[0]);
+                                event.target.value = '';
+                              }}
+                            />
+                          </label>
                           <button className="interactive-icon"><Hash className="w-5 h-5" /></button>
                         </div>
                         <div className="flex gap-3">
-                          <button onClick={() => setIsPosting(false)} className="text-xs text-on-surface-variant font-bold hover:text-on-surface transition-colors">Cancel</button>
+                          <button
+                            onClick={() => {
+                              setIsPosting(false);
+                              setPostImages([]);
+                              setPostError('');
+                            }}
+                            className="text-xs text-on-surface-variant font-bold hover:text-on-surface transition-colors"
+                          >
+                            Hủy
+                          </button>
                           <button
                             onClick={handleCreatePost}
-                            disabled={!postContent.trim() || isSubmittingPost || !isAuthenticated}
+                            disabled={!postContent.trim() || isSubmittingPost || isUploadingPostImage || !isAuthenticated}
                             className="btn-primary py-2 px-6 text-xs rounded-full shadow-xl shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            {isSubmittingPost ? 'Posting...' : isAuthenticated ? 'Post Hub' : 'Sign in to post'}
+                            {isUploadingPostImage ? 'Đang tải ảnh...' : isSubmittingPost ? 'Đang đăng...' : isAuthenticated ? 'Đăng bài' : 'Đăng nhập để đăng'}
                           </button>
                         </div>
                       </motion.div>
@@ -343,16 +353,21 @@ export default function Editorial() {
 
             {/* Post Feed */}
             <div className="space-y-6">
-              {posts.map((post, i) => (
-                <SocialPost key={i} {...post} />
+              {posts.map((post) => (
+                <SocialPost key={post.id} {...post} />
               ))}
+              {posts.length === 0 && (
+                <div className="glass-card rounded-[2rem] border-white/5 p-10 text-center text-on-surface-variant">
+                  Chưa có bài viết cộng đồng. Hãy là người đầu tiên chia sẻ.
+                </div>
+              )}
             </div>
 
             {/* End of Feed Message */}
             <div className="py-20 text-center opacity-40">
               <Sparkles className="w-8 h-8 mx-auto mb-4 text-primary animate-pulse" />
-              <p className="font-display text-lg font-bold mb-1">You're all caught up!</p>
-              <p className="text-xs font-mono uppercase tracking-[0.25em]">Transmission Complete</p>
+              <p className="font-display text-lg font-bold mb-1">Bạn đã xem hết bài mới!</p>
+              <p className="text-xs font-mono uppercase tracking-[0.25em]">Luồng tin đã cập nhật</p>
             </div>
           </section>
 
@@ -360,9 +375,14 @@ export default function Editorial() {
           <aside className="hidden lg:block lg:col-span-3 space-y-6">
             {/* Community Stats Card */}
             <div className="glass-card rounded-[2rem] p-6 border-white/5">
-              <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] mb-6 text-on-surface-variant">Global Reach</h3>
+              <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] mb-6 text-on-surface-variant">Hoạt động cộng đồng</h3>
               <div className="space-y-4">
-                {communityStats.map(stat => (
+                {[
+                  {label: 'Thành viên', value: overview?.stats.members ?? 0},
+                  {label: 'Bài đã đăng', value: overview?.stats.publishedPosts ?? 0},
+                  {label: 'Bài mới trong 7 ngày', value: overview?.stats.recentPosts ?? 0},
+                  {label: 'Tổng tương tác', value: overview?.stats.interactions ?? 0},
+                ].map(stat => (
                   <div key={stat.label} className="flex justify-between items-center pb-3 border-b border-white/5 last:border-0 last:pb-0">
                     <span className="text-xs text-on-surface-variant">{stat.label}</span>
                     <span className="font-bold text-primary font-mono">{stat.value}</span>
@@ -373,28 +393,28 @@ export default function Editorial() {
 
             {/* Who to Follow */}
             <div className="glass-card rounded-[2rem] p-6 border-white/5">
-              <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] mb-6 text-on-surface-variant">Top Collectors</h3>
+              <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] mb-6 text-on-surface-variant">Thành viên nổi bật</h3>
               <div className="space-y-5">
-                {[
-                  { name: "Julian Vance", handle: "jvance_auto", avatar: "https://i.pravatar.cc/100?u=jv" },
-                  { name: "Sarah J.", handle: "sarah_gt", avatar: "https://i.pravatar.cc/100?u=sj" },
-                  { name: "Sotheby's", handle: "sothebys_sealed", avatar: "https://i.pravatar.cc/100?u=ss" },
-                ].map((user, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 cursor-pointer group">
-                      <img src={user.avatar} className="w-10 h-10 rounded-full border border-white/10 group-hover:border-primary/50 transition-colors" alt={user.name} />
+                {overview?.topMembers.map((member) => (
+                  <Link key={member.id} to={`/profile/${member.id}`} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 group">
+                      <img
+                        src={member.avatar ?? `https://i.pravatar.cc/100?u=${encodeURIComponent(member.handle)}`}
+                        className="w-10 h-10 rounded-full border border-white/10 group-hover:border-primary/50 transition-colors object-cover"
+                        alt={member.name}
+                      />
                       <div>
-                        <p className="text-xs font-bold group-hover:text-primary transition-colors">{user.name}</p>
-                        <p className="text-[10px] text-on-surface-variant font-mono">@{user.handle}</p>
+                        <p className="text-xs font-bold group-hover:text-primary transition-colors">{member.name}</p>
+                        <p className="text-[10px] text-on-surface-variant font-mono">@{member.handle}</p>
                       </div>
                     </div>
-                    <button className="text-[10px] font-bold text-primary hover:bg-primary/10 px-3 py-1 rounded-full transition-all">Follow</button>
-                  </div>
+                    <span className="text-[10px] font-bold text-primary">{member.postCount} bài</span>
+                  </Link>
                 ))}
+                {overview?.topMembers.length === 0 && (
+                  <p className="text-xs text-on-surface-variant">Chưa có thành viên nào đăng bài.</p>
+                )}
               </div>
-              <button className="w-full mt-6 py-2.5 text-[10px] font-mono uppercase tracking-[0.2em] text-on-surface-variant hover:text-on-surface transition-colors">
-                View Global Registry →
-              </button>
             </div>
 
             <Footer hideLogo />

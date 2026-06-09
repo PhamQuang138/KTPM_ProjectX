@@ -1,4 +1,4 @@
-import { Newspaper, ShoppingBag, Car, Users, Heart, Settings, Zap, Home, ChevronLeft, LogOut } from 'lucide-react';
+import { Newspaper, ShoppingBag, Car, Heart, Settings, Zap, Home, ChevronLeft, LogOut } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -11,13 +11,12 @@ function cn(...inputs: ClassValue[]) {
 }
 
 const navItems = [
-  { icon: Home, label: 'Explore', path: '/' },
-  { icon: Newspaper, label: 'Community Feed', path: '/feed' },
-  { icon: ShoppingBag, label: 'Marketplace', path: '/market' },
-  { icon: Car, label: 'My Garage', path: '/garage' },
-  { icon: Users, label: 'Clubs', path: '#' },
-  { icon: Heart, label: 'Favorites', path: '#' },
-  { icon: Settings, label: 'Settings', path: '#' },
+  { icon: Home, label: 'Khám phá', path: '/' },
+  { icon: Newspaper, label: 'Cộng đồng', path: '/feed' },
+  { icon: ShoppingBag, label: 'Chợ xe', path: '/market' },
+  { icon: Car, label: 'Garage của tôi', path: '/garage' },
+  { icon: Heart, label: 'Đã thích', path: '/favorites' },
+  { icon: Settings, label: 'Cài đặt', path: '#' },
 ];
 
 export default function Sidebar() {
@@ -67,9 +66,9 @@ export default function Sidebar() {
                 />
               </div>
               <div>
-                <p className="font-sans text-sm text-on-surface font-bold leading-tight">{user?.name ?? 'Guest'}</p>
+                <p className="font-sans text-sm text-on-surface font-bold leading-tight">{user?.name ?? 'Khách'}</p>
                 <p className="text-[10px] text-on-surface-variant font-mono uppercase tracking-wider">
-                  {isAuthenticated ? 'Legacy Collector' : 'Sign in'}
+                  {isAuthenticated ? 'Thành viên' : 'Đăng nhập'}
                 </p>
               </div>
             </Link>
@@ -108,7 +107,7 @@ export default function Sidebar() {
                 className="mb-3 w-full text-on-surface-variant py-3 rounded-xl font-mono uppercase text-[10px] tracking-widest hover:bg-white/5 hover:text-primary transition-all border border-white/5 flex items-center justify-center gap-2"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                Logout
+                Đăng xuất
               </button>
             )}
             {isAuthenticated && (
@@ -117,7 +116,7 @@ export default function Sidebar() {
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   <Zap className="w-3 h-3 group-hover:fill-current" />
-                  New Listing
+                  Đăng bán xe
                 </span>
               </button>
             )}

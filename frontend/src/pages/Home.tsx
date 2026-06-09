@@ -17,13 +17,8 @@ import {
 import TopNav from '../components/TopNav';
 import Footer from '../components/Footer';
 import { useAuthStore } from '../store/useAuthStore';
-
-const stats = [
-  { label: 'Active Users', value: '124K+', suffix: 'Community' },
-  { label: 'Vehicles Sold', value: '12K+', suffix: 'Marketplace' },
-  { label: 'Daily Posts', value: '850+', suffix: 'Discussions' },
-  { label: 'Verified Sellers', value: '4.2K', suffix: 'Trust' },
-];
+import { useEffect, useState } from 'react';
+import { apiRequest } from '../lib/api';
 
 const features = [
   {
@@ -51,39 +46,63 @@ const features = [
 
 import BlogCard from '../components/BlogCard';
 
-const featuredArticles = [
-  {
-    title: 'The Unspoken Joy of the Air-Cooled Era',
-    excerpt: 'Why modern collectors are looking back at the 90s as the golden age of mechanical purity.',
-    author: 'Julian Vance',
-    date: 'Oct 24, 2026',
-    readTime: '8 min read',
-    image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800',
-    category: 'Analysis'
-  },
-  {
-    title: 'EV Conversion: Sacrilege or Salvation?',
-    excerpt: 'We take a deep dive into the world of electric restomods and what it means for the future of car culture.',
-    author: 'Elena Rossi',
-    date: 'Oct 21, 2026',
-    readTime: '12 min read',
-    image: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=800',
-    category: 'Future'
-  },
-  {
-    title: 'Hidden Roads: The Stelvio Pass at 4AM',
-    excerpt: 'A firsthand account of driving the world\'s most famous mountain pass before the tourists wake up.',
-    author: 'Marcus Thorne',
-    date: 'Oct 18, 2026',
-    readTime: '6 min read',
-    image: 'https://images.unsplash.com/photo-1469033049964-6750059bc438?auto=format&fit=crop&w=800',
-    category: 'Travel'
-  }
-];
+interface HomeOverview {
+  stats: {
+    members: number;
+    publishedPosts: number;
+    recentPosts: number;
+    interactions: number;
+  };
+}
+
+interface HomeVehicle {
+  id: string;
+  title: string;
+  price: string;
+  vehicle?: {
+    image: string;
+  } | null;
+}
+
+interface HomeArticle {
+  id: string;
+  title: string;
+  excerpt: string;
+  author: string;
+  readTime?: string | null;
+  image?: string | null;
+  category: string;
+  publishedAt?: string | null;
+  createdAt: string;
+}
 
 export default function Home() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const gatedPath = (path: string) => (isAuthenticated ? path : '/login');
+  const [overview, setOverview] = useState<HomeOverview | null>(null);
+  const [vehicles, setVehicles] = useState<HomeVehicle[]>([]);
+  const [articles, setArticles] = useState<HomeArticle[]>([]);
+
+  useEffect(() => {
+    Promise.all([
+      apiRequest<HomeOverview>('/posts/community-overview'),
+      apiRequest<HomeVehicle[]>('/vehicles'),
+      apiRequest<HomeArticle[]>('/articles'),
+    ])
+      .then(([overviewData, vehicleData, articleData]) => {
+        setOverview(overviewData);
+        setVehicles(vehicleData.slice(0, 4));
+        setArticles(articleData.slice(0, 3));
+      })
+      .catch(() => undefined);
+  }, []);
+
+  const stats = [
+    {label: 'Thành viên', value: overview?.stats.members ?? 0, suffix: 'Cộng đồng'},
+    {label: 'Bài đã đăng', value: overview?.stats.publishedPosts ?? 0, suffix: 'Nội dung'},
+    {label: 'Bài mới 7 ngày', value: overview?.stats.recentPosts ?? 0, suffix: 'Hoạt động'},
+    {label: 'Tổng tương tác', value: overview?.stats.interactions ?? 0, suffix: 'Kết nối'},
+  ];
 
   return (
     <div className="min-h-screen bg-background text-on-background">
@@ -211,26 +230,24 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                 {[
-                   { title: '1990 Porsche 911 (964)', price: '$124,000', image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600' },
-                   { title: '1974 GT Heritage', price: '$185,000', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA3aPfyF_LB1tLXUvYqyAtBUp6enYudj5bH7Qe99C9wbCQPS90x7VqFZl55LOjWQzfDB5t7jlU-cYMnRD5GADDqCyC68-g-V-dS69PYiYbJcEx1Y_UHc8D0tw-O8EuEto_SWXp-k485IOGW3K-oV9ws4nJiHq9G88KXfRas3QqB-cv_3iAgvwVwygChjILt-0LrzozC3g4Gh3Tfn9WE7VjBKlokl9LeUnL1nB9yoFr1gQMx3MMgyXrMQ2SXWdoJtbFc4Jl6Gt6ctA' },
-                   { title: 'BMW M3 E30 Sport', price: '$98,000', image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=600' },
-                   { title: 'Land Rover Defender', price: '$65,000', image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600' },
-                 ].map((v, i) => (
-                   <motion.div 
-                     key={i}
+                 {vehicles.map((vehicle) => (
+                   <motion.div
+                     key={vehicle.id}
                      whileHover={{ scale: 1.02 }}
                      className="rounded-2xl overflow-hidden border border-white/5 bg-background group cursor-pointer"
                    >
-                     <div className="aspect-video overflow-hidden">
-                        <img src={v.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={v.title} />
-                     </div>
-                     <div className="p-5">
-                        <h4 className="font-bold mb-1 truncate">{v.title}</h4>
-                        <p className="text-primary font-mono text-sm font-bold">{v.price}</p>
-                     </div>
+                     <Link to={gatedPath(`/market/${vehicle.id}`)} className="block">
+                       <div className="aspect-video overflow-hidden bg-white/[0.03]">
+                          {vehicle.vehicle?.image && <img src={vehicle.vehicle.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={vehicle.title} />}
+                       </div>
+                       <div className="p-5">
+                          <h4 className="font-bold mb-1 truncate">{vehicle.title}</h4>
+                          <p className="text-primary font-mono text-sm font-bold">{vehicle.price}</p>
+                       </div>
+                     </Link>
                    </motion.div>
                  ))}
+                 {vehicles.length === 0 && <p className="text-sm text-on-surface-variant">Chưa có xe nào đang được đăng bán.</p>}
               </div>
            </div>
         </section>
@@ -248,9 +265,19 @@ export default function Home() {
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {featuredArticles.map((article, i) => (
-                <BlogCard key={i} {...article} />
+              {articles.map((article) => (
+                <BlogCard
+                  key={article.id}
+                  title={article.title}
+                  excerpt={article.excerpt}
+                  author={article.author}
+                  date={new Date(article.publishedAt ?? article.createdAt).toLocaleDateString('vi-VN')}
+                  readTime={article.readTime ?? 'Đang cập nhật'}
+                  image={article.image ?? ''}
+                  category={article.category}
+                />
               ))}
+              {articles.length === 0 && <p className="text-sm text-on-surface-variant">Chưa có bài chuyên đề nào được xuất bản.</p>}
            </div>
         </section>
 

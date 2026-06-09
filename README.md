@@ -233,3 +233,24 @@ npm run db:drop-schema --workspace backend
 npm run db:migrate --workspace backend
 npm run db:seed --workspace backend
 ```
+# Deploy Vercel Multi-Services
+
+Tạo một Vercel Project với Root Directory là `./` và Application Preset là `Services`.
+File `vercel.json` ở thư mục gốc khai báo:
+
+- Frontend Vite tại `/`
+- Backend Express tại `/api`
+
+Frontend gọi backend cùng domain nên không cần URL backend riêng. Các biến cần import:
+
+- Backend: `backend/.env.vercel`
+- Frontend không cần biến môi trường API vì mặc định dùng `/api`
+
+Kết nối một Vercel Blob Store dạng Public để Vercel tự thêm
+`BLOB_READ_WRITE_TOKEN`. Build backend tự chạy `prisma migrate deploy`.
+
+Health check sau deploy:
+
+```text
+https://TEN-PROJECT.vercel.app/api/health
+```

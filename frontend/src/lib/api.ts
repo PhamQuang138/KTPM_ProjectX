@@ -15,7 +15,7 @@ export async function apiRequest<T>(path: string, options?: RequestInit): Promis
       },
     });
   } catch {
-    throw new Error('Cannot connect to the server. Check that the backend and PostgreSQL are running.');
+    throw new Error('Không thể kết nối tới máy chủ. Hãy kiểm tra backend và PostgreSQL đang chạy.');
   }
 
   const contentType = response.headers.get('content-type') ?? '';
@@ -28,7 +28,7 @@ export async function apiRequest<T>(path: string, options?: RequestInit): Promis
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
     }
-    throw new Error(payload.message || `Request failed with status ${response.status}`);
+    throw new Error(payload.message || `Yêu cầu thất bại với mã ${response.status}`);
   }
 
   return payload.data as T;

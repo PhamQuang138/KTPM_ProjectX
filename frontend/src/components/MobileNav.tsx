@@ -1,4 +1,4 @@
-import { LayoutGrid, ShoppingBag, PlusSquare, Users, User } from 'lucide-react';
+import { Heart, LayoutGrid, PlusSquare, ShoppingBag, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -13,12 +13,12 @@ export default function MobileNav() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const navItems = [
-    { icon: LayoutGrid, label: 'Explore', path: '/' },
+    { icon: LayoutGrid, label: 'Khám phá', path: '/' },
     ...(isAuthenticated
       ? [
-          { icon: ShoppingBag, label: 'Market', path: '/market' },
-          { icon: PlusSquare, label: 'Post', path: '/feed?compose=1' },
-          { icon: Users, label: 'Clubs', path: '#' },
+          { icon: ShoppingBag, label: 'Chợ xe', path: '/market' },
+          { icon: PlusSquare, label: 'Đăng', path: '/feed?compose=1' },
+          { icon: Heart, label: 'Đã thích', path: '/favorites' },
           { icon: User, label: 'Garage', path: '/garage' },
         ]
       : []),
