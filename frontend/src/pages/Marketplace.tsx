@@ -47,7 +47,7 @@ interface MarketplaceResponse {
 
 const categories = ['', 'Daily', 'Exotics', 'Classics', 'Projects'];
 const conditions = ['', 'New', 'Used', 'Project'];
-const bodyTypes = ['', 'Coupe', 'Sedan', 'SUV', 'Convertible'];
+const bodyTypes = ['', 'Coupe', 'Sedan', 'SUV', 'Convertible', 'Crossover', 'Hatchback', 'Pickup'];
 const fuelTypes = ['', 'Gasoline', 'Diesel', 'Hybrid', 'Electric'];
 const transmissions = ['', 'Automatic', 'Manual'];
 
