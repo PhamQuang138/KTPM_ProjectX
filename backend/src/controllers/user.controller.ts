@@ -8,8 +8,8 @@ export const rateUserSchema = z.object({
 });
 
 export const updateProfileSchema = z.object({
-  avatar: z.string().max(4_000_000).nullable().optional(),
-  bannerImage: z.string().max(4_000_000).nullable().optional(),
+  avatar: z.string().url().max(2048).nullable().optional(),
+  bannerImage: z.string().url().max(2048).nullable().optional(),
   bio: z.string().trim().max(1000).nullable().optional(),
   location: z.string().trim().max(120).nullable().optional(),
   focusBrands: z.array(z.string().trim().min(1).max(40)).max(12).optional(),

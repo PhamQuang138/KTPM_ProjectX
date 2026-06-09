@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useSidebarStore } from '../store/useSidebarStore';
 import { apiRequest } from '../lib/api';
 import { useAuthStore } from '../store/useAuthStore';
+import {uploadImage} from '../lib/imageUpload';
 
 const categories = [
   { label: 'Tất cả', icon: LayoutGrid },
@@ -18,12 +19,6 @@ const categories = [
   { label: 'Chợ xe', icon: ShoppingBag },
   { label: 'Tin chính thức', icon: Sparkles },
 ];
-
-interface ImageUploadResponse {
-  url: string;
-  path: string;
-  filename: string;
-}
 
 interface CommunityOverview {
   stats: {
@@ -100,15 +95,6 @@ export default function Editorial() {
       return;
     }
 
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      setPostError('Vui lòng chọn ảnh JPG, JPEG, PNG hoặc WEBP.');
-      return;
-    }
-    if (file.size > 4 * 1024 * 1024) {
-      setPostError('Ảnh phải có dung lượng tối đa 4MB.');
-      return;
-    }
     if (postImages.length >= 4) {
       setPostError('Bạn có thể đính kèm tối đa 4 ảnh cho mỗi bài viết.');
       return;
@@ -117,12 +103,7 @@ export default function Editorial() {
     setPostError('');
     setIsUploadingPostImage(true);
     try {
-      const formData = new FormData();
-      formData.append('image', file);
-      const uploaded = await apiRequest<ImageUploadResponse>('/uploads/images', {
-        method: 'POST',
-        body: formData,
-      });
+      const uploaded = await uploadImage(file);
 
       setPostImages((current) => [...current, uploaded.url]);
       setIsPosting(true);

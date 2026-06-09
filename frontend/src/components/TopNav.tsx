@@ -1,4 +1,4 @@
-import { Search, User, Bell, PlusCircle, Zap, Menu, LogOut } from 'lucide-react';
+import { Search, User, Bell, PlusCircle, Zap, Menu, LogOut, MessageCircle } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -7,6 +7,7 @@ import { useState } from 'react';
 import NotificationsTray from './NotificationsTray';
 import { useSidebarStore } from '../store/useSidebarStore';
 import { useAuthStore } from '../store/useAuthStore';
+import {useMessageStore} from '../store/useMessageStore';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -18,6 +19,7 @@ export default function TopNav({ title }: { title?: string }) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const { isOpen, toggle } = useSidebarStore();
   const { isAuthenticated, user, logout } = useAuthStore();
+  const openInbox = useMessageStore((state) => state.openInbox);
 
   const handleLogout = async () => {
     await logout();
@@ -113,6 +115,14 @@ export default function TopNav({ title }: { title?: string }) {
                 >
                   <Bell className="w-5 h-5" />
                   <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background"></span>
+                </button>
+                <button
+                  type="button"
+                  onClick={openInbox}
+                  className="relative p-2 text-on-surface hover:text-primary transition-all hover:scale-110"
+                  title="Tin nhắn"
+                >
+                  <MessageCircle className="w-5 h-5" />
                 </button>
               </>
             )}

@@ -9,6 +9,7 @@ import Admin from './pages/Admin';
 import VehicleDetail from './pages/VehicleDetail';
 import PublicProfile from './pages/PublicProfile';
 import Favorites from './pages/Favorites';
+import MessageDock from './components/MessageDock';
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <MessageDock />
     </Router>
   );
 }

@@ -45,6 +45,9 @@ model User {
   vehicles  Vehicle[]
   garageVehicles GarageVehicle[]
   vehicleListings VehicleListing[]
+  conversationsAsBuyer Conversation[] @relation("ConversationBuyer")
+  conversationsAsSeller Conversation[] @relation("ConversationSeller")
+  sentMessages Message[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -220,6 +223,7 @@ model VehicleListing {
   seller      User     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   vehicleId   String?
   vehicle     GarageVehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  conversations Conversation[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -227,6 +231,39 @@ model VehicleListing {
   @@index([vehicleId])
   @@index([category])
   @@map("vehicle_listings")
+}
+
+model Conversation {
+  id        String         @id @default(uuid())
+  listingId String
+  buyerId   String
+  sellerId  String
+  listing   VehicleListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer     User           @relation("ConversationBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller    User           @relation("ConversationSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([listingId, buyerId, sellerId])
+  @@index([buyerId, updatedAt])
+  @@index([sellerId, updatedAt])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  senderId       String
+  content        String       @db.Text
+  readAt         DateTime?
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@map("messages")
 }
 
 model Article {

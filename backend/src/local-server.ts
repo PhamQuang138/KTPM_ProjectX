@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import './config/localEnv';
 import pino from 'pino';
 import {app} from './app';
 

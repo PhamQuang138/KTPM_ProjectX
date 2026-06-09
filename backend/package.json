@@ -21,6 +21,7 @@
     "db:reset-data": "ts-node-dev --transpile-only --exit-child scripts/reset-db.ts",
     "db:ensure-admin": "ts-node-dev --transpile-only --exit-child scripts/ensure-admin.ts",
     "db:ensure-articles": "ts-node-dev --transpile-only --exit-child scripts/ensure-articles.ts",
+    "db:migrate-images": "ts-node-dev --transpile-only --exit-child scripts/migrate-images-to-blob.ts",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio"
   },

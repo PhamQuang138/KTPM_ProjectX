@@ -9,6 +9,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useSidebarStore } from '../store/useSidebarStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { apiRequest } from '../lib/api';
+import {uploadImage} from '../lib/imageUpload';
 
 interface DbPost {
   id: string;
@@ -41,12 +42,6 @@ interface DbListing {
   category: string;
   status: string;
   vehicle?: DbVehicle | null;
-}
-
-interface ImageUploadResponse {
-  url: string;
-  path: string;
-  filename: string;
 }
 
 interface ListingFormState {
@@ -251,38 +246,21 @@ export default function Garage() {
     }
   };
 
-  const readImageAsDataUrl = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      if (!file.type.startsWith('image/')) {
-        reject(new Error('Vui lòng chọn một file ảnh.'));
-        return;
-      }
-      if (file.size > 2 * 1024 * 1024) {
-        reject(new Error('Ảnh phải có dung lượng tối đa 2MB.'));
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result?.toString() ?? '');
-      reader.onerror = () => reject(new Error('Không thể đọc ảnh này.'));
-      reader.readAsDataURL(file);
-    });
-
   const handleProfileImageUpload = async (file: File | undefined, type: 'avatar' | 'bannerImage') => {
     if (!file) return;
 
     setProfileMediaError('');
     try {
-      const dataUrl = await readImageAsDataUrl(file);
+      const uploaded = await uploadImage(file);
       const updatedProfile = await apiRequest<{avatar?: string | null; bannerImage?: string | null}>('/users/me/profile', {
         method: 'PATCH',
-        body: JSON.stringify({[type]: dataUrl}),
+        body: JSON.stringify({[type]: uploaded.url}),
       });
 
       if (type === 'avatar') {
-        updateUser({avatar: updatedProfile.avatar ?? dataUrl});
+        updateUser({avatar: updatedProfile.avatar ?? uploaded.url});
       } else {
-        setProfileBannerImage(updatedProfile.bannerImage ?? dataUrl);
+        setProfileBannerImage(updatedProfile.bannerImage ?? uploaded.url);
       }
     } catch (error) {
       setProfileMediaError(error instanceof Error ? error.message : 'Không thể tải ảnh lên.');
@@ -293,23 +271,9 @@ export default function Garage() {
     if (!file) return;
 
     setVehicleFormError('');
-    if (!file.type.startsWith('image/')) {
-      setVehicleFormError('Vui lòng chọn một file ảnh.');
-      return;
-    }
-    if (file.size > 4 * 1024 * 1024) {
-      setVehicleFormError('Ảnh xe phải có dung lượng tối đa 4MB.');
-      return;
-    }
-
     setIsUploadingVehicleImage(true);
     try {
-      const formData = new FormData();
-      formData.append('image', file);
-      const uploaded = await apiRequest<ImageUploadResponse>('/uploads/images', {
-        method: 'POST',
-        body: formData,
-      });
+      const uploaded = await uploadImage(file);
 
       setVehicleForm((current) => ({...current, image: uploaded.url}));
     } catch (error) {

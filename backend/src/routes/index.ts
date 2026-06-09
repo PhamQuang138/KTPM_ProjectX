@@ -7,6 +7,7 @@ import {postRouter} from './post.routes';
 import {uploadRouter} from './upload.routes';
 import {userRouter} from './user.routes';
 import {vehicleRouter} from './vehicle.routes';
+import {messageRouter} from './message.routes';
 
 export const apiRouter = Router();
 
@@ -18,3 +19,4 @@ apiRouter.use('/users', userRouter);
 apiRouter.use('/vehicles', vehicleRouter);
 apiRouter.use('/garage', garageRouter);
 apiRouter.use('/articles', articleRouter);
+apiRouter.use('/messages', messageRouter);

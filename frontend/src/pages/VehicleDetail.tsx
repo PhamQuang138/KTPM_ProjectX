@@ -5,6 +5,7 @@ import TopNav from '../components/TopNav';
 import MobileNav from '../components/MobileNav';
 import {apiRequest} from '../lib/api';
 import {useAuthStore} from '../store/useAuthStore';
+import {useMessageStore} from '../store/useMessageStore';
 
 interface VehicleDetailData {
   id: string;
@@ -41,6 +42,7 @@ interface UserRating {
 export default function VehicleDetail() {
   const {id} = useParams();
   const currentUser = useAuthStore((state) => state.user);
+  const startContact = useMessageStore((state) => state.startContact);
   const [vehicle, setVehicle] = useState<VehicleDetailData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState('');
@@ -158,9 +160,20 @@ export default function VehicleDetail() {
                   </div>
                 </Link>
                 <div className="grid grid-cols-2 gap-3 mt-8">
-                  <button className="btn-primary py-4 rounded-xl flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    disabled={currentUser?.id === vehicle.seller.id}
+                    onClick={() =>
+                      startContact({
+                        listingId: vehicle.id,
+                        listingTitle: vehicle.title,
+                        sellerName: vehicle.seller.name,
+                      })
+                    }
+                    className="btn-primary py-4 rounded-xl flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
                     <MessageCircle className="w-4 h-4" />
-                    Contact
+                    Liên hệ
                   </button>
                   <button className="btn-secondary py-4 rounded-xl flex items-center justify-center gap-2">
                     <Share2 className="w-4 h-4" />
