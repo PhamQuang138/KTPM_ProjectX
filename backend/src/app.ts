@@ -31,6 +31,18 @@ const isAllowedOrigin = (origin: string): boolean =>
 
 export const app = express();
 
+app.use((req, _res, next) => {
+  const apiPathIndex = req.url.indexOf('/api/');
+
+  if (apiPathIndex > 0) {
+    req.url = req.url.slice(apiPathIndex);
+  } else if (req.url.endsWith('/api')) {
+    req.url = '/api';
+  }
+
+  next();
+});
+
 app.use(
   helmet({
     crossOriginResourcePolicy: {policy: 'cross-origin'},
