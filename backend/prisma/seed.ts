@@ -133,7 +133,7 @@ async function main() {
       id: article.id,
       title: article.title,
       excerpt: article.excerpt,
-      content: article.excerpt,
+      content: article.content,
       author: article.author,
       readTime: article.readTime,
       image: article.image,

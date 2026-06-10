@@ -260,12 +260,14 @@ export default function Home() {
         <section className="py-32 px-6 md:px-margin-desktop max-w-container-max mx-auto">
            <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-16">
               <div>
-                 <h2 className="text-[10px] font-mono uppercase tracking-[0.3em] text-primary font-bold mb-4">The Editorial</h2>
+                 <h2 className="text-[10px] font-mono uppercase tracking-[0.3em] text-primary font-bold mb-4">Chuyên đề CarHub</h2>
                  <h3 className="font-display text-4xl md:text-5xl font-bold tracking-tighter leading-tight">
-                    Automotive depth. <br /> Curated by experts.
+                    Kiến thức ô tô thực tế. <br /> Được biên tập đầy đủ.
                  </h3>
               </div>
-              <Link to={gatedPath('/feed')} className="btn-secondary px-8">Browse All Stories</Link>
+              <p className="max-w-sm text-sm leading-relaxed text-on-surface-variant">
+                Chọn một bài viết bên dưới để đọc toàn bộ nội dung, kinh nghiệm và hướng dẫn chi tiết.
+              </p>
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -279,6 +281,7 @@ export default function Home() {
                   readTime={article.readTime ?? 'Đang cập nhật'}
                   image={article.image ?? ''}
                   category={article.category}
+                  to={`/articles/${article.id}`}
                 />
               ))}
               {articles.length === 0 && <p className="text-sm text-on-surface-variant">Chưa có bài chuyên đề nào được xuất bản.</p>}

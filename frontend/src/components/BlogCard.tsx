@@ -1,5 +1,6 @@
-import { motion } from 'motion/react';
-import { Clock, User } from 'lucide-react';
+import {motion} from 'motion/react';
+import {Clock, User} from 'lucide-react';
+import {Link} from 'react-router-dom';
 
 interface BlogCardProps {
   title: string;
@@ -9,47 +10,50 @@ interface BlogCardProps {
   readTime: string;
   image: string;
   category: string;
+  to: string;
   key?: string | number;
 }
 
-export default function BlogCard({ title, excerpt, author, date, readTime, image, category }: BlogCardProps) {
+export default function BlogCard({title, excerpt, author, date, readTime, image, category, to}: BlogCardProps) {
   return (
-    <motion.div 
-      whileHover={{ y: -5 }}
-      className="group relative bg-white/[0.03] border border-white/5 rounded-[2rem] overflow-hidden flex flex-col h-full hover:border-primary/30 transition-all duration-500"
+    <motion.article
+      whileHover={{y: -5}}
+      className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/5 bg-white/[0.03] transition-all duration-500 hover:border-primary/30"
     >
-      <div className="aspect-[16/10] overflow-hidden relative">
-        <img 
-          src={image} 
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-          alt={title} 
+      <Link to={to} className="relative block aspect-[16/10] overflow-hidden">
+        <img
+          src={image}
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          alt={title}
         />
-        <div className="absolute top-4 left-4 bg-background/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10">
-          <span className="text-[10px] font-mono text-primary font-bold uppercase tracking-widest">{category}</span>
+        <div className="absolute left-4 top-4 rounded-full border border-white/10 bg-background/60 px-4 py-1.5 backdrop-blur-md">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-primary">{category}</span>
         </div>
-      </div>
-      
-      <div className="p-8 flex flex-col flex-grow">
-        <div className="flex items-center gap-4 text-[10px] font-mono text-on-surface-variant uppercase tracking-widest mb-4">
-          <span className="flex items-center gap-1.5"><User className="w-3 h-3" /> {author}</span>
-          <span>•</span>
-          <span className="flex items-center gap-1.5"><Clock className="w-3 h-3" /> {readTime}</span>
+      </Link>
+
+      <div className="flex flex-grow flex-col p-8">
+        <div className="mb-4 flex items-center gap-4 text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">
+          <span className="flex items-center gap-1.5"><User className="h-3 w-3" /> {author}</span>
+          <span>-</span>
+          <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> {readTime}</span>
         </div>
-        
-        <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors leading-snug">
-          {title}
-        </h3>
-        <p className="text-sm text-on-surface-variant line-clamp-3 leading-relaxed opacity-70 mb-6">
+
+        <Link to={to}>
+          <h3 className="mb-3 text-xl font-bold leading-snug transition-colors group-hover:text-primary">
+            {title}
+          </h3>
+        </Link>
+        <p className="mb-6 line-clamp-3 text-sm leading-relaxed text-on-surface-variant opacity-70">
           {excerpt}
         </p>
-        
-        <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between">
-          <span className="text-[10px] font-mono text-on-surface-variant uppercase tracking-widest">{date}</span>
-          <button className="text-[10px] font-mono text-primary font-bold uppercase tracking-widest hover:underline">
-            Read Article →
-          </button>
+
+        <div className="mt-auto flex items-center justify-between border-t border-white/5 pt-6">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">{date}</span>
+          <Link to={to} className="text-[10px] font-mono font-bold uppercase tracking-widest text-primary hover:underline">
+            Đọc toàn bộ bài viết →
+          </Link>
         </div>
       </div>
-    </motion.div>
+    </motion.article>
   );
 }

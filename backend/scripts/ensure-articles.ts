@@ -13,31 +13,43 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
-  const count = await prisma.article.count();
-  if (count > 0) {
-    console.log(`Articles already exist: ${count}`);
-    return;
-  }
+  await prisma.$transaction([
+    prisma.article.deleteMany({
+      where: {id: {notIn: articlesSeed.map((article) => article.id)}},
+    }),
+    ...articlesSeed.map((article) =>
+      prisma.article.upsert({
+        where: {id: article.id},
+        create: {
+          id: article.id,
+          title: article.title,
+          excerpt: article.excerpt,
+          content: article.content,
+          author: article.author,
+          readTime: article.readTime,
+          image: article.image,
+          category: article.category,
+          status: ArticleStatus.PUBLISHED,
+          publishedAt: new Date(article.date),
+          createdAt: new Date(article.createdAt),
+          updatedAt: new Date(article.updatedAt),
+        },
+        update: {
+          title: article.title,
+          excerpt: article.excerpt,
+          content: article.content,
+          author: article.author,
+          readTime: article.readTime,
+          image: article.image,
+          category: article.category,
+          status: ArticleStatus.PUBLISHED,
+          publishedAt: new Date(article.date),
+        },
+      }),
+    ),
+  ]);
 
-  await prisma.article.createMany({
-    data: articlesSeed.map((article) => ({
-      id: article.id,
-      title: article.title,
-      excerpt: article.excerpt,
-      content: article.excerpt,
-      author: article.author,
-      readTime: article.readTime,
-      image: article.image,
-      category: article.category,
-      status: ArticleStatus.PUBLISHED,
-      publishedAt: new Date(article.date),
-      createdAt: new Date(article.createdAt),
-      updatedAt: new Date(article.updatedAt),
-    })),
-    skipDuplicates: true,
-  });
-
-  console.log(`Inserted ${articlesSeed.length} articles.`);
+  console.log(`Synchronized ${articlesSeed.length} published articles.`);
 }
 
 main()
