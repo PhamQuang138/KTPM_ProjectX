@@ -1,7 +1,19 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import {GoogleGenAI} from '@google/genai';
 import {z} from 'zod';
 import {prisma} from '../config/prisma';
+const getGeminiClient = () => {
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
 
+  if (!apiKey) {
+    console.log('GEMINI_API_KEY =', process.env.GEMINI_API_KEY);
+    throw new Error('GEMINI_NOT_CONFIGURED');
+  }
+
+  return new GoogleGenAI({apiKey});
+};
 const vehicleIntentSchema = z.object({
   answer: z.string().trim().min(1).max(2000),
   shouldSearch: z.boolean().default(true),
@@ -127,7 +139,7 @@ const analyzeRequest = async (message: string, imageUrl?: string): Promise<Vehic
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) throw new Error('GEMINI_NOT_CONFIGURED');
 
-  const ai = new GoogleGenAI({apiKey});
+  const ai = getGeminiClient();
   const parts: Array<{text: string} | {inlineData: {mimeType: string; data: string}}> = [
     {
       text: `Yêu cầu của người dùng: ${message || 'Hãy nhận dạng chiếc xe trong ảnh và tìm xe tương tự.'}`,
