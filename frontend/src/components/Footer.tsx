@@ -1,68 +1,61 @@
-import { Share2, Globe, Mail } from 'lucide-react';
+import {Link} from 'react-router-dom';
 
-export default function Footer({ hideLogo }: { hideLogo?: boolean }) {
+export default function Footer({hideLogo}: {hideLogo?: boolean}) {
   return (
     <footer className={`${hideLogo ? 'mt-0 border-t-0 p-0 bg-transparent' : 'mt-64 bg-surface-container-lowest border-t border-outline-variant/20 shadow-none'} transition-all duration-700`}>
       {!hideLogo && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 px-6 md:px-margin-desktop py-16 max-w-container-max mx-auto">
+        <div className="mx-auto grid max-w-container-max grid-cols-1 gap-12 px-6 py-16 md:grid-cols-2 md:px-margin-desktop">
           <div className="space-y-6">
-            <h3 className="font-display text-3xl text-on-surface font-bold tracking-tighter">CarHub</h3>
-            <p className="text-secondary text-sm max-w-sm font-sans opacity-80 leading-relaxed">
-              Defining the future of luxury automotive trade through precision data and exclusive collector access.
+            <h3 className="font-display text-3xl font-bold tracking-tighter text-on-surface">CarHub</h3>
+            <p className="max-w-sm text-sm leading-relaxed text-secondary opacity-80">
+              Cộng đồng dành cho người yêu xe: chia sẻ bài viết, quản lý Garage, mua bán và trao đổi trực tiếp.
             </p>
-            <div className="flex space-x-4">
-              <button className="text-on-surface-variant hover:text-primary transition-all hover:-translate-y-1">
-                <Share2 className="w-5 h-5" />
-              </button>
-              <button className="text-on-surface-variant hover:text-primary transition-all hover:-translate-y-1">
-                <Globe className="w-5 h-5" />
-              </button>
-              <button className="text-on-surface-variant hover:text-primary transition-all hover:-translate-y-1">
-                <Mail className="w-5 h-5" />
-              </button>
-            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-8">
             <div className="space-y-4">
-              <p className="font-mono text-[10px] text-on-surface-variant uppercase tracking-[0.2em]">Platform</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-on-surface-variant">Khám phá</p>
               <ul className="space-y-2">
-                {['Heritage', 'Sustainability', 'Careers'].map((link) => (
-                  <li key={link}>
-                    <a href="#" className="font-mono text-xs uppercase text-secondary hover:text-primary transition-all inline-block hover:translate-x-1">
-                      {link}
-                    </a>
+                {[
+                  {label: 'Cộng đồng', to: '/feed'},
+                  {label: 'Chợ xe', to: '/market'},
+                  {label: 'Garage', to: '/garage'},
+                ].map((item) => (
+                  <li key={item.to}>
+                    <Link to={item.to} className="inline-block font-mono text-xs uppercase text-secondary transition-all hover:translate-x-1 hover:text-primary">
+                      {item.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
             </div>
             <div className="space-y-4">
-              <p className="font-mono text-[10px] text-on-surface-variant uppercase tracking-[0.2em]">Legal</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-on-surface-variant">Tài khoản</p>
               <ul className="space-y-2">
-                {['Privacy Policy', 'Terms of Service'].map((link) => (
-                  <li key={link}>
-                    <a href="#" className="font-mono text-xs uppercase text-secondary hover:text-primary transition-all inline-block hover:translate-x-1">
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                <li>
+                  <Link to="/login" className="inline-block font-mono text-xs uppercase text-secondary transition-all hover:translate-x-1 hover:text-primary">
+                    Đăng nhập / đăng ký
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/saved" className="inline-block font-mono text-xs uppercase text-secondary transition-all hover:translate-x-1 hover:text-primary">
+                    Bài viết đã lưu
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
         </div>
       )}
-      
-      <div className={`${hideLogo ? 'px-0 py-4 opacity-50' : 'px-6 md:px-margin-desktop py-8 border-t border-white/5'} max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-4`}>
-        <p className="font-mono text-[9px] text-secondary/60 tracking-[0.2em] uppercase">
+
+      <div className={`${hideLogo ? 'px-0 py-4 opacity-50' : 'px-6 md:px-margin-desktop py-8 border-t border-white/5'} mx-auto flex max-w-container-max flex-col items-center justify-between gap-4 md:flex-row`}>
+        <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-secondary/60">
           © {new Date().getFullYear()} CarHub
         </p>
         {!hideLogo && (
           <div className="flex gap-8">
-            <span className="font-mono text-[10px] text-on-surface-variant uppercase tracking-widest">ENGLISH (US)</span>
-            <span className="font-mono text-[10px] text-on-surface-variant flex items-center gap-2 tracking-widest">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-              SYSTEM: OK
-            </span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant">Tiếng Việt</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant">Dữ liệu từ CarHub</span>
           </div>
         )}
       </div>

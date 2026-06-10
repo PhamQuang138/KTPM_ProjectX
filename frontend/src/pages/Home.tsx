@@ -5,12 +5,10 @@ import {
   ArrowRight, 
   ShoppingBag, 
   Users, 
-  PenTool, 
-  TrendingUp, 
+  Car,
   ShieldCheck, 
-  Globe, 
+  Database,
   MessageSquare,
-  Search,
   Star,
   ChevronRight
 } from 'lucide-react';
@@ -23,24 +21,24 @@ import { apiRequest } from '../lib/api';
 const features = [
   {
     icon: ShoppingBag,
-    title: 'Modern Marketplace',
-    description: 'Buy and sell everything from daily drivers to rare collectibles with zero platform fees.',
+    title: 'Chợ xe cộng đồng',
+    description: 'Tìm kiếm, lọc và xem chi tiết các tin xe đang được thành viên đăng bán trên hệ thống.',
     color: 'bg-blue-500/10 text-blue-400',
     link: '/market'
   },
   {
     icon: Users,
-    title: 'Vibrant Community',
-    description: 'Join thousands of enthusiasts discussing maintenance, modifications, and road trips.',
+    title: 'Cộng đồng người yêu xe',
+    description: 'Đăng bài, chia sẻ nhiều hình ảnh, bình luận, thả tim và theo dõi những thành viên bạn quan tâm.',
     color: 'bg-purple-500/10 text-purple-400',
     link: '/feed'
   },
   {
-    icon: PenTool,
-    title: 'Expert Blogging',
-    description: 'Share your ownership journey, write reviews, and build your reputation as an expert.',
+    icon: Car,
+    title: 'Garage cá nhân',
+    description: 'Lưu thông tin xe của bạn, quản lý hình ảnh và tạo tin bán trực tiếp từ Garage.',
     color: 'bg-orange-500/10 text-orange-400',
-    link: '/feed'
+    link: '/garage'
   }
 ];
 
@@ -102,10 +100,10 @@ export default function Home() {
   }, []);
 
   const stats = [
-    {label: 'Thành viên', value: overview?.stats.members ?? 0, suffix: 'Cộng đồng'},
-    {label: 'Bài đã đăng', value: overview?.stats.publishedPosts ?? 0, suffix: 'Nội dung'},
-    {label: 'Bài mới 7 ngày', value: overview?.stats.recentPosts ?? 0, suffix: 'Hoạt động'},
-    {label: 'Tổng tương tác', value: overview?.stats.interactions ?? 0, suffix: 'Kết nối'},
+    {label: 'Thành viên', value: overview?.stats.members ?? 0, suffix: 'Tài khoản'},
+    {label: 'Bài cộng đồng', value: overview?.stats.publishedPosts ?? 0, suffix: 'Đã xuất bản'},
+    {label: 'Bài mới 7 ngày', value: overview?.stats.recentPosts ?? 0, suffix: 'Hoạt động gần đây'},
+    {label: 'Tổng tương tác', value: overview?.stats.interactions ?? 0, suffix: 'Thích, bình luận, chia sẻ'},
   ];
 
   return (
@@ -114,11 +112,13 @@ export default function Home() {
       
       <main>
         {/* HERO SECTION */}
-        <section className="relative pt-20 pb-32 overflow-hidden">
-          <div className="absolute inset-0 z-0">
-             <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] mix-blend-screen animate-pulse" />
-             <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[100px] mix-blend-screen" />
-          </div>
+        <section className="relative flex min-h-[78vh] items-center overflow-hidden pb-20 pt-20">
+          <img
+            src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=2200"
+            alt="Cộng đồng ô tô CarHub"
+            className="absolute inset-0 h-full w-full object-cover opacity-35"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/35 via-background/70 to-background" />
 
           <div className="max-w-container-max mx-auto px-6 md:px-margin-desktop relative z-10 text-center">
              <motion.div
@@ -128,7 +128,7 @@ export default function Home() {
                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8"
              >
                <span className="w-2 h-2 bg-primary rounded-full animate-ping" />
-               <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-on-surface-variant font-bold">The Future of Car Culture</span>
+               <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-on-surface-variant font-bold">Cộng đồng ô tô CarHub</span>
              </motion.div>
 
              <motion.h1 
@@ -137,8 +137,8 @@ export default function Home() {
                transition={{ duration: 0.6, delay: 0.1 }}
                className="font-display text-6xl md:text-8xl font-bold tracking-tighter leading-[0.85] mb-8"
              >
-               BUY, SELL & SHARE <br />
-               <span className="text-primary italic">YOUR JOURNEY</span>
+               MUA BÁN, KẾT NỐI <br />
+               <span className="text-primary italic">VÀ CHIA SẺ ĐAM MÊ</span>
              </motion.h1>
 
              <motion.p 
@@ -147,7 +147,7 @@ export default function Home() {
                transition={{ duration: 0.6, delay: 0.2 }}
                className="max-w-2xl mx-auto text-on-surface-variant text-lg md:text-xl leading-relaxed mb-12 opacity-80"
              >
-               CarHub is the complete automotive ecosystem. Join the global community where enthusiasts connect, trade, and document their life on the road.
+               Một nơi để thành viên chia sẻ bài viết, quản lý Garage, đăng bán xe và trao đổi trực tiếp với nhau.
              </motion.p>
 
              <motion.div 
@@ -157,11 +157,11 @@ export default function Home() {
                className="flex flex-col sm:flex-row items-center justify-center gap-4"
              >
                <Link to={gatedPath('/market')} className="btn-primary px-10 py-5 rounded-2xl text-base shadow-2xl shadow-primary/20 group w-full sm:w-auto">
-                 Explore Marketplace
+                 Khám phá chợ xe
                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                </Link>
                <Link to={gatedPath('/feed')} className="bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 text-on-background px-10 py-5 rounded-2xl text-base transition-all w-full sm:w-auto">
-                 Join Community
+                 Tham gia cộng đồng
                </Link>
              </motion.div>
           </div>
@@ -192,13 +192,13 @@ export default function Home() {
         <section className="py-32 px-6 md:px-margin-desktop max-w-container-max mx-auto">
            <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-16">
               <div className="max-w-xl">
-                 <h2 className="text-[10px] font-mono uppercase tracking-[0.3em] text-primary font-bold mb-4">Core Ecosystem</h2>
+                 <h2 className="text-[10px] font-mono uppercase tracking-[0.3em] text-primary font-bold mb-4">Chức năng chính</h2>
                  <h3 className="font-display text-4xl md:text-5xl font-bold tracking-tighter leading-tight">
-                    Beyond just listings. <br /> A home for enthusiasts.
+                    Mọi hoạt động về xe. <br /> Trong cùng một hệ thống.
                  </h3>
               </div>
               <p className="text-on-surface-variant max-w-sm opacity-70">
-                 We've built everything you need to manage your automotive life in one seamless digital home.
+                 Các nội dung bên dưới được lấy từ tài khoản, bài viết và tin xe đang lưu trong cơ sở dữ liệu CarHub.
               </p>
            </div>
 
@@ -215,7 +215,7 @@ export default function Home() {
                   <h4 className="text-xl font-bold mb-4">{f.title}</h4>
                   <p className="text-sm text-on-surface-variant leading-relaxed mb-8 opacity-80">{f.description}</p>
                   <Link to={gatedPath(f.link)} className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-primary font-bold group-hover:gap-4 transition-all">
-                     Explore More <ChevronRight className="w-4 h-4" />
+                     Mở chức năng <ChevronRight className="w-4 h-4" />
                   </Link>
                 </motion.div>
               ))}
@@ -227,10 +227,10 @@ export default function Home() {
            <div className="max-w-container-max mx-auto px-6 md:px-margin-desktop">
               <div className="flex items-center justify-between mb-12">
                  <div>
-                    <h3 className="font-display text-3xl font-bold tracking-tight">Trending Listings</h3>
-                    <p className="text-sm text-on-surface-variant mt-2">The hottest finds updated hourly</p>
+                    <h3 className="font-display text-3xl font-bold tracking-tight">Tin xe được quan tâm</h3>
+                    <p className="text-sm text-on-surface-variant mt-2">Sắp xếp từ dữ liệu lượt lưu và bình luận thực tế</p>
                  </div>
-                 <Link to={gatedPath('/market')} className="btn-secondary px-6">View All Listings</Link>
+                 <Link to={gatedPath('/market')} className="btn-secondary px-6">Xem toàn bộ tin xe</Link>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -306,15 +306,19 @@ export default function Home() {
 
               <div className="space-y-12">
                  <div className="space-y-6">
-                    <h3 className="font-display text-4xl md:text-5xl font-bold tracking-tighter leading-tight">Trusted by 100k+ global enthusiasts.</h3>
-                    <p className="text-on-surface-variant text-lg leading-relaxed opacity-80">Our platform is built on trust, verification, and passion. We're not just about transactions; we're about the stories behind every mile.</p>
+                    <h3 className="font-display text-4xl md:text-5xl font-bold tracking-tighter leading-tight">
+                      {overview?.stats.members ?? 0} thành viên đang xây dựng cộng đồng CarHub.
+                    </h3>
+                    <p className="text-on-surface-variant text-lg leading-relaxed opacity-80">
+                      Dữ liệu tài khoản, bài cộng đồng, Garage, tin bán xe và hội thoại đều được lưu trong hệ thống để người dùng tiếp tục công việc trên mọi thiết bị.
+                    </p>
                  </div>
 
                  <div className="space-y-8">
                     {[
-                      { icon: ShieldCheck, title: 'Verified History', desc: 'Every premium listing undergoes a community-sourced verification process.' },
-                      { icon: Globe, title: 'Global Network', desc: 'Connect with experts from Tokyo to Tokyo specializing in every niche.' },
-                      { icon: MessageSquare, title: 'Active Conversations', desc: 'Real-time discussions on the topics that matter most to drivers.' }
+                      { icon: ShieldCheck, title: 'Tài khoản và quyền quản lý', desc: 'Quản trị viên và tài khoản đã xác thực được nhận diện rõ ràng; người dùng chỉ sửa hoặc xóa nội dung thuộc quyền của mình.' },
+                      { icon: Database, title: 'Dữ liệu được lưu tập trung', desc: `${overview?.stats.publishedPosts ?? 0} bài cộng đồng và ${overview?.stats.interactions ?? 0} lượt tương tác đang được ghi nhận trong cơ sở dữ liệu.` },
+                      { icon: MessageSquare, title: 'Trao đổi trực tiếp', desc: 'Người mua có thể nhắn tin cho người bán và cuộc trò chuyện được gắn với đúng tin xe đang quan tâm.' }
                     ].map((item, i) => (
                       <div key={i} className="flex gap-6">
                          <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
@@ -335,17 +339,15 @@ export default function Home() {
         <section className="py-32 px-6 md:px-margin-desktop max-w-container-max mx-auto">
            <div className="p-16 md:p-24 rounded-[4rem] bg-primary relative overflow-hidden text-center group">
               <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
-              <div className="absolute -right-20 -top-20 w-80 h-80 bg-white/10 rounded-full blur-[100px]" />
-              
               <h2 className="relative z-10 font-display text-5xl md:text-7xl font-bold text-on-primary tracking-tighter mb-8 max-w-3xl mx-auto">
-                Ready to join the <br /> automotive revolution?
+                Bắt đầu hành trình <br /> của bạn trên CarHub
               </h2>
               <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-6">
                  <Link to="/login" className="bg-white text-primary px-12 py-5 rounded-2xl text-lg font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all w-full sm:w-auto">
-                    Get Started Free
+                    Đăng nhập hoặc đăng ký
                  </Link>
-                 <Link to={gatedPath('/market')} className="border-2 border-white/30 text-white px-12 py-5 rounded-2xl text-lg font-bold hover:bg-white hover:text-primary transition-all w-full sm:w-auto">
-                    List Your Vehicle
+                 <Link to={gatedPath('/garage?addVehicle=1')} className="border-2 border-white/30 text-white px-12 py-5 rounded-2xl text-lg font-bold hover:bg-white hover:text-primary transition-all w-full sm:w-auto">
+                    Đăng bán xe
                  </Link>
               </div>
            </div>
