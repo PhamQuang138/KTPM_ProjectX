@@ -179,7 +179,8 @@ Nếu câu hỏi chỉ hỏi kiến thức ô tô, trả lời hữu ích trong 
 Nếu có ảnh, hãy nhận dạng thận trọng; model/năm không chắc thì để null hoặc dùng khoảng năm.`,
     },
   });
-
+  console.log("GEMINI RESPONSE:");
+  console.log(response.text);
   return vehicleIntentSchema.parse(JSON.parse(response.text || '{}'));
 };
 
