@@ -114,6 +114,8 @@ export default function Sidebar() {
             )}
             {isAuthenticated && (
               <button
+                type="button"
+                onClick={() => navigate('/garage?addVehicle=1')}
                 className="relative overflow-hidden w-full bg-surface-container-highest text-on-surface py-3 rounded-xl font-mono uppercase text-[10px] tracking-widest hover:brightness-110 transition-all border border-white/5 shadow-xl hover:bg-primary hover:text-on-primary group"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">

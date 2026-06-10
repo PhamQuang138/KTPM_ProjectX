@@ -2,7 +2,7 @@ import Sidebar from '../components/Sidebar';
 import TopNav from '../components/TopNav';
 import MobileNav from '../components/MobileNav';
 import SocialPost from '../components/SocialPost';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Eye, MessageCircle, TrendingUp, Plus, Star, Heart, Users, MapPin, Globe, Grid3X3, List, PenTool, Camera, LoaderCircle, BadgeCheck, Pencil, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FormEvent, useEffect, useState } from 'react';
@@ -183,6 +183,7 @@ export default function Garage() {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState('');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isOpen } = useSidebarStore();
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
@@ -410,6 +411,15 @@ export default function Garage() {
     setVehicleFormError('');
     setIsAddingVehicle(true);
   };
+
+  useEffect(() => {
+    if (searchParams.get('addVehicle') !== '1') return;
+
+    openCreateVehicle();
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('addVehicle');
+    setSearchParams(nextParams, {replace: true});
+  }, [searchParams, setSearchParams]);
 
   const openEditVehicle = (vehicle: DbVehicle) => {
     setEditingVehicle(vehicle);
