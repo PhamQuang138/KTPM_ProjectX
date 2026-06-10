@@ -12,6 +12,7 @@ const user_routes_1 = require("./user.routes");
 const vehicle_routes_1 = require("./vehicle.routes");
 const message_routes_1 = require("./message.routes");
 const notification_routes_1 = require("./notification.routes");
+const ai_routes_1 = require("./ai.routes");
 exports.apiRouter = (0, express_1.Router)();
 exports.apiRouter.use('/auth', auth_routes_1.authRouter);
 exports.apiRouter.use('/admin', admin_routes_1.adminRouter);
@@ -23,4 +24,5 @@ exports.apiRouter.use('/garage', garage_routes_1.garageRouter);
 exports.apiRouter.use('/articles', article_routes_1.articleRouter);
 exports.apiRouter.use('/messages', message_routes_1.messageRouter);
 exports.apiRouter.use('/notifications', notification_routes_1.notificationRouter);
+exports.apiRouter.use('/ai', ai_routes_1.aiRouter);
 //# sourceMappingURL=index.js.map
