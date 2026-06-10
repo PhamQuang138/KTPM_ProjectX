@@ -277,25 +277,27 @@ export default function Editorial() {
             </div>
 
             {/* Hub Navigation */}
-            <div className="glass-card rounded-[2rem] p-6 border-white/5">
-              <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] mb-4 text-on-surface-variant">Khám phá cộng đồng</h3>
-              <nav className="space-y-1">
-                {categories.map(cat => (
-                  <button 
-                    key={cat.label}
-                    onClick={() => setActiveCategory(cat.label)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-sans transition-all group ${
-                      activeCategory === cat.label 
-                        ? 'bg-primary/10 text-primary font-bold shadow-lg shadow-primary/5' 
-                        : 'text-on-surface-variant hover:bg-white/5 hover:text-on-surface'
-                    }`}
-                  >
-                    <cat.icon className={`w-4 h-4 ${activeCategory === cat.label ? 'text-primary' : 'text-on-surface-variant group-hover:text-on-surface'}`} />
-                    {cat.label}
-                  </button>
-                ))}
-              </nav>
-            </div>
+            {!isOpen && (
+              <div className="glass-card rounded-[2rem] p-6 border-white/5">
+                <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] mb-4 text-on-surface-variant">Khám phá cộng đồng</h3>
+                <nav className="space-y-1">
+                  {categories.map(cat => (
+                    <button
+                      key={cat.label}
+                      onClick={() => setActiveCategory(cat.label)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-sans transition-all group ${
+                        activeCategory === cat.label
+                          ? 'bg-primary/10 text-primary font-bold shadow-lg shadow-primary/5'
+                          : 'text-on-surface-variant hover:bg-white/5 hover:text-on-surface'
+                      }`}
+                    >
+                      <cat.icon className={`w-4 h-4 ${activeCategory === cat.label ? 'text-primary' : 'text-on-surface-variant group-hover:text-on-surface'}`} />
+                      {cat.label}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            )}
 
           </aside>
 
