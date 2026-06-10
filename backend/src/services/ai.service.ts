@@ -1,3 +1,4 @@
+console.log("AI SERVICE VERSION 2026-06-11");
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -136,9 +137,6 @@ const loadImagePart = async (imageUrl: string) => {
 };
 
 const analyzeRequest = async (message: string, imageUrl?: string): Promise<VehicleIntent> => {
-  const apiKey = process.env.GEMINI_API_KEY?.trim();
-  if (!apiKey) throw new Error('GEMINI_NOT_CONFIGURED');
-
   const ai = getGeminiClient();
   const parts: Array<{text: string} | {inlineData: {mimeType: string; data: string}}> = [
     {
@@ -284,3 +282,5 @@ export const aiService = {
     };
   },
 };
+
+
