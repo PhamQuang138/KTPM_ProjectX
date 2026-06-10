@@ -219,6 +219,18 @@ export const postDbService = {
     });
   },
 
+  updateCaption(id: string, content: string) {
+    return prisma.post.update({
+      where: {id},
+      data: {content},
+      select: {id: true, content: true, updatedAt: true},
+    });
+  },
+
+  delete(id: string) {
+    return prisma.post.delete({where: {id}});
+  },
+
   async toggleLike(postId: string, userId: string) {
     const post = await prisma.post.findUnique({
       where: {id: postId},

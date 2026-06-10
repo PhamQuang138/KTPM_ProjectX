@@ -5,12 +5,15 @@ import TopNav from '../components/TopNav';
 import MobileNav from '../components/MobileNav';
 import SocialPost, {SocialPostProps} from '../components/SocialPost';
 import {apiRequest} from '../lib/api';
+import {motion} from 'motion/react';
+import {useSidebarStore} from '../store/useSidebarStore';
 
 export default function Favorites({mode}: {mode: 'liked' | 'saved'}) {
   const [posts, setPosts] = useState<SocialPostProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const isLiked = mode === 'liked';
+  const {isOpen} = useSidebarStore();
 
   useEffect(() => {
     let isMounted = true;
@@ -35,7 +38,14 @@ export default function Favorites({mode}: {mode: 'liked' | 'saved'}) {
     <div className="min-h-screen bg-background text-on-surface pb-24 md:pb-0">
       <Sidebar />
       <TopNav title={isLiked ? 'Bài viết đã thích' : 'Bài viết đã lưu'} />
-      <main className="mx-auto max-w-3xl px-4 py-8 md:px-6">
+      <motion.main
+        animate={{
+          marginLeft: isOpen ? '16rem' : '0rem',
+          width: isOpen ? 'calc(100% - 16rem)' : '100%',
+        }}
+        className="w-full transition-all duration-300 max-md:!ml-0 max-md:!w-full"
+      >
+      <div className="mx-auto max-w-3xl px-4 py-8 md:px-6">
         <section className="mb-8 flex items-center gap-3">
           <div className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${isLiked ? 'border-red-400/20 bg-red-500/10 text-red-300' : 'border-primary/20 bg-primary/10 text-primary'}`}>
             {isLiked ? <Heart className="h-5 w-5 fill-current" /> : <Bookmark className="h-5 w-5 fill-current" />}
@@ -54,8 +64,18 @@ export default function Favorites({mode}: {mode: 'liked' | 'saved'}) {
             <p className="mt-2 text-sm text-on-surface-variant">Các bài bạn {isLiked ? 'thả tim' : 'lưu'} sẽ xuất hiện tại đây.</p>
           </div>
         )}
-        {!isLoading && !error && posts.map((post) => <SocialPost key={post.id} {...post} />)}
-      </main>
+        {!isLoading && !error && posts.map((post) => (
+          <SocialPost
+            key={post.id}
+            {...post}
+            onDeleted={(postId) => setPosts((current) => current.filter((item) => item.id !== postId))}
+            onCaptionUpdated={(postId, content) =>
+              setPosts((current) => current.map((item) => (item.id === postId ? {...item, content} : item)))
+            }
+          />
+        ))}
+      </div>
+      </motion.main>
       <MobileNav />
     </div>
   );

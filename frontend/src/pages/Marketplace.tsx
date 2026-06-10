@@ -6,6 +6,8 @@ import MobileNav from '../components/MobileNav';
 import VehicleCard from '../components/VehicleCard';
 import {apiRequest} from '../lib/api';
 import {useAuthStore} from '../store/useAuthStore';
+import {useSidebarStore} from '../store/useSidebarStore';
+import {motion} from 'motion/react';
 
 interface Listing {
   id: string;
@@ -55,6 +57,7 @@ const transmissions = ['', 'Automatic', 'Manual'];
 
 export default function Marketplace() {
   const user = useAuthStore((state) => state.user);
+  const {isOpen} = useSidebarStore();
   const [data, setData] = useState<MarketplaceResponse | null>(null);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -122,7 +125,13 @@ export default function Marketplace() {
   return (
     <div className="min-h-screen bg-background text-on-background">
       <Sidebar />
-      <main className="pb-24 md:ml-64">
+      <motion.main
+        animate={{
+          marginLeft: isOpen ? '16rem' : '0rem',
+          width: isOpen ? 'calc(100% - 16rem)' : '100%',
+        }}
+        className="w-full pb-24 transition-all duration-300 max-md:!ml-0 max-md:!w-full"
+      >
         <TopNav title="Chợ xe" />
         <section className="mx-auto max-w-container-max px-5 py-8 md:px-margin-desktop">
           <div className="mb-8">
@@ -236,7 +245,7 @@ export default function Marketplace() {
             </aside>
           </div>
         </section>
-      </main>
+      </motion.main>
       <MobileNav />
     </div>
   );

@@ -61,6 +61,10 @@ export const createCommentSchema = z.object({
   content: z.string().trim().min(1, 'Comment cannot be empty').max(2000),
 });
 
+export const updatePostCaptionSchema = z.object({
+  content: z.string().trim().min(1, 'Nội dung không được để trống').max(5000),
+});
+
 const mapCommunityPost = (post: Awaited<ReturnType<typeof postDbService.list>>[number]) => ({
   id: post.id,
   author: {
@@ -238,6 +242,27 @@ export const postController = {
     if (!post) return res.status(404).json({message: 'Không tìm thấy bài viết'});
 
     return res.status(201).json({data: await postDbService.addShare(post.id, req.user!.id)});
+  },
+
+  async updateCaption(req: AuthenticatedRequest, res: Response) {
+    const post = await postDbService.getById(req.params.id);
+    if (!post) return res.status(404).json({message: 'Không tìm thấy bài viết'});
+    if (post.authorId !== req.user!.id && req.user!.role !== 'ADMIN') {
+      return res.status(403).json({message: 'Bạn không có quyền sửa bài viết này'});
+    }
+
+    return res.json({data: await postDbService.updateCaption(post.id, req.body.content)});
+  },
+
+  async delete(req: AuthenticatedRequest, res: Response) {
+    const post = await postDbService.getById(req.params.id);
+    if (!post) return res.status(404).json({message: 'Không tìm thấy bài viết'});
+    if (post.authorId !== req.user!.id && req.user!.role !== 'ADMIN') {
+      return res.status(403).json({message: 'Bạn không có quyền xóa bài viết này'});
+    }
+
+    await postDbService.delete(post.id);
+    return res.status(204).send();
   },
 
   async toggleBookmark(req: AuthenticatedRequest, res: Response) {

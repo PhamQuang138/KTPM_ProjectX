@@ -4,6 +4,7 @@ import {
   createPostSchema,
   legacyCreatePostSchema,
   postController,
+  updatePostCaptionSchema,
 } from '../controllers/post.controller';
 import {validateBody} from '../middlewares/validateRequest';
 import {optionalAuth, requireAuth} from '../middlewares/auth';
@@ -19,6 +20,8 @@ postRouter.post('/:id/like', requireAuth, postController.toggleLike);
 postRouter.post('/:id/bookmark', requireAuth, postController.toggleBookmark);
 postRouter.post('/:id/comments', requireAuth, validateBody(createCommentSchema), postController.addComment);
 postRouter.post('/:id/share', requireAuth, postController.addShare);
+postRouter.patch('/:id/caption', requireAuth, validateBody(updatePostCaptionSchema), postController.updateCaption);
+postRouter.delete('/:id', requireAuth, postController.delete);
 postRouter.get('/:id', postController.getById);
 postRouter.post('/', requireAuth, validateBody(createPostSchema), postController.create);
 postRouter.post('/community', requireAuth, validateBody(legacyCreatePostSchema), postController.createLegacyCommunityPost);

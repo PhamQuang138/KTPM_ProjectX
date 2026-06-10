@@ -1,24 +1,197 @@
-carhub-garage/
-├── backend/                # Server-side (Flask/Node.js)
-│   ├── app/
-│   │   ├── models/         # Định nghĩa các Class (User, Car, Blog, Comment)
-│   │   ├── controllers/    # Xử lý logic nghiệp vụ (Business Logic)
-│   │   ├── routes/         # Định nghĩa các endpoint API
-│   │   ├── middleware/     # Kiểm tra quyền (Admin/User), Token Auth
-│   │   └── utils/          # Các hàm bổ trợ (upload ảnh lên Cloudinary, format giá)
-│   ├── tests/              # File kiểm thử (Unit test/Integration test)
-│   ├── config.py / .env    # Cấu hình môi trường & Database
-│   └── main.js / run.py    # Entry point của ứng dụng
-├── frontend/               # Client-side (React hoặc HTML/CSS)
-│   ├── public/             # Assets tĩnh
-│   ├── src/
-│   │   ├── components/     # Các thành phần tái sử dụng (Navbar, CarCard, Footer)
-│   │   ├── pages/          # Các trang chính (Home, Login, CarDetail, AdminDash)
-│   │   ├── services/       # Quản lý gọi API từ Backend (Axios/Fetch)
-│   │   └── assets/         # CSS/SASS, Images nội bộ
-│   └── package.json
-├── docs/                   # Tài liệu Kỹ thuật phần mềm (Cực quan trọng để nộp bài)
-│   ├── SRS_Document.pdf
-│   ├── UML_Diagrams/       # Lưu các file .drawio hoặc .png sơ đồ
-│   └── Database_Schema.png
-└── README.md               # Hướng dẫn cài đặt và mô tả dự án
+CARHUB - GHI CHU KIEN TRUC VA VAN HANH
+Cap nhat: 10/06/2026
+
+1. TONG QUAN
+
+Du an la monorepo npm workspaces gom:
+- frontend: React 19 + Vite + TypeScript + Tailwind CSS + Zustand.
+- backend: Node.js + Express + TypeScript + Prisma ORM.
+- database: PostgreSQL (dang dung Neon cloud).
+- luu anh production: Vercel Blob; database chi luu URL va metadata.
+- deploy: Vercel multi-service, frontend tai "/" va backend tai "/api".
+
+2. CAU TRUC CHINH
+
+KTPM___/
+|-- frontend/
+|   |-- src/
+|   |   |-- components/       UI dung chung: Sidebar, TopNav, SocialPost, VehicleCard...
+|   |   |-- pages/            Home, Feed, Marketplace, Garage, Profile, Admin...
+|   |   |-- lib/              API client va upload anh
+|   |   |-- store/            Auth, sidebar, message state
+|   |   |-- App.tsx           Router cua ung dung
+|   |   `-- main.tsx          React entrypoint
+|   |-- .env.production.example
+|   |-- package.json
+|   `-- vercel.json
+|-- backend/
+|   |-- prisma/
+|   |   |-- schema.prisma     Schema PostgreSQL
+|   |   |-- migrations/       Lich su migration
+|   |   `-- seed.ts           Seed co ban
+|   |-- scripts/              Seed catalog, du lieu chau A, backfill, admin...
+|   |-- src/
+|   |   |-- config/           Env va Prisma client
+|   |   |-- controllers/      Xu ly HTTP
+|   |   |-- middlewares/      Auth, validation, upload
+|   |   |-- routes/           Dinh nghia API
+|   |   |-- services/         Business logic va truy van DB
+|   |   |-- data/             Du lieu seed noi bo
+|   |   |-- app.ts            Express app dung chung local/Vercel
+|   |   `-- local-server.ts   Server listen khi chay local
+|   |-- .env.example
+|   |-- .env.vercel.example
+|   |-- package.json
+|   `-- vercel.json
+|-- package.json              Workspace scripts
+|-- vercel.json               Cau hinh Vercel multi-service
+`-- note.txt
+
+3. CAC NHOM DU LIEU TRONG POSTGRESQL
+
+- User: tai khoan, mat khau bcrypt, avatar, banner, profile, role, verified.
+- Post + Image: bai cong dong va nhieu anh.
+- PostLike, PostComment, PostBookmark, PostShare: tuong tac bai viet.
+- UserFollow, UserRating: theo doi va danh gia thanh vien.
+- GarageVehicle: xe ca nhan, thong so va danh sach URL anh.
+- VehicleListing: tin dang cho xe, lien ket GarageVehicle.
+- ListingFavorite, ListingComment: luu va binh luan tin xe.
+- Conversation + Message: nhan tin truc tiep hoac theo mot tin xe.
+- Notification: thong bao like, comment, follow, marketplace.
+- Article: bai viet chuyen de.
+- PasswordResetToken: ma dat lai mat khau.
+
+4. LUONG HOAT DONG CHINH
+
+Tai khoan:
+- Dang ky/dang nhap tai /api/auth.
+- JWT duoc frontend luu trong localStorage va gui bang Authorization Bearer.
+- USER quan ly noi dung cua minh; ADMIN co quyen quan tri toan he thong.
+- ADMIN va tai khoan verified hien icon BadgeCheck mau xanh.
+
+Feed:
+- Tao post gom caption va toi da 8 anh.
+- Tac gia hoac ADMIN co the xoa post.
+- Khi sua post, API chi cho cap nhat truong content/caption; anh va metadata khong bi sua.
+- Ho tro like, comment, bookmark, danh sach da thich va da luu.
+- Feed uu tien bai cua ADMIN va tai khoan verified.
+
+Garage va cho xe:
+- GarageVehicle la xe ca nhan; VehicleListing la tin dang ban rieng.
+- Co the them, sua, xoa xe; xoa xe se xoa cac listing lien quan trong transaction.
+- Mot xe co toi da 12 anh; anh dau tien la anh bia.
+- Co the tao, sua, danh dau da ban va xoa listing.
+- Marketplace co search, filter va phan trang 10 tin/trang.
+- Nhan "Lien he" tao/mo conversation co gan listing de hai ben biet dang trao doi ve xe nao.
+
+Anh:
+- Frontend gui file qua /api/uploads/images.
+- Local development luu file trong backend/uploads va Express phuc vu /uploads.
+- Production can BLOB_READ_WRITE_TOKEN de upload Vercel Blob.
+- Database khong luu binary/base64, chi luu URL anh de tiet kiem dung luong Neon.
+
+5. CHAY LOCAL
+
+Yeu cau:
+- Node.js 20 tro len.
+- PostgreSQL/Neon co the truy cap.
+- Tao backend/.env tu backend/.env.example.
+
+Lenh tai thu muc goc:
+
+  npm install
+  npm run dev
+
+Dia chi:
+- Frontend: http://localhost:3000
+- Backend health: http://localhost:4000/api/health
+
+Chay rieng:
+
+  npm run dev:frontend
+  npm run dev:backend
+
+Build:
+
+  npm run build
+
+Database:
+
+  npm run db:generate --workspace backend
+  npm run db:migrate:deploy --workspace backend
+  npm run db:seed --workspace backend
+  npm run db:ensure-admin --workspace backend
+  npm run db:studio --workspace backend
+
+6. BIEN MOI TRUONG BACKEND QUAN TRONG
+
+- NODE_ENV=development hoac production
+- PORT=4000 (chi can cho local)
+- DATABASE_URL=PostgreSQL/Neon connection string
+- CORS_ORIGIN=http://localhost:3000 hoac domain production
+- JWT_SECRET=chuoi bi mat it nhat 32 ky tu
+- JWT_EXPIRES_IN=7d
+- ADMIN_USERNAME va ADMIN_PASSWORD
+- RATE_LIMIT_WINDOW_MS va RATE_LIMIT_MAX
+- BLOB_READ_WRITE_TOKEN (production upload)
+- SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM (quen mat khau)
+
+Khong commit backend/.env, token Blob, JWT secret hoac mat khau database.
+
+Frontend:
+- Local co the dung VITE_API_URL=/api nho Vite proxy.
+- Vercel multi-service hien tai dung API cung domain; frontend/src/lib/api.ts tu xu ly prefix production.
+
+7. API CHINH
+
+- /api/health
+- /api/auth
+- /api/users
+- /api/posts
+- /api/garage
+- /api/vehicles
+- /api/articles
+- /api/messages
+- /api/notifications
+- /api/uploads
+- /api/admin
+
+Route CRUD moi can nho:
+- PATCH /api/posts/:id/caption
+- DELETE /api/posts/:id
+- POST/PATCH/DELETE /api/garage/vehicles
+- POST/PATCH/DELETE /api/vehicles
+- GET /api/users/suggestions/follow
+
+8. DEPLOY VERCEL
+
+Repository root dung vercel.json voi hai services:
+- frontend root "frontend", routePrefix "/".
+- backend root "backend", routePrefix "/api".
+
+Can import bien moi truong backend tren Vercel:
+- DATABASE_URL
+- CORS_ORIGIN=https://carhub-community.vercel.app
+- JWT_SECRET
+- JWT_EXPIRES_IN
+- ADMIN_USERNAME
+- ADMIN_PASSWORD
+- RATE_LIMIT_WINDOW_MS
+- RATE_LIMIT_MAX
+- BLOB_READ_WRITE_TOKEN
+- SMTP_* neu dung email
+
+Sau deploy kiem tra:
+
+  Invoke-RestMethod https://carhub-community.vercel.app/api/health
+
+Neu thay {"status":"ok",...} thi backend da hoat dong.
+
+9. NGUYEN TAC KHI PHAT TRIEN TIEP
+
+- Them model: sua schema.prisma, tao migration, sau do prisma generate.
+- Them API: route -> validation middleware -> controller -> service -> Prisma.
+- Khong luu file anh vao PostgreSQL.
+- Moi route sua/xoa phai kiem tra owner hoac role ADMIN.
+- Dung SocialPost cho bai feed de giu dong bo like/comment/bookmark/edit/delete.
+- Khi sidebar dong/mo, main content phai doi ca margin-left va width de luon can giua.

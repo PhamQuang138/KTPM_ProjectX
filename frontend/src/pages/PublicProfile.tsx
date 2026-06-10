@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {Link, Navigate, useParams} from 'react-router-dom';
-import {ArrowLeft, Camera, Globe, Grid3X3, List, LoaderCircle, MapPin, MessageCircle, PenTool, Star} from 'lucide-react';
+import {ArrowLeft, BadgeCheck, Camera, Globe, Grid3X3, List, LoaderCircle, MapPin, MessageCircle, PenTool, Star} from 'lucide-react';
 import {AnimatePresence, motion} from 'motion/react';
 import TopNav from '../components/TopNav';
 import MobileNav from '../components/MobileNav';
@@ -209,8 +209,11 @@ export default function PublicProfile() {
     <div className="min-h-screen bg-background text-on-background">
       <Sidebar />
       <motion.main
-        animate={{marginLeft: isOpen ? '16rem' : '0rem'}}
-        className="pb-24 transition-all duration-300 max-lg:!ml-0"
+        animate={{
+          marginLeft: isOpen ? '16rem' : '0rem',
+          width: isOpen ? 'calc(100% - 16rem)' : '100%',
+        }}
+        className="w-full pb-24 transition-all duration-300 max-lg:!ml-0 max-lg:!w-full"
       >
         <TopNav title="Profile" />
 
@@ -281,7 +284,9 @@ export default function PublicProfile() {
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-2 min-w-0">
                         <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight break-words min-w-0">{profile.name}</h1>
                         <span className="badge-primary">{profile.role === 'ADMIN' ? 'Admin' : 'Thành viên'}</span>
-                        {(profile.isVerifiedProfessional || profile.role === 'ADMIN') && <span className="badge-success">Tích xanh</span>}
+                        {(profile.isVerifiedProfessional || profile.role === 'ADMIN') && (
+                          <BadgeCheck className="h-6 w-6 text-blue-400" aria-label="Tài khoản đã xác thực" />
+                        )}
                       </div>
                       <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 text-xs text-on-surface-variant font-mono uppercase tracking-widest">
                         <span className="flex items-center gap-1.5 min-w-0">
@@ -293,7 +298,6 @@ export default function PublicProfile() {
                           <Globe className="w-3.5 h-3.5 shrink-0" />
                           <span className="break-all">@{handle}</span>
                         </span>
-                        {(profile.isVerifiedProfessional || profile.role === 'ADMIN') && <span className="text-primary font-bold">Tài khoản đã xác thực</span>}
                       </div>
                       {currentUser?.id !== profile.id && (
                         <div className="mt-5 flex flex-col items-center md:items-start">
@@ -457,7 +461,14 @@ export default function PublicProfile() {
                         className="space-y-6"
                       >
                         {socialPosts.map((post) => (
-                          <SocialPost key={post.id} {...post} />
+                          <SocialPost
+                            key={post.id}
+                            {...post}
+                            onDeleted={(postId) => setPosts((current) => current.filter((item) => item.id !== postId))}
+                            onCaptionUpdated={(postId, content) =>
+                              setPosts((current) => current.map((item) => (item.id === postId ? {...item, content} : item)))
+                            }
+                          />
                         ))}
                         {socialPosts.length === 0 && (
                           <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-8 text-on-surface-variant">

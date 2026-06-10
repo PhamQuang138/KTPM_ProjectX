@@ -30,6 +30,30 @@ const getRating = async (targetUserId: string, viewerId?: string) => {
 };
 
 export const userService = {
+  getFollowSuggestions(viewerId: string) {
+    return prisma.user.findMany({
+      where: {
+        id: {not: viewerId},
+        followers: {none: {followerId: viewerId}},
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        avatar: true,
+        role: true,
+        isVerifiedProfessional: true,
+        _count: {select: {followers: true, posts: true}},
+      },
+      orderBy: [
+        {role: 'desc'},
+        {isVerifiedProfessional: 'desc'},
+        {posts: {_count: 'desc'}},
+      ],
+      take: 5,
+    });
+  },
+
   searchUsers(query: string, viewerId: string) {
     const search = query.trim();
     if (search.length < 2) return Promise.resolve([]);

@@ -16,6 +16,10 @@ export const updateProfileSchema = z.object({
 });
 
 export const userController = {
+  async getFollowSuggestions(req: AuthenticatedRequest, res: Response) {
+    return res.json({data: await userService.getFollowSuggestions(req.user!.id)});
+  },
+
   async searchUsers(req: AuthenticatedRequest, res: Response) {
     const query = req.query.q?.toString() ?? '';
     return res.json({data: await userService.searchUsers(query, req.user!.id)});

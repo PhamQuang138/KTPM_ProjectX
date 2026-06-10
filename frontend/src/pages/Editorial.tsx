@@ -4,7 +4,7 @@ import Footer from '../components/Footer';
 import SocialPost, { SocialPostProps } from '../components/SocialPost';
 import MobileNav from '../components/MobileNav';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Plus, Hash, Sparkles, MessageSquare, Camera, PenTool, LayoutGrid, Bell, ShoppingBag } from 'lucide-react';
+import { Search, Plus, Hash, Sparkles, MessageSquare, Camera, PenTool, LayoutGrid, Bell, ShoppingBag, UserPlus, BadgeCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { useSidebarStore } from '../store/useSidebarStore';
@@ -36,6 +36,19 @@ interface CommunityOverview {
   }[];
 }
 
+interface FollowSuggestion {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string | null;
+  role: 'USER' | 'ADMIN';
+  isVerifiedProfessional: boolean;
+  _count: {
+    followers: number;
+    posts: number;
+  };
+}
+
 export default function Editorial() {
   const [activeCategory, setActiveCategory] = useState('Tất cả');
   const [isPosting, setIsPosting] = useState(false);
@@ -45,6 +58,7 @@ export default function Editorial() {
   const [posts, setPosts] = useState<SocialPostProps[]>([]);
   const [visiblePostCount, setVisiblePostCount] = useState(10);
   const [overview, setOverview] = useState<CommunityOverview | null>(null);
+  const [followSuggestions, setFollowSuggestions] = useState<FollowSuggestion[]>([]);
   const [isSubmittingPost, setIsSubmittingPost] = useState(false);
   const [postError, setPostError] = useState('');
   const postInputRef = useRef<HTMLTextAreaElement>(null);
@@ -125,6 +139,19 @@ export default function Editorial() {
     }
   };
 
+  const handleFollowSuggestion = async (suggestedUserId: string) => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    try {
+      await apiRequest(`/users/${suggestedUserId}/follow`, {method: 'POST'});
+      setFollowSuggestions((current) => current.filter((suggestion) => suggestion.id !== suggestedUserId));
+    } catch (error) {
+      setPostError(error instanceof Error ? error.message : 'Không thể theo dõi tài khoản này.');
+    }
+  };
+
   useEffect(() => {
     if (searchParams.get('compose') !== '1') return;
 
@@ -158,18 +185,22 @@ export default function Editorial() {
     Promise.all([
       apiRequest<SocialPostProps[]>('/posts/community'),
       apiRequest<CommunityOverview>('/posts/community-overview'),
+      isAuthenticated
+        ? apiRequest<FollowSuggestion[]>('/users/suggestions/follow')
+        : Promise.resolve([] as FollowSuggestion[]),
     ])
-      .then(([dbPosts, communityOverview]) => {
+      .then(([dbPosts, communityOverview, suggestions]) => {
         if (!isMounted) return;
         setPosts(dbPosts);
         setOverview(communityOverview);
+        setFollowSuggestions(suggestions);
       })
       .catch(() => undefined);
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [isAuthenticated]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -178,9 +209,13 @@ export default function Editorial() {
         <Sidebar />
       </div>
       <motion.main 
-        animate={{ marginLeft: isOpen ? '16rem' : '0rem' }}
-        className="max-w-container-max mx-auto px-6 md:px-margin-desktop py-8 mb-24 md:mb-12 transition-all duration-300"
+        animate={{
+          marginLeft: isOpen ? '16rem' : '0rem',
+          width: isOpen ? 'calc(100% - 16rem)' : '100%',
+        }}
+        className="w-full pb-8 mb-24 md:mb-12 transition-all duration-300 max-md:!ml-0 max-md:!w-full"
       >
+        <div className="max-w-container-max mx-auto px-6 md:px-margin-desktop py-8">
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
@@ -197,15 +232,44 @@ export default function Editorial() {
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 py-4 border-y border-white/5">
-                <div className="text-center">
-                  <p className="text-sm font-bold">12</p>
-                  <p className="text-[9px] text-on-surface-variant font-mono uppercase">Xe</p>
-                </div>
-                <div className="text-center border-l border-white/5">
-                  <p className="text-sm font-bold">2.4k</p>
-                  <p className="text-[9px] text-on-surface-variant font-mono uppercase">Điểm</p>
-                </div>
+              <div className="space-y-3 border-y border-white/5 py-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">
+                  Gợi ý theo dõi
+                </p>
+                {followSuggestions.map((suggestion) => (
+                  <div key={suggestion.id} className="flex items-center gap-2">
+                    <Link to={`/profile/${suggestion.id}`} className="flex min-w-0 flex-1 items-center gap-2">
+                      <img
+                        src={suggestion.avatar ?? `https://i.pravatar.cc/80?u=${encodeURIComponent(suggestion.email)}`}
+                        alt={suggestion.name}
+                        className="h-8 w-8 shrink-0 rounded-full border border-white/10 object-cover"
+                      />
+                      <span className="min-w-0">
+                        <span className="flex items-center gap-1">
+                          <span className="block truncate text-xs font-bold">{suggestion.name}</span>
+                          {(suggestion.role === 'ADMIN' || suggestion.isVerifiedProfessional) && (
+                            <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-blue-400" />
+                          )}
+                        </span>
+                        <span className="block truncate text-[9px] text-on-surface-variant">
+                          {suggestion._count.posts} bài viết
+                        </span>
+                      </span>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => void handleFollowSuggestion(suggestion.id)}
+                      className="interactive-icon shrink-0"
+                      title={`Theo dõi ${suggestion.name}`}
+                    >
+                      <UserPlus className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+                {!isAuthenticated && <p className="text-xs text-on-surface-variant">Đăng nhập để xem gợi ý phù hợp.</p>}
+                {isAuthenticated && followSuggestions.length === 0 && (
+                  <p className="text-xs text-on-surface-variant">Bạn đã theo dõi hết các gợi ý hiện có.</p>
+                )}
               </div>
               <Link to="/garage" className="block w-full mt-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-mono uppercase tracking-widest transition-all text-center">
                 Hồ sơ của tôi
@@ -365,7 +429,14 @@ export default function Editorial() {
             {/* Post Feed */}
             <div className="space-y-6">
               {posts.slice(0, visiblePostCount).map((post) => (
-                <SocialPost key={post.id} {...post} />
+                <SocialPost
+                  key={post.id}
+                  {...post}
+                  onDeleted={(postId) => setPosts((current) => current.filter((item) => item.id !== postId))}
+                  onCaptionUpdated={(postId, content) =>
+                    setPosts((current) => current.map((item) => (item.id === postId ? {...item, content} : item)))
+                  }
+                />
               ))}
               {posts.length === 0 && (
                 <div className="glass-card rounded-[2rem] border-white/5 p-10 text-center text-on-surface-variant">
@@ -432,6 +503,7 @@ export default function Editorial() {
 
             <Footer hideLogo />
           </aside>
+        </div>
         </div>
       </motion.main>
 

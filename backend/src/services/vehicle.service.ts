@@ -101,7 +101,10 @@ export const vehicleService = {
   },
 
   deleteGarageVehicle(id: string) {
-    return prisma.garageVehicle.delete({where: {id}});
+    return prisma.$transaction(async (transaction) => {
+      await transaction.vehicleListing.deleteMany({where: {vehicleId: id}});
+      return transaction.garageVehicle.delete({where: {id}});
+    });
   },
 
   async listListings(input: {

@@ -3,7 +3,7 @@ import TopNav from '../components/TopNav';
 import MobileNav from '../components/MobileNav';
 import SocialPost from '../components/SocialPost';
 import { Link } from 'react-router-dom';
-import { Eye, MessageCircle, TrendingUp, Plus, Star, Heart, Users, MapPin, Globe, Grid3X3, List, PenTool, Camera, LoaderCircle } from 'lucide-react';
+import { Eye, MessageCircle, TrendingUp, Plus, Star, Heart, Users, MapPin, Globe, Grid3X3, List, PenTool, Camera, LoaderCircle, BadgeCheck, Pencil, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FormEvent, useEffect, useState } from 'react';
 import { useSidebarStore } from '../store/useSidebarStore';
@@ -128,6 +128,25 @@ const createListingForm = (listing?: DbListing, vehicle?: DbVehicle): ListingFor
   status: listing?.status ?? 'Active Listing',
 });
 
+const createVehicleForm = (vehicle?: DbVehicle) => ({
+  title: vehicle?.title ?? '',
+  description: vehicle?.description ?? '',
+  listingDescription: '',
+  price: '',
+  location: '',
+  images: vehicle?.images?.length ? vehicle.images : vehicle?.image ? [vehicle.image] : [],
+  condition: vehicle?.condition ?? 'Used',
+  make: vehicle?.make ?? '',
+  model: vehicle?.model ?? '',
+  year: vehicle?.year?.toString() ?? '',
+  mileage: vehicle?.mileage?.toString() ?? '',
+  bodyType: vehicle?.bodyType ?? 'Coupe',
+  fuelType: vehicle?.fuelType ?? 'Gasoline',
+  transmission: vehicle?.transmission ?? 'Automatic',
+  category: 'Daily',
+  specs: vehicle?.specs.join(', ') ?? '',
+});
+
 export default function Garage() {
   const [activeTab, setActiveTab] = useState('garage');
   const [isAddingVehicle, setIsAddingVehicle] = useState(false);
@@ -138,24 +157,8 @@ export default function Garage() {
   const [vehicleFormError, setVehicleFormError] = useState('');
   const [isSavingVehicle, setIsSavingVehicle] = useState(false);
   const [isUploadingVehicleImage, setIsUploadingVehicleImage] = useState(false);
-  const [vehicleForm, setVehicleForm] = useState({
-    title: '',
-    description: '',
-    listingDescription: '',
-    price: '',
-    location: '',
-    images: [] as string[],
-    condition: 'Used',
-    make: '',
-    model: '',
-    year: '',
-    mileage: '',
-    bodyType: 'Coupe',
-    fuelType: 'Gasoline',
-    transmission: 'Automatic',
-    category: 'Daily',
-    specs: '',
-  });
+  const [vehicleForm, setVehicleForm] = useState(createVehicleForm());
+  const [editingVehicle, setEditingVehicle] = useState<DbVehicle | null>(null);
   const [listingVehicle, setListingVehicle] = useState<DbVehicle | null>(null);
   const [editingListing, setEditingListing] = useState<DbListing | null>(null);
   const [listingForm, setListingForm] = useState<ListingFormState>(createListingForm());
@@ -333,38 +336,48 @@ export default function Garage() {
       return;
     }
 
-    if (publishToMarketplace && (!vehicleForm.price.trim() || !vehicleForm.location.trim())) {
+    if (!editingVehicle && publishToMarketplace && (!vehicleForm.price.trim() || !vehicleForm.location.trim())) {
       setVehicleFormError('Giá bán và địa điểm là bắt buộc khi đăng lên chợ xe.');
       return;
     }
 
     setIsSavingVehicle(true);
     try {
-      const createdVehicle = await apiRequest<DbVehicle>('/garage/vehicles', {
-        method: 'POST',
-        body: JSON.stringify({
-          title: vehicleForm.title,
-          description: vehicleForm.description,
-          image: vehicleForm.images[0],
-          images: vehicleForm.images,
-          condition: vehicleForm.condition,
-          make: vehicleForm.make || undefined,
-          model: vehicleForm.model || undefined,
-          year: vehicleForm.year ? Number(vehicleForm.year) : undefined,
-          mileage: vehicleForm.mileage ? Number(vehicleForm.mileage) : undefined,
-          bodyType: vehicleForm.bodyType || undefined,
-          fuelType: vehicleForm.fuelType || undefined,
-          transmission: vehicleForm.transmission || undefined,
-          specs: vehicleForm.specs
-            .split(',')
-            .map((spec) => spec.trim())
-            .filter(Boolean),
-        }),
-      });
+      const vehiclePayload = {
+        title: vehicleForm.title,
+        description: vehicleForm.description,
+        image: vehicleForm.images[0],
+        images: vehicleForm.images,
+        condition: vehicleForm.condition,
+        make: vehicleForm.make || undefined,
+        model: vehicleForm.model || undefined,
+        year: vehicleForm.year ? Number(vehicleForm.year) : undefined,
+        mileage: vehicleForm.mileage ? Number(vehicleForm.mileage) : undefined,
+        bodyType: vehicleForm.bodyType || undefined,
+        fuelType: vehicleForm.fuelType || undefined,
+        transmission: vehicleForm.transmission || undefined,
+        specs: vehicleForm.specs
+          .split(',')
+          .map((spec) => spec.trim())
+          .filter(Boolean),
+      };
+      const savedVehicle = await apiRequest<DbVehicle>(
+        editingVehicle ? `/garage/vehicles/${editingVehicle.id}` : '/garage/vehicles',
+        {
+          method: editingVehicle ? 'PATCH' : 'POST',
+          body: JSON.stringify({
+            ...vehiclePayload,
+          }),
+        },
+      );
 
-      setMyVehicles((vehicles) => [createdVehicle, ...vehicles]);
+      setMyVehicles((vehicles) =>
+        editingVehicle
+          ? vehicles.map((vehicle) => (vehicle.id === savedVehicle.id ? savedVehicle : vehicle))
+          : [savedVehicle, ...vehicles],
+      );
 
-      if (publishToMarketplace) {
+      if (!editingVehicle && publishToMarketplace) {
         const createdListing = await apiRequest<DbListing>('/vehicles', {
           method: 'POST',
           body: JSON.stringify({
@@ -373,36 +386,54 @@ export default function Garage() {
             price: vehicleForm.price,
             location: vehicleForm.location,
             category: vehicleForm.category,
-            vehicleId: createdVehicle.id,
+            vehicleId: savedVehicle.id,
           }),
         });
         setMyListings((listings) => [createdListing, ...listings]);
       }
 
-      setVehicleForm({
-        title: '',
-        description: '',
-        listingDescription: '',
-        price: '',
-        location: '',
-        images: [],
-        condition: 'Used',
-        make: '',
-        model: '',
-        year: '',
-        mileage: '',
-        bodyType: 'Coupe',
-        fuelType: 'Gasoline',
-        transmission: 'Automatic',
-        category: 'Daily',
-        specs: '',
-      });
+      setVehicleForm(createVehicleForm());
+      setEditingVehicle(null);
       setIsAddingVehicle(false);
-      setActiveTab(publishToMarketplace ? 'marketplace' : 'garage');
+      setActiveTab(!editingVehicle && publishToMarketplace ? 'marketplace' : 'garage');
     } catch (error) {
       setVehicleFormError(error instanceof Error ? error.message : 'Không thể lưu xe hoặc tin đăng.');
     } finally {
       setIsSavingVehicle(false);
+    }
+  };
+
+  const openCreateVehicle = () => {
+    setEditingVehicle(null);
+    setVehicleForm(createVehicleForm());
+    setPublishToMarketplace(true);
+    setVehicleFormError('');
+    setIsAddingVehicle(true);
+  };
+
+  const openEditVehicle = (vehicle: DbVehicle) => {
+    setEditingVehicle(vehicle);
+    setVehicleForm(createVehicleForm(vehicle));
+    setPublishToMarketplace(false);
+    setVehicleFormError('');
+    setIsAddingVehicle(true);
+  };
+
+  const closeVehicleModal = () => {
+    setEditingVehicle(null);
+    setVehicleForm(createVehicleForm());
+    setVehicleFormError('');
+    setIsAddingVehicle(false);
+  };
+
+  const handleDeleteVehicle = async (vehicle: DbVehicle) => {
+    if (!window.confirm(`Xóa "${vehicle.title}" và các tin bán liên quan?`)) return;
+    try {
+      await apiRequest(`/garage/vehicles/${vehicle.id}`, {method: 'DELETE'});
+      setMyVehicles((vehicles) => vehicles.filter((item) => item.id !== vehicle.id));
+      setMyListings((listings) => listings.filter((listing) => listing.vehicle?.id !== vehicle.id));
+    } catch (error) {
+      setVehicleFormError(error instanceof Error ? error.message : 'Không thể xóa xe.');
     }
   };
 
@@ -505,8 +536,11 @@ export default function Garage() {
     <div className="min-h-screen bg-background text-on-background">
       <Sidebar />
       <motion.main 
-        animate={{ marginLeft: isOpen ? '16rem' : '0rem' }}
-        className="pb-24 transition-all duration-300"
+        animate={{
+          marginLeft: isOpen ? '16rem' : '0rem',
+          width: isOpen ? 'calc(100% - 16rem)' : '100%',
+        }}
+        className="w-full pb-24 transition-all duration-300 max-md:!ml-0 max-md:!w-full"
       >
         <TopNav title="Hồ sơ của tôi" />
         
@@ -574,14 +608,14 @@ export default function Garage() {
                   <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
                     <h1 className="font-display text-4xl font-bold tracking-tight">{displayName}</h1>
                     <span className="badge-primary">{user?.role === 'ADMIN' ? 'Admin' : 'Thành viên'}</span>
-                    {(isVerifiedProfessional || user?.role === 'ADMIN') && <span className="badge-success">Tích xanh</span>}
+                    {(isVerifiedProfessional || user?.role === 'ADMIN') && (
+                      <BadgeCheck className="h-6 w-6 text-blue-400" aria-label="Tài khoản đã xác thực" />
+                    )}
                   </div>
                   <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 text-xs text-on-surface-variant font-mono uppercase tracking-widest">
                     <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {profileLocation || 'Chưa có địa điểm'}</span>
                     <span className="opacity-30">•</span>
                     <span className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5" /> @{handle}</span>
-                    <span className="opacity-30">•</span>
-                    {(isVerifiedProfessional || user?.role === 'ADMIN') && <span className="text-primary font-bold">Tài khoản đã xác thực</span>}
                   </div>
                 </div>
               </div>
@@ -714,6 +748,22 @@ export default function Garage() {
                           >
                             {hasActiveListing(vehicle) ? 'Already Listed' : 'List for Sale'}
                           </button>
+                          <div className="mt-2 flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => openEditVehicle(vehicle)}
+                              className="flex items-center gap-1 rounded-lg border border-white/15 bg-black/35 px-3 py-2 text-[10px] font-bold text-white hover:bg-white/10"
+                            >
+                              <Pencil className="h-3.5 w-3.5" /> Sửa
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void handleDeleteVehicle(vehicle)}
+                              className="flex items-center gap-1 rounded-lg border border-red-400/30 bg-black/35 px-3 py-2 text-[10px] font-bold text-red-200 hover:bg-red-500/20"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" /> Xóa
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -724,7 +774,7 @@ export default function Garage() {
                       </div>
                     )}
                     <button
-                      onClick={() => setIsAddingVehicle(true)}
+                      onClick={openCreateVehicle}
                       className="aspect-[4/3] border-2 border-dashed border-white/10 rounded-[2rem] flex flex-col items-center justify-center gap-3 text-on-surface-variant hover:border-primary/40 hover:text-primary transition-all"
                     >
                       <Plus className="w-8 h-8" />
@@ -742,7 +792,9 @@ export default function Garage() {
                     className="space-y-6"
                   >
                     {myPosts.map((post) => ({
+                      id: post.id,
                       author: {
+                        id: user?.id,
                         name: displayName,
                         handle,
                         avatar,
@@ -759,7 +811,14 @@ export default function Garage() {
                       comments: 0,
                       category: post.status,
                     })).map((post, i) => (
-                      <SocialPost key={myPosts[i]?.id ?? i} {...post} />
+                      <SocialPost
+                        key={myPosts[i]?.id ?? i}
+                        {...post}
+                        onDeleted={(postId) => setMyPosts((current) => current.filter((item) => item.id !== postId))}
+                        onCaptionUpdated={(postId, content) =>
+                          setMyPosts((current) => current.map((item) => (item.id === postId ? {...item, content} : item)))
+                        }
+                      />
                     ))}
                     {myPosts.length === 0 && (
                       <div className="glass-card rounded-[2rem] border-white/5 p-10 text-center text-on-surface-variant">
@@ -809,7 +868,7 @@ export default function Garage() {
                         <List className="w-8 h-8 mx-auto mb-4" />
                         <p className="font-display text-lg font-bold">Chưa có tin đang bán</p>
                         <p className="text-xs text-on-surface-variant font-mono uppercase tracking-widest mt-2">Thêm xe vào Garage để bắt đầu đăng bán</p>
-                        <button onClick={() => setIsAddingVehicle(true)} className="mt-8 btn-secondary px-8">Thêm tin đăng</button>
+                        <button onClick={openCreateVehicle} className="mt-8 btn-secondary px-8">Thêm tin đăng</button>
                      </div>
                      )}
                   </motion.div>
@@ -825,10 +884,12 @@ export default function Garage() {
           <form onSubmit={handleCreateVehicle} className="mx-auto my-0 md:my-6 w-full max-w-2xl bg-surface-container border border-white/10 rounded-[2rem] p-5 md:p-8 shadow-2xl space-y-5">
             <div className="flex items-start justify-between gap-6">
               <div>
-                <h2 className="font-display text-2xl font-bold">Thêm xe</h2>
-                <p className="text-sm text-on-surface-variant mt-1">Lưu xe vào Garage, sau đó có thể đăng lên chợ xe.</p>
+                <h2 className="font-display text-2xl font-bold">{editingVehicle ? 'Sửa xe' : 'Thêm xe'}</h2>
+                <p className="text-sm text-on-surface-variant mt-1">
+                  {editingVehicle ? 'Cập nhật thông tin và hình ảnh xe trong Garage.' : 'Lưu xe vào Garage, sau đó có thể đăng lên chợ xe.'}
+                </p>
               </div>
-              <button type="button" onClick={() => setIsAddingVehicle(false)} className="text-on-surface-variant hover:text-on-surface">Hủy</button>
+              <button type="button" onClick={closeVehicleModal} className="text-on-surface-variant hover:text-on-surface">Hủy</button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -919,7 +980,7 @@ export default function Garage() {
               </p>
             </div>
 
-            <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-background px-4 py-3">
+            {!editingVehicle && <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-background px-4 py-3">
               <input
                 type="checkbox"
                 checked={publishToMarketplace}
@@ -927,9 +988,9 @@ export default function Garage() {
                 className="w-4 h-4"
               />
               <span className="text-sm font-bold">Đăng lên chợ xe</span>
-            </label>
+            </label>}
 
-            {publishToMarketplace && (
+            {!editingVehicle && publishToMarketplace && (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <input required placeholder="Giá bán, ví dụ $65,000" value={vehicleForm.price} onChange={(event) => setVehicleForm({...vehicleForm, price: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
@@ -952,7 +1013,15 @@ export default function Garage() {
             )}
 
             <button disabled={isSavingVehicle || isUploadingVehicleImage} type="submit" className="btn-primary w-full py-4 rounded-xl disabled:opacity-60 disabled:cursor-not-allowed">
-              {isUploadingVehicleImage ? 'Đang tải ảnh...' : isSavingVehicle ? 'Đang lưu...' : publishToMarketplace ? 'Lưu và đăng bán' : 'Lưu vào Garage'}
+              {isUploadingVehicleImage
+                ? 'Đang tải ảnh...'
+                : isSavingVehicle
+                  ? 'Đang lưu...'
+                  : editingVehicle
+                    ? 'Lưu thay đổi'
+                    : publishToMarketplace
+                      ? 'Lưu và đăng bán'
+                      : 'Lưu vào Garage'}
             </button>
           </form>
         </div>

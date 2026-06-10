@@ -1,4 +1,4 @@
-import { Heart, MessageSquare, Bookmark, MoreHorizontal, CheckCircle2 } from 'lucide-react';
+import { Heart, MessageSquare, Bookmark, MoreHorizontal, CheckCircle2, Pencil, Trash2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FormEvent, ReactNode, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -59,6 +59,8 @@ export interface SocialPostProps {
     price: string;
     image: string;
   };
+  onDeleted?: (id: string) => void;
+  onCaptionUpdated?: (id: string, content: string) => void;
 }
 
 export default function SocialPost({
@@ -76,7 +78,9 @@ export default function SocialPost({
   isLikedInitial = false,
   isBookmarkedInitial = false,
   commentItems = [],
-  marketplaceListing
+  marketplaceListing,
+  onDeleted,
+  onCaptionUpdated,
 }: SocialPostProps) {
   const navigate = useNavigate();
   const [likes, setLikes] = useState(initialLikes);
@@ -90,10 +94,55 @@ export default function SocialPost({
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [displayContent, setDisplayContent] = useState(content);
+  const [captionDraft, setCaptionDraft] = useState(content);
+  const [isEditingCaption, setIsEditingCaption] = useState(false);
+  const [isPostMenuOpen, setIsPostMenuOpen] = useState(false);
+  const [isSavingCaption, setIsSavingCaption] = useState(false);
+  const [isDeletingPost, setIsDeletingPost] = useState(false);
   const currentUser = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const currentUserAvatar = currentUser?.avatar ?? `https://i.pravatar.cc/100?u=${encodeURIComponent(currentUser?.email ?? 'guest')}`;
   const authorProfilePath = author.id ? `/profile/${author.id}` : undefined;
+  const canManagePost = Boolean(
+    id && currentUser && (currentUser.id === author.id || currentUser.role === 'ADMIN'),
+  );
+
+  const saveCaption = async () => {
+    const nextContent = captionDraft.trim();
+    if (!id || !nextContent || isSavingCaption) return;
+
+    setInteractionError('');
+    setIsSavingCaption(true);
+    try {
+      const updated = await apiRequest<{id: string; content: string}>(`/posts/${id}/caption`, {
+        method: 'PATCH',
+        body: JSON.stringify({content: nextContent}),
+      });
+      setDisplayContent(updated.content);
+      setCaptionDraft(updated.content);
+      setIsEditingCaption(false);
+      onCaptionUpdated?.(id, updated.content);
+    } catch (error) {
+      setInteractionError(error instanceof Error ? error.message : 'Không thể sửa nội dung bài viết.');
+    } finally {
+      setIsSavingCaption(false);
+    }
+  };
+
+  const deletePost = async () => {
+    if (!id || isDeletingPost || !window.confirm('Bạn có chắc muốn xóa bài viết này?')) return;
+
+    setInteractionError('');
+    setIsDeletingPost(true);
+    try {
+      await apiRequest(`/posts/${id}`, {method: 'DELETE'});
+      onDeleted?.(id);
+    } catch (error) {
+      setInteractionError(error instanceof Error ? error.message : 'Không thể xóa bài viết.');
+      setIsDeletingPost(false);
+    }
+  };
 
   const requireLogin = () => {
     if (isAuthenticated) return true;
@@ -225,14 +274,91 @@ export default function SocialPost({
             </div>
           </div>
         </div>
-        <button className="interactive-icon">
-          <MoreHorizontal className="w-4 h-4 text-on-surface-variant" />
-        </button>
+        {canManagePost && (
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsPostMenuOpen((current) => !current)}
+              className="interactive-icon"
+              aria-label="Quản lý bài viết"
+            >
+              <MoreHorizontal className="w-4 h-4 text-on-surface-variant" />
+            </button>
+            <AnimatePresence>
+              {isPostMenuOpen && (
+                <motion.div
+                  initial={{opacity: 0, y: -6}}
+                  animate={{opacity: 1, y: 0}}
+                  exit={{opacity: 0, y: -6}}
+                  className="absolute right-0 top-11 z-20 w-44 overflow-hidden rounded-xl border border-white/10 bg-surface-container-high shadow-2xl"
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCaptionDraft(displayContent);
+                      setIsEditingCaption(true);
+                      setIsPostMenuOpen(false);
+                    }}
+                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-xs hover:bg-white/5"
+                  >
+                    <Pencil className="h-4 w-4" /> Sửa caption
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isDeletingPost}
+                    onClick={() => void deletePost()}
+                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-xs text-red-300 hover:bg-red-500/10 disabled:opacity-50"
+                  >
+                    <Trash2 className="h-4 w-4" /> {isDeletingPost ? 'Đang xóa...' : 'Xóa bài viết'}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
 
       {/* Post Content */}
       <div className="space-y-4">
-        <p className="text-post whitespace-pre-wrap">{content}</p>
+        {isEditingCaption ? (
+          <div className="space-y-3 rounded-2xl border border-primary/20 bg-white/[0.03] p-4">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-bold text-primary">Chỉnh sửa caption</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setCaptionDraft(displayContent);
+                  setIsEditingCaption(false);
+                }}
+                className="interactive-icon"
+                aria-label="Đóng"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <textarea
+              value={captionDraft}
+              onChange={(event) => setCaptionDraft(event.target.value)}
+              maxLength={5000}
+              className="min-h-28 w-full resize-y rounded-xl border border-white/10 bg-background px-4 py-3 text-sm focus:border-primary/40 focus:outline-none"
+            />
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={() => setIsEditingCaption(false)} className="btn-secondary px-4 py-2 text-xs">
+                Hủy
+              </button>
+              <button
+                type="button"
+                disabled={!captionDraft.trim() || isSavingCaption}
+                onClick={() => void saveCaption()}
+                className="btn-primary px-4 py-2 text-xs disabled:opacity-50"
+              >
+                {isSavingCaption ? 'Đang lưu...' : 'Lưu caption'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-post whitespace-pre-wrap">{displayContent}</p>
+        )}
         
         {/* Images */}
         {imageSources.length > 0 && (
