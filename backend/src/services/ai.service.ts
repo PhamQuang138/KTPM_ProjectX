@@ -28,17 +28,18 @@ const vehicleIntentSchema = z.object({
   answer: z.string().trim().min(1).max(2000),
   shouldSearch: z.boolean().default(true),
   filters: z.object({
-    makes: z.array(z.string().trim().min(1).max(80)).max(8).default([]),
-    models: z.array(z.string().trim().min(1).max(80)).max(8).default([]),
-    bodyTypes: z.array(z.string().trim().min(1).max(80)).max(8).default([]),
-    conditions: z.array(z.string().trim().min(1).max(40)).max(4).default([]),
-    fuelTypes: z.array(z.string().trim().min(1).max(40)).max(6).default([]),
-    transmissions: z.array(z.string().trim().min(1).max(40)).max(4).default([]),
-    minYear: z.number().int().min(1886).max(2100).nullable().default(null),
-    maxYear: z.number().int().min(1886).max(2100).nullable().default(null),
-    maxPriceVnd: z.number().positive().nullable().default(null),
-    location: z.string().trim().max(120).nullable().default(null),
-    keywords: z.array(z.string().trim().min(1).max(80)).max(10).default([]),
+      makes: z.array(z.string().trim().min(1).max(80)).max(8).default([]),
+      models: z.array(z.string().trim().min(1).max(80)).max(8).default([]),
+      bodyTypes: z.array(z.string().trim().min(1).max(80)).max(8).default([]),
+      conditions: z.array(z.string().trim().min(1).max(40)).max(4).default([]),
+      fuelTypes: z.array(z.string().trim().min(1).max(40)).max(6).default([]),
+      transmissions: z.array(z.string().trim().min(1).max(40)).max(4).default([]),
+      minYear: z.number().int().min(1886).max(2100).nullable().default(null),
+      maxYear: z.number().int().min(1886).max(2100).nullable().default(null),
+      maxPriceUsd: z.number().positive().nullable().default(null),
+      location: z.string().trim().max(120).nullable().default(null),
+      keywords: z.array(z.string().trim().min(1).max(80)).max(10).default([]),
+      limit: z.number().int().min(1).max(20).nullable().default(null),
   }),
   imageAnalysis: z.object({
     make: z.string().trim().max(80).nullable().default(null),
@@ -64,7 +65,7 @@ const responseJsonSchema = {
       additionalProperties: false,
       required: [
         'makes', 'models', 'bodyTypes', 'conditions', 'fuelTypes', 'transmissions',
-        'minYear', 'maxYear', 'maxPriceVnd', 'location', 'keywords',
+        'minYear', 'maxYear', 'maxPriceUsd', 'location', 'keywords', 'limit',
       ],
       properties: {
         makes: {type: 'array', items: {type: 'string'}},
@@ -75,9 +76,10 @@ const responseJsonSchema = {
         transmissions: {type: 'array', items: {type: 'string'}},
         minYear: {anyOf: [{type: 'integer'}, {type: 'null'}]},
         maxYear: {anyOf: [{type: 'integer'}, {type: 'null'}]},
-        maxPriceVnd: {anyOf: [{type: 'number'}, {type: 'null'}]},
+        maxPriceUsd: {anyOf: [{type: 'number'}, {type: 'null'}]},
         location: {anyOf: [{type: 'string'}, {type: 'null'}]},
         keywords: {type: 'array', items: {type: 'string'}},
+        limit: {anyOf: [{type: 'integer'}, {type: 'null'}]},
       },
     },
     imageAnalysis: {
@@ -104,17 +106,12 @@ const responseJsonSchema = {
 const normalize = (value?: string | null) =>
   value?.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim() ?? '';
 
-const parseVndPrice = (value: string): number | null => {
-  const normalized = normalize(value).replace(/,/g, '.');
-  const number = Number(normalized.match(/\d+(?:\.\d+)?/)?.[0]);
-  if (!Number.isFinite(number)) return null;
-  if (normalized.includes('ty')) return number * 1_000_000_000;
-  if (normalized.includes('trieu')) return number * 1_000_000;
-  if (normalized.includes('vnd') || value.includes('đ')) {
-    const digits = Number(value.replace(/\D/g, ''));
-    return Number.isFinite(digits) ? digits : null;
-  }
-  return null;
+const parseUsdPrice = (value: string): number | null => {
+  const normalized = value.replace(/,/g, '').replace(/\s/g, '');
+  const match = normalized.match(/\d+(?:\.\d+)?/);
+  if (!match) return null;
+  const number = Number(match[0]);
+  return Number.isFinite(number) ? number : null;
 };
 
 const imageUrlAllowed = (imageUrl: string) => {
@@ -173,10 +170,20 @@ Nếu người dùng đề cập ngân sách hoặc giới hạn giá:
 - Nếu người dùng ghi bằng USD hoặc ký hiệu $, sử dụng trực tiếp.
 - Nếu người dùng ghi bằng VND, đồng, triệu hoặc tỷ, hãy quy đổi sang USD theo tỷ giá gần đúng 1 USD = 26.000 VND.
 - Nếu người dùng không đề cập giá thì để null.
+Nếu người dùng yêu cầu số lượng kết quả, ví dụ:
+- "tìm 3 xe"
+- "cho tôi 5 chiếc"
+- "top 10 xe SUV"
 
+thì điền filters.limit bằng số lượng đó.
+
+Nếu không đề cập số lượng thì để null.
+
+Giới hạn tối đa 20 kết quả.
 Không tự suy đoán ngân sách của người dùng.
 Nếu câu hỏi chỉ hỏi kiến thức ô tô, trả lời hữu ích trong answer và đặt shouldSearch=false.
 Nếu có ảnh, hãy nhận dạng thận trọng; model/năm không chắc thì để null hoặc dùng khoảng năm.`,
+
     },
   });
   console.log("GEMINI RESPONSE:");
@@ -203,7 +210,7 @@ export const aiService = {
     const bodyTypes = [...intent.filters.bodyTypes, ...(imageAnalysis?.bodyType ? [imageAnalysis.bodyType] : [])];
     const minYear = intent.filters.minYear ?? imageAnalysis?.estimatedYearFrom ?? null;
     const maxYear = intent.filters.maxYear ?? imageAnalysis?.estimatedYearTo ?? null;
-
+    const limit = Math.min(Math.max(intent.filters.limit ?? 6, 1), 20);
     const candidates = await prisma.vehicleListing.findMany({
       where: {status: {not: 'Hidden'}},
       include: {
@@ -257,10 +264,9 @@ export const aiService = {
         if (minYear && vehicle?.year && vehicle.year >= minYear) score += 2;
         if (maxYear && vehicle?.year && vehicle.year <= maxYear) score += 2;
 
-        const priceVnd = parseVndPrice(listing.price);
-        if (intent.filters.maxPriceVnd && priceVnd && priceVnd <= intent.filters.maxPriceVnd) score += 3;
-        if (intent.filters.maxPriceVnd && priceVnd && priceVnd > intent.filters.maxPriceVnd) score -= 8;
-
+      const priceUsd = parseUsdPrice(listing.price);
+      if (intent.filters.maxPriceUsd && priceUsd && priceUsd <= intent.filters.maxPriceUsd) score += 3;
+      if (intent.filters.maxPriceUsd && priceUsd && priceUsd > intent.filters.maxPriceUsd) score -= 8;
         return {listing, score};
       })
       .filter(({listing, score}) => {
@@ -272,7 +278,7 @@ export const aiService = {
         return score > 0 || (!keywords.length && !makes.length && !models.length);
       })
       .sort((left, right) => right.score - left.score)
-      .slice(0, 6)
+      .slice(0, limit)
       .map(({listing, score}) => ({
         id: listing.id,
         title: listing.title,
@@ -294,7 +300,15 @@ export const aiService = {
 
     return {
       answer: `${intent.answer}${resultSummary}`,
-      filters: {...intent.filters, makes, models, bodyTypes, minYear, maxYear},
+      filters: {
+      ...intent.filters,
+      makes,
+      models,
+      bodyTypes,
+      minYear,
+      maxYear,
+      limit,
+      },
       imageAnalysis,
       listings: ranked,
     };
