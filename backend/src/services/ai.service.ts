@@ -1,4 +1,8 @@
 console.log("AI SERVICE VERSION 2026-06-11");
+console.log('ALL ENV KEYS:', Object.keys(process.env).sort());
+console.log('GEMINI_API_KEY=', process.env.GEMINI_API_KEY);
+console.log('GOOGLE_API_KEY=', process.env.GOOGLE_API_KEY);
+console.log('GEMINI_MODEL=', process.env.GEMINI_MODEL);
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -6,10 +10,15 @@ import {GoogleGenAI} from '@google/genai';
 import {z} from 'zod';
 import {prisma} from '../config/prisma';
 const getGeminiClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  const apiKey =
+    process.env.GEMINI_API_KEY?.trim() ||
+    process.env.GOOGLE_API_KEY?.trim() ||
+    process.env.API_KEY?.trim();
+
+  console.log('GEMINI KEY EXISTS =', Boolean(apiKey));
+  console.log('GEMINI MODEL =', process.env.GEMINI_MODEL);
 
   if (!apiKey) {
-    console.log('GEMINI_API_KEY =', process.env.GEMINI_API_KEY);
     throw new Error('GEMINI_NOT_CONFIGURED');
   }
 
@@ -157,7 +166,15 @@ const analyzeRequest = async (message: string, imageUrl?: string): Promise<Vehic
 Phân tích câu hỏi tiếng Việt và ảnh đầu vào thành bộ lọc tìm kiếm.
 Không bịa listing, giá hay người bán. Listing thật sẽ do backend truy vấn sau.
 answer là câu trả lời ngắn bằng tiếng Việt, mô tả điều bạn hiểu và lưu ý độ chắc chắn nếu nhận dạng ảnh.
-Chỉ điền maxPriceVnd khi người dùng nêu giá bằng VND, đồng, triệu hoặc tỷ.
+Giá xe trên CarHub được lưu và hiển thị bằng USD ($).
+
+Nếu người dùng đề cập ngân sách hoặc giới hạn giá:
+- Chỉ điền maxPriceUsd khi người dùng nêu giá.
+- Nếu người dùng ghi bằng USD hoặc ký hiệu $, sử dụng trực tiếp.
+- Nếu người dùng ghi bằng VND, đồng, triệu hoặc tỷ, hãy quy đổi sang USD theo tỷ giá gần đúng 1 USD = 26.000 VND.
+- Nếu người dùng không đề cập giá thì để null.
+
+Không tự suy đoán ngân sách của người dùng.
 Nếu câu hỏi chỉ hỏi kiến thức ô tô, trả lời hữu ích trong answer và đặt shouldSearch=false.
 Nếu có ảnh, hãy nhận dạng thận trọng; model/năm không chắc thì để null hoặc dùng khoảng năm.`,
     },
