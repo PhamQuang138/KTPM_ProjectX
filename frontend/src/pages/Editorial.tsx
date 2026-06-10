@@ -4,7 +4,7 @@ import Footer from '../components/Footer';
 import SocialPost, { SocialPostProps } from '../components/SocialPost';
 import MobileNav from '../components/MobileNav';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Plus, Hash, Sparkles, MessageSquare, Camera, PenTool, LayoutGrid, Bell, ShoppingBag, UserPlus, BadgeCheck } from 'lucide-react';
+import { Search, Plus, Sparkles, MessageSquare, Camera, PenTool, LayoutGrid, Bell, ShoppingBag, UserPlus, BadgeCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { useSidebarStore } from '../store/useSidebarStore';
@@ -382,7 +382,6 @@ export default function Editorial() {
                               {postImages.length}/8 ảnh
                             </span>
                           )}
-                          <button className="interactive-icon"><Hash className="w-5 h-5" /></button>
                         </div>
                         <div className="flex gap-3">
                           <button
