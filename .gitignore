@@ -1,13 +1,14 @@
-node_modules/
-build/
-dist/
-coverage/
-.DS_Store
-*.log
-.env*
-!.env.example
-!.env.production.example
-!.env.*.example
-backend/uploads/
-backend/generated/
-.vercel/
+# node_modules/
+# build/
+# dist/
+# coverage/
+# .DS_Store
+# *.log
+# .env*
+# !.env.example
+# !.env.production.example
+# !.env.*.example
+# backend/uploads/
+# backend/generated/
+# .vercel/
+abc

@@ -1,0 +1,33 @@
+
+> ktpm-monorepo@0.0.0 dev
+> concurrently -n backend,frontend -c green,cyan "npm run dev:backend" "npm run dev:frontend"
+
+[backend] 
+[backend] > ktpm-monorepo@0.0.0 dev:backend
+[backend] > npm run dev --workspace backend
+[backend] 
+[frontend] 
+[frontend] > ktpm-monorepo@0.0.0 dev:frontend
+[frontend] > npm run dev --workspace frontend
+[frontend] 
+[backend] 
+[backend] > ktpm-backend@0.0.0 dev
+[backend] > ts-node-dev --respawn --transpile-only src/local-server.ts
+[backend] 
+[frontend] 
+[frontend] > ktpm-frontend@0.0.0 dev
+[frontend] > vite --port=3000 --host=0.0.0.0
+[frontend] 
+[backend] [INFO] 10:02:49 ts-node-dev ver. 2.0.0 (using ts-node ver. 10.9.2, typescript ver. 5.8.3)
+[frontend] (node:10352) [DEP0205] DeprecationWarning: `module.register()` is deprecated. Use `module.registerHooks()` instead.
+[frontend] (Use `node --trace-deprecation ...` to show where the warning was created)
+[frontend] 
+[frontend]   [32m[1mVITE[22m v6.4.3[39m  [2mready in [0m[1m430[22m[2m[0m ms[22m
+[frontend] 
+[frontend]   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m3000[22m/[39m
+[frontend]   [32m➜[39m  [1mNetwork[22m: [36mhttp://10.7.96.130:[1m3000[22m/[39m
+[backend] ◇ injected env (13) from .env // tip: ⌘ enable debugging { debug: true }
+[backend] ◇ injected env (24) from ..\.vercel\.env.production.local // tip: ◈ encrypted .env [www.dotenvx.com]
+[backend] {"level":30,"time":1781060571055,"pid":2620,"hostname":"Quang","port":4000,"environment":"development","msg":"Backend server is running at http://localhost:4000"}
+[backend] prisma:query SELECT "public"."articles"."id", "public"."articles"."title", "public"."articles"."excerpt", "public"."articles"."content", "public"."articles"."author", "public"."articles"."readTime", "public"."articles"."image", "public"."articles"."category", "public"."articles"."status"::text, "public"."articles"."publishedAt", "public"."articles"."createdAt", "public"."articles"."updatedAt" FROM "public"."articles" WHERE "public"."articles"."status" = CAST($1::text AS "public"."ArticleStatus") ORDER BY "public"."articles"."publishedAt" DESC, "public"."articles"."createdAt" DESC OFFSET $2
+[backend] prisma:query SELECT "public"."articles"."id", "public"."articles"."title", "public"."articles"."excerpt", "public"."articles"."content", "public"."articles"."author", "public"."articles"."readTime", "public"."articles"."image", "public"."articles"."category", "public"."articles"."status"::text, "public"."articles"."publishedAt", "public"."articles"."createdAt", "public"."articles"."updatedAt" FROM "public"."articles" WHERE ("public"."articles"."id" = $1 AND "public"."articles"."status" = CAST($2::text AS "public"."ArticleStatus")) LIMIT $3 OFFSET $4

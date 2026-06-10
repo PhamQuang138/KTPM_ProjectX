@@ -1,0 +1,3 @@
+ALTER TABLE "users" ADD COLUMN "bio" TEXT;
+ALTER TABLE "users" ADD COLUMN "location" TEXT;
+ALTER TABLE "users" ADD COLUMN "focusBrands" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];

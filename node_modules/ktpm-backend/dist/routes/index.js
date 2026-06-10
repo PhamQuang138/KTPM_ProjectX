@@ -1,0 +1,26 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.apiRouter = void 0;
+const express_1 = require("express");
+const article_routes_1 = require("./article.routes");
+const admin_routes_1 = require("./admin.routes");
+const auth_routes_1 = require("./auth.routes");
+const garage_routes_1 = require("./garage.routes");
+const post_routes_1 = require("./post.routes");
+const upload_routes_1 = require("./upload.routes");
+const user_routes_1 = require("./user.routes");
+const vehicle_routes_1 = require("./vehicle.routes");
+const message_routes_1 = require("./message.routes");
+const notification_routes_1 = require("./notification.routes");
+exports.apiRouter = (0, express_1.Router)();
+exports.apiRouter.use('/auth', auth_routes_1.authRouter);
+exports.apiRouter.use('/admin', admin_routes_1.adminRouter);
+exports.apiRouter.use('/posts', post_routes_1.postRouter);
+exports.apiRouter.use('/uploads', upload_routes_1.uploadRouter);
+exports.apiRouter.use('/users', user_routes_1.userRouter);
+exports.apiRouter.use('/vehicles', vehicle_routes_1.vehicleRouter);
+exports.apiRouter.use('/garage', garage_routes_1.garageRouter);
+exports.apiRouter.use('/articles', article_routes_1.articleRouter);
+exports.apiRouter.use('/messages', message_routes_1.messageRouter);
+exports.apiRouter.use('/notifications', notification_routes_1.notificationRouter);
+//# sourceMappingURL=index.js.map
