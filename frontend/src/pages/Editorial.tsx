@@ -3,7 +3,7 @@ import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 import SocialPost, { SocialPostProps } from '../components/SocialPost';
 import MobileNav from '../components/MobileNav';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Plus, Sparkles, MessageSquare, Camera, PenTool, LayoutGrid, Bell, ShoppingBag, UserPlus, BadgeCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
@@ -63,6 +63,7 @@ export default function Editorial() {
   const [postError, setPostError] = useState('');
   const postInputRef = useRef<HTMLTextAreaElement>(null);
   const feedEndRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { isOpen } = useSidebarStore();
@@ -201,6 +202,16 @@ export default function Editorial() {
       isMounted = false;
     };
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    const targetId = location.hash.slice(1);
+    if (!targetId || !posts.length) return;
+    setVisiblePostCount(posts.length);
+    const timer = window.setTimeout(() => {
+      document.getElementById(targetId)?.scrollIntoView({behavior: 'smooth', block: 'center'});
+    }, 50);
+    return () => window.clearTimeout(timer);
+  }, [location.hash, posts]);
 
   return (
     <div className="min-h-screen bg-background">

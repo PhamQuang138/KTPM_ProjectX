@@ -9,6 +9,7 @@ import {userRouter} from './user.routes';
 import {vehicleRouter} from './vehicle.routes';
 import {messageRouter} from './message.routes';
 import {notificationRouter} from './notification.routes';
+import {aiRouter} from './ai.routes';
 
 export const apiRouter = Router();
 
@@ -22,3 +23,4 @@ apiRouter.use('/garage', garageRouter);
 apiRouter.use('/articles', articleRouter);
 apiRouter.use('/messages', messageRouter);
 apiRouter.use('/notifications', notificationRouter);
+apiRouter.use('/ai', aiRouter);

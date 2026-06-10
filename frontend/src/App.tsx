@@ -11,6 +11,7 @@ import PublicProfile from './pages/PublicProfile';
 import Favorites from './pages/Favorites';
 import MessageDock from './components/MessageDock';
 import ArticleDetail from './pages/ArticleDetail';
+import ChatbotDock from './components/ChatbotDock';
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <ChatbotDock />
       <MessageDock />
     </Router>
   );

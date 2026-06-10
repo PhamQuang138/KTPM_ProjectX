@@ -1,5 +1,5 @@
 import {FormEvent, useCallback, useEffect, useRef, useState} from 'react';
-import {ChevronLeft, ExternalLink, LoaderCircle, MessageCircle, Send, X} from 'lucide-react';
+import {ChevronLeft, ExternalLink, LoaderCircle, MessageCircle, Send, Share2, X} from 'lucide-react';
 import {Link} from 'react-router-dom';
 import {apiRequest} from '../lib/api';
 import {useAuthStore} from '../store/useAuthStore';
@@ -36,7 +36,15 @@ interface Conversation {
 
 export default function MessageDock() {
   const currentUser = useAuthStore((state) => state.user);
-  const {isOpen, contactTarget, activeConversationId, selectConversation, close} = useMessageStore();
+  const {
+    isOpen,
+    contactTarget,
+    activeConversationId,
+    pendingPostShare,
+    clearPostShare,
+    selectConversation,
+    close,
+  } = useMessageStore();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [content, setContent] = useState('');
@@ -132,6 +140,32 @@ export default function MessageDock() {
     }
   };
 
+  const selectOrShareConversation = async (conversationId: string) => {
+    if (!pendingPostShare) {
+      selectConversation(conversationId);
+      return;
+    }
+
+    setError('');
+    setIsSending(true);
+    try {
+      const excerpt = pendingPostShare.content.trim().slice(0, 220);
+      await apiRequest<ChatMessage>(`/messages/${conversationId}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({
+          content: `Chia sẻ bài viết của ${pendingPostShare.authorName}:\n${excerpt}\n/feed#post-${pendingPostShare.postId}`,
+        }),
+      });
+      clearPostShare();
+      selectConversation(conversationId);
+      await Promise.all([loadMessages(conversationId), loadConversations()]);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Không thể chia sẻ bài viết.');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   if (!isOpen || !currentUser) return null;
 
   const otherParticipant = activeConversation
@@ -165,6 +199,14 @@ export default function MessageDock() {
               <p className="truncate text-[10px] text-on-surface-variant">{activeConversation?.listing?.title ?? 'Trò chuyện trực tiếp'}</p>
             </div>
           </>
+        ) : pendingPostShare ? (
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <Share2 className="h-5 w-5 text-primary" />
+            <div className="min-w-0">
+              <h2 className="truncate font-display text-base font-bold">Chia sẻ bài viết</h2>
+              <p className="truncate text-[10px] text-on-surface-variant">Chọn người nhận</p>
+            </div>
+          </div>
         ) : (
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <MessageCircle className="h-5 w-5 text-primary" />
@@ -192,7 +234,8 @@ export default function MessageDock() {
               <button
                 key={conversation.id}
                 type="button"
-                onClick={() => selectConversation(conversation.id)}
+                onClick={() => void selectOrShareConversation(conversation.id)}
+                disabled={isSending}
                 className="flex w-full items-center gap-3 rounded-xl p-3 text-left hover:bg-white/5"
               >
                 <img
@@ -218,7 +261,9 @@ export default function MessageDock() {
           {conversations.length === 0 && (
             <div className="flex h-full flex-col items-center justify-center px-8 text-center text-sm text-on-surface-variant">
               <MessageCircle className="mb-3 h-8 w-8 text-primary" />
-              Chưa có cuộc trò chuyện nào.
+              {pendingPostShare
+                ? 'Bạn chưa có cuộc trò chuyện. Hãy mở hồ sơ người nhận và nhắn tin trước.'
+                : 'Chưa có cuộc trò chuyện nào.'}
             </div>
           )}
         </div>
@@ -264,7 +309,23 @@ export default function MessageDock() {
                         : 'rounded-bl-md bg-surface-container-high text-on-surface'
                     }`}
                   >
-                    <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                    <div className="break-words">
+                      {message.content.split('\n').map((line, index) =>
+                        line.startsWith('/feed#post-') ? (
+                          <Link
+                            key={`${message.id}-${index}`}
+                            to={line}
+                            className="mt-2 flex items-center gap-1 font-bold underline"
+                          >
+                            Mở bài viết <ExternalLink className="h-3.5 w-3.5" />
+                          </Link>
+                        ) : (
+                          <span key={`${message.id}-${index}`} className="block whitespace-pre-wrap">
+                            {line}
+                          </span>
+                        ),
+                      )}
+                    </div>
                     <p className="mt-1 text-right text-[9px] opacity-60">
                       {new Date(message.createdAt).toLocaleTimeString('vi-VN', {
                         hour: '2-digit',

@@ -1,8 +1,9 @@
-import { Heart, MessageSquare, Bookmark, MoreHorizontal, CheckCircle2, Pencil, Trash2, X } from 'lucide-react';
+import { Heart, MessageSquare, Bookmark, MoreHorizontal, CheckCircle2, Pencil, Send, Trash2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FormEvent, ReactNode, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
+import { useMessageStore } from '../store/useMessageStore';
 import { apiRequest } from '../lib/api';
 import ImageLightbox from './ImageLightbox';
 
@@ -101,6 +102,7 @@ export default function SocialPost({
   const [isSavingCaption, setIsSavingCaption] = useState(false);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
   const currentUser = useAuthStore((state) => state.user);
+  const sharePost = useMessageStore((state) => state.sharePost);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const currentUserAvatar = currentUser?.avatar ?? `https://i.pravatar.cc/100?u=${encodeURIComponent(currentUser?.email ?? 'guest')}`;
   const authorProfilePath = author.id ? `/profile/${author.id}` : undefined;
@@ -235,6 +237,15 @@ export default function SocialPost({
   };
 
   const imageSources = (images?.length ? images : image ? [image] : []).filter(Boolean);
+  const shareInMessage = () => {
+    if (!id) return;
+    sharePost({
+      postId: id,
+      authorName: author.name,
+      content: displayContent,
+      image: imageSources[0],
+    });
+  };
   const markImageFailed = (source: string) => {
     setFailedImages((current) => new Set(current).add(source));
   };
@@ -452,6 +463,14 @@ export default function SocialPost({
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={shareInMessage}
+            className="interactive-icon text-on-surface-variant"
+            title="Gửi bài viết qua tin nhắn"
+          >
+            <Send className="h-4 w-4" />
+          </button>
           <button 
             onClick={toggleBookmark}
             className={`interactive-icon ${isBookmarked ? 'text-primary' : 'text-on-surface-variant'}`}
