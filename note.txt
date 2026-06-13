@@ -137,9 +137,12 @@ Tro ly tim xe AI:
   Aston Martin.
 - Chatbot giu lich su gan nhat de xu ly cau hoi noi tiep va co bo loc local cho
   cac truy van tim xe co cau truc, giup tranh phu thuoc timeout cua OpenRouter.
+- So luong duoc nhan tu ca chu so va chu Viet nhu "3 mau", "3 chiec" hoac
+  "ba xe"; yeu cau nay duoc uu tien hon gia tri mac dinh va duoc ke thua trong
+  cac cau hoi noi tiep.
 - Backend truy van listing that trong PostgreSQL va xep hang theo bo loc,
   tu khoa, favorite va comment; AI khong tu tao listing.
-- Toi da 20 ket qua; mac dinh 6 ket qua.
+- Toi da 20 ket qua; mac dinh 6 khi nguoi dung khong noi so luong.
 - Anh AI chi duoc tai tu localhost, PUBLIC_BACKEND_URL hoac Vercel Blob;
   chi chap nhan JPEG, PNG, WEBP va toi da 4 MB o backend.
 
