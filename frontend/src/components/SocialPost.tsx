@@ -102,7 +102,7 @@ export default function SocialPost({
   const [isSavingCaption, setIsSavingCaption] = useState(false);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
   const currentUser = useAuthStore((state) => state.user);
-  const sharePost = useMessageStore((state) => state.sharePost);
+  const shareContent = useMessageStore((state) => state.shareContent);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const currentUserAvatar = currentUser?.avatar ?? `https://i.pravatar.cc/100?u=${encodeURIComponent(currentUser?.email ?? 'guest')}`;
   const authorProfilePath = author.id ? `/profile/${author.id}` : undefined;
@@ -239,9 +239,10 @@ export default function SocialPost({
   const imageSources = (images?.length ? images : image ? [image] : []).filter(Boolean);
   const shareInMessage = () => {
     if (!id) return;
-    sharePost({
-      postId: id,
-      authorName: author.name,
+    shareContent({
+      type: 'community',
+      id,
+      title: `Bài viết của ${author.name}`,
       content: displayContent,
       image: imageSources[0],
     });

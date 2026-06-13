@@ -104,6 +104,8 @@ Garage va cho xe:
 - Bo loc gom category, condition, make, bodyType, fuelType, transmission va nam.
 - Sort ho tro newest, trending va oldest.
 - Thanh vien co the luu tin, binh luan va danh gia nguoi ban.
+- Tin xe co nut "Chia se" tren trang chi tiet. Nguoi dung chon mot conversation,
+  he thong gui ten xe, gia, mo ta ngan va duong dan /market/:id vao tin nhan.
 - Catalog tham khao hien co 150 tin khong trung tieu de, trong do co 56 mau xe
   chau Au va 16 tin thuoc nhom Exotics.
 - Gia cac hang trong bang cap nhat ngay 13/06/2026 duoc rang buoc theo min/max
@@ -118,6 +120,8 @@ Garage va cho xe:
 Nhan tin va thong bao:
 - Co the tao conversation truc tiep giua hai thanh vien.
 - Nhan "Lien he" tao/mo conversation gan voi listing dang quan tam.
+- Co the chia se ca bai cong dong va tin Marketplace vao conversation da co;
+  duong dan trong tin nhan duoc hien thanh nut mo bai viet hoac mo tin xe.
 - Moi conversation tai toi da 200 message va danh dau message da doc khi mo.
 - Frontend polling message va danh sach conversation moi 5 giay khi dock dang mo.
 - Gui message, like/comment/follow va tuong tac marketplace co the tao Notification.

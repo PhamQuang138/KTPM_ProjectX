@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {Link, Navigate, useParams} from 'react-router-dom';
-import {ArrowLeft, CheckCircle2, Heart, MapPin, MessageCircle, Star, ZoomIn} from 'lucide-react';
+import {ArrowLeft, CheckCircle2, Heart, MapPin, MessageCircle, Share2, Star, ZoomIn} from 'lucide-react';
 import TopNav from '../components/TopNav';
 import MobileNav from '../components/MobileNav';
 import {apiRequest} from '../lib/api';
@@ -56,6 +56,7 @@ export default function VehicleDetail() {
   const {id} = useParams();
   const currentUser = useAuthStore((state) => state.user);
   const startContact = useMessageStore((state) => state.startContact);
+  const shareContent = useMessageStore((state) => state.shareContent);
   const [vehicle, setVehicle] = useState<VehicleDetailData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState('');
@@ -206,7 +207,7 @@ export default function VehicleDetail() {
                     <p className="text-xs text-on-surface-variant">{vehicle.seller.email}</p>
                   </div>
                 </Link>
-                <div className="grid grid-cols-2 gap-3 mt-8">
+                <div className="grid grid-cols-3 gap-3 mt-8">
                   <button
                     type="button"
                     disabled={currentUser?.id === vehicle.seller.id}
@@ -227,6 +228,23 @@ export default function VehicleDetail() {
                   <button onClick={toggleFavorite} className="btn-secondary py-4 rounded-xl flex items-center justify-center gap-2">
                     <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current text-red-400' : ''}`} />
                     Lưu ({favoriteCount})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      shareContent({
+                        type: 'marketplace',
+                        id: vehicle.id,
+                        title: vehicle.title,
+                        price: vehicle.price,
+                        content: listingDescription || `${vehicle.title} tại ${vehicle.location}`,
+                        image: vehicle.vehicle?.image,
+                      })
+                    }
+                    className="btn-secondary py-4 rounded-xl flex items-center justify-center gap-2"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Chia sẻ
                   </button>
                 </div>
                 <div className="mt-8 pt-6 border-t border-white/10">

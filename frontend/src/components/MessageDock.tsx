@@ -40,8 +40,8 @@ export default function MessageDock() {
     isOpen,
     contactTarget,
     activeConversationId,
-    pendingPostShare,
-    clearPostShare,
+    pendingShare,
+    clearShare,
     selectConversation,
     close,
   } = useMessageStore();
@@ -141,7 +141,7 @@ export default function MessageDock() {
   };
 
   const selectOrShareConversation = async (conversationId: string) => {
-    if (!pendingPostShare) {
+    if (!pendingShare) {
       selectConversation(conversationId);
       return;
     }
@@ -149,18 +149,25 @@ export default function MessageDock() {
     setError('');
     setIsSending(true);
     try {
-      const excerpt = pendingPostShare.content.trim().slice(0, 220);
+      const excerpt = pendingShare.content.trim().slice(0, 220);
+      const isMarketplace = pendingShare.type === 'marketplace';
+      const sharePath = isMarketplace
+        ? `/market/${pendingShare.id}`
+        : `/feed#post-${pendingShare.id}`;
+      const heading = isMarketplace
+        ? `Chia sẻ tin xe: ${pendingShare.title}${pendingShare.price ? ` - ${pendingShare.price}` : ''}`
+        : `Chia sẻ ${pendingShare.title}`;
       await apiRequest<ChatMessage>(`/messages/${conversationId}/messages`, {
         method: 'POST',
         body: JSON.stringify({
-          content: `Chia sẻ bài viết của ${pendingPostShare.authorName}:\n${excerpt}\n/feed#post-${pendingPostShare.postId}`,
+          content: `${heading}:\n${excerpt}\n${sharePath}`,
         }),
       });
-      clearPostShare();
+      clearShare();
       selectConversation(conversationId);
       await Promise.all([loadMessages(conversationId), loadConversations()]);
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Không thể chia sẻ bài viết.');
+      setError(requestError instanceof Error ? requestError.message : 'Không thể chia sẻ nội dung.');
     } finally {
       setIsSending(false);
     }
@@ -199,11 +206,13 @@ export default function MessageDock() {
               <p className="truncate text-[10px] text-on-surface-variant">{activeConversation?.listing?.title ?? 'Trò chuyện trực tiếp'}</p>
             </div>
           </>
-        ) : pendingPostShare ? (
+        ) : pendingShare ? (
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <Share2 className="h-5 w-5 text-primary" />
             <div className="min-w-0">
-              <h2 className="truncate font-display text-base font-bold">Chia sẻ bài viết</h2>
+              <h2 className="truncate font-display text-base font-bold">
+                {pendingShare.type === 'marketplace' ? 'Chia sẻ tin xe' : 'Chia sẻ bài viết'}
+              </h2>
               <p className="truncate text-[10px] text-on-surface-variant">Chọn người nhận</p>
             </div>
           </div>
@@ -261,7 +270,7 @@ export default function MessageDock() {
           {conversations.length === 0 && (
             <div className="flex h-full flex-col items-center justify-center px-8 text-center text-sm text-on-surface-variant">
               <MessageCircle className="mb-3 h-8 w-8 text-primary" />
-              {pendingPostShare
+              {pendingShare
                 ? 'Bạn chưa có cuộc trò chuyện. Hãy mở hồ sơ người nhận và nhắn tin trước.'
                 : 'Chưa có cuộc trò chuyện nào.'}
             </div>
@@ -311,13 +320,14 @@ export default function MessageDock() {
                   >
                     <div className="break-words">
                       {message.content.split('\n').map((line, index) =>
-                        line.startsWith('/feed#post-') ? (
+                        line.startsWith('/feed#post-') || line.startsWith('/market/') ? (
                           <Link
                             key={`${message.id}-${index}`}
                             to={line}
                             className="mt-2 flex items-center gap-1 font-bold underline"
                           >
-                            Mở bài viết <ExternalLink className="h-3.5 w-3.5" />
+                            {line.startsWith('/market/') ? 'Mở tin xe' : 'Mở bài viết'}
+                            <ExternalLink className="h-3.5 w-3.5" />
                           </Link>
                         ) : (
                           <span key={`${message.id}-${index}`} className="block whitespace-pre-wrap">
