@@ -20,7 +20,6 @@
     "concurrently": "^8.2.2"
   },
   "dependencies": {
-    "@vercel/analytics": "^2.0.1",
     "openai": "^6.42.0"
   }
 }

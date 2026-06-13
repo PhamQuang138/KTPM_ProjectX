@@ -5,7 +5,6 @@ import helmet from 'helmet';
 import multer from 'multer';
 import path from 'path';
 import {apiRouter} from './routes';
-import { Analytics } from "@vercel/analytics/next"
 
 const parseNumber = (value: string | undefined, fallback: number): number => {
   const parsed = Number(value);
