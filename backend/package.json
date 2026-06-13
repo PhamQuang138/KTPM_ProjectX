@@ -26,6 +26,7 @@
     "db:seed-marketplace-asia": "ts-node --transpile-only scripts/seed-marketplace-asia.ts",
     "db:seed-community-asia-extra": "ts-node --transpile-only scripts/seed-community-and-asia-extra.ts",
     "db:seed-daily-content": "ts-node --transpile-only scripts/seed-daily-content-expansion.ts",
+    "db:audit-daily-content": "ts-node --transpile-only scripts/audit-daily-content.ts",
     "db:backfill-vehicle-search": "ts-node --transpile-only scripts/backfill-vehicle-search-metadata.ts",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio"

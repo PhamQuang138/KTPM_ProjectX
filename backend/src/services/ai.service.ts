@@ -17,7 +17,7 @@ const vehicleIntentSchema = z.object({
   answer: z.string().trim().min(1).max(2000),
   shouldSearch: z.boolean().default(true),
   filters: z.object({
-      makes: z.array(z.string().trim().min(1).max(80)).max(8).default([]),
+      makes: z.array(z.string().trim().min(1).max(80)).max(20).default([]),
       models: z.array(z.string().trim().min(1).max(80)).max(8).default([]),
       bodyTypes: z.array(z.string().trim().min(1).max(80)).max(8).default([]),
       conditions: z.array(z.string().trim().min(1).max(40)).max(4).default([]),
@@ -148,7 +148,9 @@ const fallbackIntent = (message: string, history: ConversationMessage[]): Vehicl
   const current = normalize(message);
   const knownMakes = [
     'Toyota', 'Honda', 'Mazda', 'Mitsubishi', 'Nissan', 'Suzuki', 'Subaru', 'Lexus',
-    'Hyundai', 'Kia', 'Genesis', 'Ford', 'VinFast',
+    'Hyundai', 'Kia', 'Genesis', 'Ford', 'VinFast', 'BMW', 'Mercedes-Benz', 'Audi',
+    'Volkswagen', 'Volvo', 'Peugeot', 'Renault', 'Porsche', 'Land Rover', 'Bentley',
+    'Ferrari', 'Lamborghini', 'McLaren', 'Aston Martin',
   ];
   const makes = knownMakes.filter((make) => conversation.includes(normalize(make)));
   if (current.includes('xe nhat') || current.includes('nhat ban')) {
@@ -156,6 +158,12 @@ const fallbackIntent = (message: string, history: ConversationMessage[]): Vehicl
   }
   if (current.includes('xe han') || current.includes('han quoc')) {
     makes.push('Hyundai', 'Kia', 'Genesis');
+  }
+  if (current.includes('xe chau au') || current.includes('chau au') || current.includes('xe duc')) {
+    makes.push(
+      'BMW', 'Mercedes-Benz', 'Audi', 'Volkswagen', 'Volvo', 'Peugeot', 'Renault',
+      'Porsche', 'Land Rover', 'Bentley', 'Ferrari', 'Lamborghini', 'McLaren', 'Aston Martin',
+    );
   }
 
   const bodyTypes = [
@@ -167,13 +175,28 @@ const fallbackIntent = (message: string, history: ConversationMessage[]): Vehicl
     ['MPV', ['mpv', '7 cho']],
   ].filter(([, aliases]) => (aliases as string[]).some((alias) => conversation.includes(alias)))
     .map(([bodyType]) => bodyType as string);
-  const limitMatch = current.match(/\b(\d{1,2})\s*(?:xe|chiec|ket qua)?\b/);
+  const limitMatch = current.match(/\b(\d{1,2})\s*(?:mau\s*)?(?:xe|chiec|ket qua)\b/);
   const underMillions = current.match(/(?:duoi|toi da|khong qua)\s*(\d{2,4})\s*trieu/);
   const rangeMillions = current.match(/(?:tu|khoang)\s*(\d{2,4})\s*(?:den|-)\s*(\d{2,4})\s*trieu/);
+  const billionDecimal = current.match(/(\d+)\s*(?:ty|ti)\s*(\d{1,2})?/);
+  const aroundBillion = /(?:tren duoi|khoang|tam|xap xi)/.test(current) && billionDecimal
+    ? (Number(billionDecimal[1]) + Number(`0.${billionDecimal[2] ?? 0}`)) * 1_000_000_000
+    : null;
   const asksForGoodValue = ['gia tot', 'gia hop ly', 'dang tien'].some((phrase) => current.includes(phrase));
+  const regionLabel = current.includes('chau au')
+    ? ' châu Âu'
+    : current.includes('xe nhat') || current.includes('nhat ban')
+      ? ' Nhật'
+      : current.includes('xe han') || current.includes('han quoc')
+        ? ' Hàn Quốc'
+        : '';
+  const requestedCount = limitMatch ? Math.min(Number(limitMatch[1]), 20) : null;
+  const budgetLabel = aroundBillion
+    ? ` trong khoảng ${(aroundBillion * 0.8 / 1_000_000_000).toLocaleString('vi-VN')} đến ${(aroundBillion * 1.2 / 1_000_000_000).toLocaleString('vi-VN')} tỷ đồng`
+    : '';
 
   return vehicleIntentSchema.parse({
-    answer: 'Tôi sẽ dùng các tiêu chí trong cuộc trò chuyện để tìm xe phù hợp trong chợ xe.',
+    answer: `Tôi sẽ tìm ${requestedCount ? `${requestedCount} ` : ''}mẫu xe${regionLabel}${budgetLabel}.`,
     shouldSearch: true,
     filters: {
       makes: [...new Set(makes)],
@@ -184,20 +207,43 @@ const fallbackIntent = (message: string, history: ConversationMessage[]): Vehicl
       transmissions: [],
       minYear: null,
       maxYear: null,
-      minPriceVnd: rangeMillions ? Number(rangeMillions[1]) * 1_000_000 : asksForGoodValue ? 500_000_000 : null,
+      minPriceVnd: rangeMillions
+        ? Number(rangeMillions[1]) * 1_000_000
+        : aroundBillion
+          ? Math.round(aroundBillion * 0.8)
+          : asksForGoodValue
+            ? 500_000_000
+            : null,
       maxPriceVnd: rangeMillions
         ? Number(rangeMillions[2]) * 1_000_000
         : underMillions
           ? Number(underMillions[1]) * 1_000_000
+          : aroundBillion
+            ? Math.round(aroundBillion * 1.2)
           : asksForGoodValue
             ? 1_000_000_000
             : null,
       location: null,
       keywords: [],
-      limit: limitMatch ? Math.min(Number(limitMatch[1]), 20) : null,
+      limit: requestedCount,
     },
     imageAnalysis: null,
   });
+};
+
+const shouldUseLocalSearch = (message: string): boolean => {
+  const normalizedMessage = normalize(message);
+  const rawMessage = message.toLowerCase();
+  const hasSearchIntent =
+    ['tim', 'goi y', 'cho toi', 'can mua'].some((word) => normalizedMessage.includes(word)) ||
+    ['tìm', 'gợi ý', 'cho tôi', 'cần mua'].some((word) => rawMessage.includes(word));
+  const hasStructuredFilter = [
+    'xe chau au', 'chau au', 'xe nhat', 'xe han', 'suv', 'sedan', 'ban tai',
+    'trieu', 'ty', 'ti', 'gia', 'duoi', 'khoang', 'tren duoi',
+  ].some((word) => normalizedMessage.includes(word)) ||
+    ['châu âu', 'xe nhật', 'xe hàn', 'triệu', 'tỷ', 'tỉ', 'giá', 'dưới', 'khoảng', 'trên dưới']
+      .some((word) => rawMessage.includes(word));
+  return hasSearchIntent && hasStructuredFilter;
 };
 
 const imageUrlAllowed = (imageUrl: string) => {
@@ -233,6 +279,10 @@ const analyzeRequest = async (
   imageUrl?: string,
   history: ConversationMessage[] = [],
 ): Promise<VehicleIntent> => {
+  if (!imageUrl && shouldUseLocalSearch(message)) {
+    return fallbackIntent(message, history);
+  }
+
   const {apiKey, model} = getOpenRouterConfig();
   const userContent: Array<
     {type: 'text'; text: string} |
@@ -267,6 +317,7 @@ Quy tắc ngân sách:
 Quy tắc xuất xứ:
 - "Xe Nhật" gồm Toyota, Honda, Mazda, Mitsubishi, Nissan, Suzuki, Subaru và Lexus.
 - "Xe Hàn" gồm Hyundai, Kia và Genesis.
+- "Xe châu Âu" gồm BMW, Mercedes-Benz, Audi, Volkswagen, Volvo, Peugeot, Renault, Porsche, Land Rover, Bentley, Ferrari, Lamborghini, McLaren và Aston Martin.
 - Khi người dùng nói theo xuất xứ, điền các hãng tương ứng vào filters.makes, không chỉ đưa "xe Nhật" hoặc "xe Hàn" vào keywords.
 
 Đây là hội thoại nhiều lượt. Hãy dùng lịch sử gần nhất để hiểu các câu nối tiếp như "còn xe Nhật thì sao", "loại rẻ hơn", "đời mới hơn" hoặc "3 chiếc thôi". Giữ lại tiêu chí trước đó nếu người dùng không yêu cầu thay đổi; tiêu chí mới sẽ bổ sung hoặc thay thế tiêu chí liên quan.
@@ -353,12 +404,20 @@ const matchesAny = (value: string | null | undefined, expected: string[]) => {
 
 export const aiService = {
   async chat(message: string, imageUrl?: string, history: ConversationMessage[] = []) {
-    const intent = await analyzeRequest(message, imageUrl, history);
+    const localResolution = !imageUrl && shouldUseLocalSearch(message);
+    const intent = localResolution
+      ? fallbackIntent(message, history)
+      : await analyzeRequest(message, imageUrl, history);
     const normalizedMessage = normalize(message);
     const regionalMakes = normalizedMessage.includes('xe nhat') || normalizedMessage.includes('nhat ban')
       ? ['Toyota', 'Honda', 'Mazda', 'Mitsubishi', 'Nissan', 'Suzuki', 'Subaru', 'Lexus']
       : normalizedMessage.includes('xe han') || normalizedMessage.includes('han quoc')
         ? ['Hyundai', 'Kia', 'Genesis']
+        : normalizedMessage.includes('xe chau au') || normalizedMessage.includes('chau au')
+          ? [
+            'BMW', 'Mercedes-Benz', 'Audi', 'Volkswagen', 'Volvo', 'Peugeot', 'Renault',
+            'Porsche', 'Land Rover', 'Bentley', 'Ferrari', 'Lamborghini', 'McLaren', 'Aston Martin',
+          ]
         : [];
     if (regionalMakes.length) {
       intent.filters.makes = [...new Set([...intent.filters.makes, ...regionalMakes])];
@@ -411,6 +470,10 @@ export const aiService = {
       ...models,
       ...bodyTypes,
     ].map(normalize).filter(Boolean);
+    const requireDistinctModels =
+      normalizedMessage.includes('mau xe') ||
+      message.toLowerCase().includes('mẫu xe');
+    const seenModels = new Set<string>();
 
     const ranked = candidates
       .map((listing) => {
@@ -462,6 +525,13 @@ export const aiService = {
         return score > 0 || (!keywords.length && !makes.length && !models.length);
       })
       .sort((left, right) => right.score - left.score)
+      .filter(({listing}) => {
+        if (!requireDistinctModels) return true;
+        const key = normalize(`${listing.vehicle?.make} ${listing.vehicle?.model}`);
+        if (!key || seenModels.has(key)) return false;
+        seenModels.add(key);
+        return true;
+      })
       .slice(0, limit)
       .map(({listing, score}) => ({
         id: listing.id,
@@ -498,6 +568,7 @@ export const aiService = {
       },
       imageAnalysis,
       listings: ranked,
+      resolution: localResolution ? 'local' : 'ai',
     };
   },
 };

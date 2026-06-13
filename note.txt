@@ -104,6 +104,16 @@ Garage va cho xe:
 - Bo loc gom category, condition, make, bodyType, fuelType, transmission va nam.
 - Sort ho tro newest, trending va oldest.
 - Thanh vien co the luu tin, binh luan va danh gia nguoi ban.
+- Catalog tham khao hien co 150 tin khong trung tieu de, trong do co 56 mau xe
+  chau Au va 16 tin thuoc nhom Exotics.
+- Gia cac hang trong bang cap nhat ngay 13/06/2026 duoc rang buoc theo min/max
+  ngay trong script seed, ke ca khi sinh them ban doi cu.
+- Mo ta catalog duoc viet theo thong tin dong xe, muc dich su dung va gia tham
+  khao; khong gan lich su, odo hay chu xe gia. Moi tin deu ghi ro khong phai
+  tin rao truc tiep va kem URL nguon anh Wikipedia/Wikimedia Commons.
+- Chay "npm run db:seed-daily-content --workspace backend" de tao lai catalog.
+- Chay "npm run db:audit-daily-content --workspace backend" de kiem tra so
+  luong, trung tieu de, gia, mo ta, nguon anh va nhom xe chau Au/Exotics.
 
 Nhan tin va thong bao:
 - Co the tao conversation truc tiep giua hai thanh vien.
@@ -120,7 +130,13 @@ Tro ly tim xe AI:
 - Frontend nen anh ve WEBP, toi da 1920 px truoc khi upload.
 - Backend dung OpenRouter structured output de tach hang, mau, kieu xe, nam, gia,
   dia diem, nhien lieu, hop so, tu khoa va so luong mong muon.
-- Neu gia duoc nhap bang VND, prompt yeu cau model quy doi gan dung sang USD.
+- Gia duoc hieu va loc truc tiep bang VND, khong quy doi sang USD.
+- Cau hoi "tren duoi 1 ty 5" duoc hieu la khoang tham khao 1,2-1,8 ty dong.
+- Bo loc xe chau Au gom BMW, Mercedes-Benz, Audi, Volkswagen, Volvo, Peugeot,
+  Renault, Porsche, Land Rover, Bentley, Ferrari, Lamborghini, McLaren va
+  Aston Martin.
+- Chatbot giu lich su gan nhat de xu ly cau hoi noi tiep va co bo loc local cho
+  cac truy van tim xe co cau truc, giup tranh phu thuoc timeout cua OpenRouter.
 - Backend truy van listing that trong PostgreSQL va xep hang theo bo loc,
   tu khoa, favorite va comment; AI khong tu tao listing.
 - Toi da 20 ket qua; mac dinh 6 ket qua.

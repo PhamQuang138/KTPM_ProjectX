@@ -6,7 +6,7 @@ const COMMUNITY_MARKER = 'CARHUB_DAILY_COMMUNITY_V1';
 const MARKET_MARKER = 'CARHUB_DAILY_MARKET_V1';
 const LEGACY_COMMUNITY_MARKER = 'CARHUB_COMMUNITY_SEED_V2';
 const COMMUNITY_POST_COUNT = 45;
-const MARKET_LISTING_COUNT = 100;
+const MARKET_LISTING_COUNT = 150;
 
 const locations = [
   'Hà Nội',
@@ -82,6 +82,7 @@ interface DailyVehicle {
   transmission: string;
   mileage: number;
   specs: string[];
+  category?: 'Daily' | 'Exotics';
 }
 
 const dailyVehicles: DailyVehicle[] = [
@@ -104,17 +105,17 @@ const dailyVehicles: DailyVehicle[] = [
   {make: 'Toyota', model: 'Camry', wikipediaPage: 'Toyota Camry', year: 2021, price: 980, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 41000, specs: []},
   {make: 'Toyota', model: 'Fortuner', wikipediaPage: 'Toyota Fortuner', year: 2022, price: 1050, bodyType: 'SUV', fuelType: 'Diesel', transmission: 'Automatic', mileage: 36000, specs: []},
   {make: 'Toyota', model: 'Innova Cross', wikipediaPage: 'Toyota Innova', year: 2023, price: 760, bodyType: 'MPV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 18000, specs: []},
-  {make: 'Honda', model: 'City', wikipediaPage: 'Honda City', year: 2022, price: 520, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 29000, specs: []},
+  {make: 'Honda', model: 'City', wikipediaPage: 'Honda City', year: 2022, price: 418, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 29000, specs: []},
   {make: 'Honda', model: 'Civic', wikipediaPage: 'Honda Civic (eleventh generation)', year: 2022, price: 720, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 25000, specs: []},
   {make: 'Honda', model: 'CR-V', wikipediaPage: 'Honda CR-V', year: 2021, price: 850, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 42000, specs: []},
   {make: 'Honda', model: 'HR-V', wikipediaPage: 'Honda HR-V', year: 2023, price: 680, bodyType: 'Crossover', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 16000, specs: []},
-  {make: 'Hyundai', model: 'Grand i10', wikipediaPage: 'Hyundai i10', year: 2022, price: 350, bodyType: 'Hatchback', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 34000, specs: []},
+  {make: 'Hyundai', model: 'Grand i10', wikipediaPage: 'Hyundai i10', year: 2022, price: 426, bodyType: 'Hatchback', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 34000, specs: []},
   {make: 'Hyundai', model: 'Accent', wikipediaPage: 'Hyundai Accent', year: 2022, price: 470, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 31000, specs: []},
   {make: 'Hyundai', model: 'Creta', wikipediaPage: 'Hyundai Creta', year: 2023, price: 620, bodyType: 'Crossover', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 19000, specs: []},
   {make: 'Hyundai', model: 'Tucson', wikipediaPage: 'Hyundai Tucson', year: 2022, price: 780, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 28000, specs: []},
   {make: 'Hyundai', model: 'Santa Fe', wikipediaPage: 'Hyundai Santa Fe', year: 2021, price: 920, bodyType: 'SUV', fuelType: 'Diesel', transmission: 'Automatic', mileage: 47000, specs: []},
-  {make: 'Kia', model: 'Morning', wikipediaPage: 'Kia Picanto', year: 2022, price: 340, bodyType: 'Hatchback', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 30000, specs: []},
-  {make: 'Kia', model: 'Soluto', wikipediaPage: 'Kia Pegas', year: 2021, price: 330, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 44000, specs: []},
+  {make: 'Kia', model: 'Morning', wikipediaPage: 'Kia Picanto', year: 2022, price: 359, bodyType: 'Hatchback', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 30000, specs: []},
+  {make: 'Kia', model: 'Soluto', wikipediaPage: 'Kia Pegas', year: 2021, price: 359, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 44000, specs: []},
   {make: 'Kia', model: 'K3', wikipediaPage: 'Kia Forte', year: 2022, price: 560, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 26000, specs: []},
   {make: 'Kia', model: 'Seltos', wikipediaPage: 'Kia Seltos', year: 2022, price: 610, bodyType: 'Crossover', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 33000, specs: []},
   {make: 'Kia', model: 'Sportage', wikipediaPage: 'Kia Sportage', year: 2023, price: 820, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 17000, specs: []},
@@ -129,10 +130,80 @@ const dailyVehicles: DailyVehicle[] = [
   {make: 'Ford', model: 'Territory', wikipediaPage: 'Ford Territory (China)', year: 2023, price: 760, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 18000, specs: []},
   {make: 'Ford', model: 'Ranger', wikipediaPage: 'Ford Ranger', year: 2022, price: 800, bodyType: 'Pickup', fuelType: 'Diesel', transmission: 'Automatic', mileage: 42000, specs: []},
   {make: 'Ford', model: 'Everest', wikipediaPage: 'Ford Everest', year: 2022, price: 1100, bodyType: 'SUV', fuelType: 'Diesel', transmission: 'Automatic', mileage: 39000, specs: []},
-  {make: 'Nissan', model: 'Almera', wikipediaPage: 'Nissan Almera', year: 2022, price: 450, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 30000, specs: []},
+  {make: 'Nissan', model: 'Almera', wikipediaPage: 'Nissan Almera', year: 2022, price: 539, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 30000, specs: []},
   {make: 'Nissan', model: 'Navara', wikipediaPage: 'Nissan Navara', year: 2021, price: 680, bodyType: 'Pickup', fuelType: 'Diesel', transmission: 'Automatic', mileage: 51000, specs: []},
   {make: 'Suzuki', model: 'XL7', wikipediaPage: 'Suzuki XL7', year: 2023, price: 560, bodyType: 'MPV', fuelType: 'Hybrid', transmission: 'Automatic', mileage: 15000, specs: []},
   {make: 'VinFast', model: 'VF 6', wikipediaPage: 'VinFast VF 6', year: 2024, price: 680, bodyType: 'Crossover', fuelType: 'Electric', transmission: 'Automatic', mileage: 8000, specs: []},
+  {make: 'BMW', model: '3 Series', wikipediaPage: 'BMW 3 Series', year: 2024, price: 1899, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'BMW', model: '5 Series', wikipediaPage: 'BMW 5 Series', year: 2024, price: 2599, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'BMW', model: '7 Series', wikipediaPage: 'BMW 7 Series', year: 2024, price: 4999, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'BMW', model: 'X1', wikipediaPage: 'BMW X1', year: 2024, price: 1999, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'BMW', model: 'X3', wikipediaPage: 'BMW X3', year: 2024, price: 2399, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'BMW', model: 'X5', wikipediaPage: 'BMW X5', year: 2024, price: 4199, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'BMW', model: 'i4', wikipediaPage: 'BMW i4', year: 2024, price: 3799, bodyType: 'Sedan', fuelType: 'Electric', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'BMW', model: 'iX', wikipediaPage: 'BMW iX', year: 2024, price: 5499, bodyType: 'SUV', fuelType: 'Electric', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Mercedes-Benz', model: 'C-Class', wikipediaPage: 'Mercedes-Benz C-Class', year: 2024, price: 1599, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Mercedes-Benz', model: 'E-Class', wikipediaPage: 'Mercedes-Benz E-Class', year: 2024, price: 2299, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Mercedes-Benz', model: 'S-Class', wikipediaPage: 'Mercedes-Benz S-Class', year: 2024, price: 5099, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Mercedes-Benz', model: 'CLA', wikipediaPage: 'Mercedes-Benz CLA-Class', year: 2024, price: 1899, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Mercedes-Benz', model: 'GLA', wikipediaPage: 'Mercedes-Benz GLA', year: 2024, price: 1899, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Mercedes-Benz', model: 'GLC', wikipediaPage: 'Mercedes-Benz GLC', year: 2024, price: 2399, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Mercedes-Benz', model: 'GLE', wikipediaPage: 'Mercedes-Benz GLE-Class', year: 2024, price: 4199, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Mercedes-Benz', model: 'G-Class', wikipediaPage: 'Mercedes-Benz G-Class', year: 2024, price: 10950, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
+  {make: 'Mercedes-Benz', model: 'EQS', wikipediaPage: 'Mercedes-Benz EQS', year: 2024, price: 5999, bodyType: 'Sedan', fuelType: 'Electric', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Audi', model: 'A3', wikipediaPage: 'Audi A3', year: 2024, price: 1599, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Audi', model: 'A4', wikipediaPage: 'Audi A4', year: 2024, price: 1899, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Audi', model: 'A6', wikipediaPage: 'Audi A6', year: 2024, price: 2499, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Audi', model: 'Q3', wikipediaPage: 'Audi Q3', year: 2024, price: 1799, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Audi', model: 'Q5', wikipediaPage: 'Audi Q5', year: 2024, price: 2399, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Audi', model: 'Q7', wikipediaPage: 'Audi Q7', year: 2024, price: 3599, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Audi', model: 'Q8', wikipediaPage: 'Audi Q8', year: 2024, price: 4499, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Audi', model: 'e-tron GT', wikipediaPage: 'Audi e-tron GT', year: 2024, price: 5299, bodyType: 'Sedan', fuelType: 'Electric', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
+  {make: 'Volkswagen', model: 'Golf', wikipediaPage: 'Volkswagen Golf', year: 2024, price: 999, bodyType: 'Hatchback', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Volkswagen', model: 'Passat', wikipediaPage: 'Volkswagen Passat', year: 2024, price: 1299, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Volkswagen', model: 'Tiguan', wikipediaPage: 'Volkswagen Tiguan', year: 2024, price: 1699, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Volkswagen', model: 'Teramont', wikipediaPage: 'Volkswagen Atlas', year: 2024, price: 2299, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Volkswagen', model: 'Touareg', wikipediaPage: 'Volkswagen Touareg', year: 2024, price: 3199, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Volvo', model: 'S60', wikipediaPage: 'Volvo S60', year: 2024, price: 1699, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Volvo', model: 'S90', wikipediaPage: 'Volvo S90', year: 2024, price: 2299, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Volvo', model: 'XC40', wikipediaPage: 'Volvo XC40', year: 2024, price: 1799, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Volvo', model: 'XC60', wikipediaPage: 'Volvo XC60', year: 2024, price: 2399, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Volvo', model: 'XC90', wikipediaPage: 'Volvo XC90', year: 2024, price: 4199, bodyType: 'SUV', fuelType: 'Hybrid', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Peugeot', model: '2008', wikipediaPage: 'Peugeot 2008', year: 2024, price: 799, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Peugeot', model: '3008', wikipediaPage: 'Peugeot 3008', year: 2024, price: 1099, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Peugeot', model: '5008', wikipediaPage: 'Peugeot 5008', year: 2024, price: 1299, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Peugeot', model: '408', wikipediaPage: 'Peugeot 408', year: 2024, price: 1199, bodyType: 'Crossover', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Land Rover', model: 'Range Rover Evoque', wikipediaPage: 'Range Rover Evoque', year: 2024, price: 2959, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Land Rover', model: 'Discovery Sport', wikipediaPage: 'Land Rover Discovery Sport', year: 2024, price: 3299, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Land Rover', model: 'Defender', wikipediaPage: 'Land Rover Defender (L663)', year: 2024, price: 4899, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Land Rover', model: 'Range Rover Sport', wikipediaPage: 'Range Rover Sport', year: 2024, price: 10760, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
+  {make: 'Bentley', model: 'Continental GT', wikipediaPage: 'Bentley Continental GT', year: 2024, price: 18000, bodyType: 'Coupe', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
+  {make: 'Bentley', model: 'Bentayga', wikipediaPage: 'Bentley Bentayga', year: 2024, price: 18750, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
+  {
+    make: 'Bentley',
+    model: 'Flying Spur',
+    wikipediaPage: 'Bentley Flying Spur',
+    imageUrl: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Bentley%20Flying%20Spur%20Mulliner%20%282024%29%20IMG%204168%20%28cropped%29.jpg',
+    imageSourcePage: 'https://commons.wikimedia.org/wiki/File:Bentley_Flying_Spur_Mulliner_(2024)_IMG_4168_(cropped).jpg',
+    year: 2024,
+    price: 19548,
+    bodyType: 'Sedan',
+    fuelType: 'Gasoline',
+    transmission: 'Automatic',
+    mileage: 0,
+    specs: [],
+    category: 'Exotics',
+  },
+  {make: 'Porsche', model: 'Macan', wikipediaPage: 'Porsche Macan', year: 2024, price: 3499, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: []},
+  {make: 'Porsche', model: 'Cayenne', wikipediaPage: 'Porsche Cayenne', year: 2024, price: 5299, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
+  {make: 'Porsche', model: 'Panamera', wikipediaPage: 'Porsche Panamera', year: 2024, price: 6399, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
+  {make: 'Porsche', model: '911', wikipediaPage: 'Porsche 911', year: 2024, price: 8299, bodyType: 'Coupe', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
+  {make: 'Ferrari', model: 'Roma', wikipediaPage: 'Ferrari Roma', year: 2024, price: 12500, bodyType: 'Coupe', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
+  {make: 'Ferrari', model: '296 GTB', wikipediaPage: 'Ferrari 296', year: 2024, price: 16500, bodyType: 'Coupe', fuelType: 'Hybrid', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
+  {make: 'Lamborghini', model: 'Huracan', wikipediaPage: 'Lamborghini Huracán', year: 2024, price: 14500, bodyType: 'Coupe', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
+  {make: 'Lamborghini', model: 'Urus', wikipediaPage: 'Lamborghini Urus', year: 2024, price: 15500, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
+  {make: 'McLaren', model: '720S', wikipediaPage: 'McLaren 720S', year: 2023, price: 16000, bodyType: 'Coupe', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
+  {make: 'Aston Martin', model: 'DB12', wikipediaPage: 'Aston Martin DB12', year: 2024, price: 16800, bodyType: 'Coupe', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
 ];
 
 const formatPrice = (price: number) =>
@@ -141,6 +212,53 @@ const formatPrice = (price: number) =>
     currency: 'VND',
     maximumFractionDigits: 0,
   }).format(price * 1_000_000);
+
+const brandPriceRanges = new Map<string, {min: number; max: number}>([
+  ['Honda', {min: 418, max: 2399}],
+  ['Bentley', {min: 18000, max: 19548}],
+  ['MG', {min: 399, max: 869}],
+  ['Land Rover', {min: 2959, max: 10760}],
+  ['BMW', {min: 1899, max: 10990}],
+  ['Toyota', {min: 479, max: 4370}],
+  ['Ford', {min: 603, max: 2439}],
+  ['Hyundai', {min: 426, max: 1500}],
+  ['Kia', {min: 359, max: 1980}],
+  ['Mercedes-Benz', {min: 1599, max: 10950}],
+  ['Mitsubishi', {min: 380, max: 1365}],
+  ['Lexus', {min: 2130, max: 9610}],
+  ['VinFast', {min: 352, max: 4600}],
+  ['Suzuki', {min: 252, max: 639}],
+  ['Nissan', {min: 539, max: 970}],
+]);
+
+const clampPriceToBrandRange = (make: string, price: number) => {
+  const range = brandPriceRanges.get(make);
+  return range ? Math.min(range.max, Math.max(range.min, price)) : price;
+};
+
+const vehicleUseCases: Record<string, string> = {
+  Sedan: 'phù hợp nhu cầu đi lại hằng ngày, công việc và các hành trình liên tỉnh',
+  Hatchback: 'linh hoạt trong đô thị, dễ xoay trở và thuận tiện khi đỗ xe',
+  SUV: 'ưu tiên không gian, tầm quan sát và khả năng phục vụ gia đình',
+  Crossover: 'cân bằng giữa độ linh hoạt trong phố và không gian sử dụng',
+  MPV: 'hướng đến gia đình đông người hoặc nhu cầu chở nhiều hành lý',
+  Pickup: 'đáp ứng cả nhu cầu di chuyển cá nhân lẫn chuyên chở hàng hóa',
+  Coupe: 'tập trung vào thiết kế thể thao và trải nghiệm vận hành',
+};
+
+const buildCatalogDescription = (
+  item: DailyVehicle,
+  title: string,
+  price: number,
+  location: string,
+  verifiedImage: WikipediaImage,
+) => [
+  `${title} là mẫu ${item.bodyType} sử dụng động cơ ${item.fuelType}, hộp số ${item.transmission}; ${vehicleUseCases[item.bodyType] ?? 'phù hợp với nhiều nhu cầu sử dụng khác nhau'}.`,
+  `Mức giá tham khảo hiện tại là ${formatPrice(price)}. Khi so sánh, người mua nên đối chiếu đúng phiên bản, trang bị, năm sản xuất, chính sách phân phối, thuế phí và tình trạng thực tế của xe.`,
+  `Khu vực tham khảo: ${location}. Nội dung do CarHub biên soạn cho mục đích tra cứu và so sánh, không phải tin rao trực tiếp của chủ xe hoặc đại lý.`,
+  `Ảnh đại diện đúng dòng ${item.make} ${item.model}, lấy từ Wikipedia/Wikimedia Commons. Màu sắc, phiên bản hoặc cấu hình trong ảnh có thể khác xe được phân phối tại Việt Nam.`,
+  `Nguồn ảnh: ${verifiedImage.sourcePage}`,
+].join('\n\n');
 
 interface WikipediaImage {
   imageUrl: string;
@@ -151,36 +269,40 @@ const sleep = (milliseconds: number) =>
   new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 const loadWikipediaImages = async (): Promise<Map<string, WikipediaImage>> => {
-  const requestedTitles = dailyVehicles.map((item) => item.wikipediaPage);
-  const params = new URLSearchParams({
-    action: 'query',
-    format: 'json',
-    origin: '*',
-    redirects: '1',
-    prop: 'pageimages',
-    piprop: 'original',
-    titles: requestedTitles.join('|'),
-  });
-  const endpoint = `https://en.wikipedia.org/w/api.php?${params.toString()}`;
-
-  let payload: any;
-  for (let attempt = 1; attempt <= 5; attempt += 1) {
-    const response = await fetch(endpoint, {
-      headers: {'User-Agent': 'CarHubAccuracyAudit/1.0 (demo data verification)'},
+  const requestedTitles = [...new Set(dailyVehicles.map((item) => item.wikipediaPage))];
+  const payloads: any[] = [];
+  for (let offset = 0; offset < requestedTitles.length; offset += 40) {
+    const params = new URLSearchParams({
+      action: 'query',
+      format: 'json',
+      origin: '*',
+      redirects: '1',
+      prop: 'pageimages',
+      piprop: 'original',
+      titles: requestedTitles.slice(offset, offset + 40).join('|'),
     });
-    if (response.ok) {
-      payload = await response.json();
-      break;
+    const endpoint = `https://en.wikipedia.org/w/api.php?${params.toString()}`;
+
+    for (let attempt = 1; attempt <= 5; attempt += 1) {
+      const response = await fetch(endpoint, {
+        headers: {'User-Agent': 'CarHubAccuracyAudit/1.0 (catalog image verification)'},
+      });
+      if (response.ok) {
+        payloads.push(await response.json());
+        break;
+      }
+      if (response.status !== 429 || attempt === 5) {
+        throw new Error(`Không thể tải ảnh đã kiểm chứng từ Wikipedia: HTTP ${response.status}.`);
+      }
+      await sleep(attempt * 10_000);
     }
-    if (response.status !== 429 || attempt === 5) {
-      throw new Error(`Không thể tải ảnh đã kiểm chứng từ Wikipedia: HTTP ${response.status}.`);
-    }
-    await sleep(attempt * 10_000);
   }
 
   const aliases = new Map<string, string>();
-  for (const item of payload.query?.normalized ?? []) aliases.set(item.from, item.to);
-  for (const item of payload.query?.redirects ?? []) aliases.set(item.from, item.to);
+  for (const payload of payloads) {
+    for (const item of payload.query?.normalized ?? []) aliases.set(item.from, item.to);
+    for (const item of payload.query?.redirects ?? []) aliases.set(item.from, item.to);
+  }
   const resolveTitle = (title: string) => {
     let resolved = title;
     for (let index = 0; index < 4 && aliases.has(resolved); index += 1) {
@@ -189,9 +311,12 @@ const loadWikipediaImages = async (): Promise<Map<string, WikipediaImage>> => {
     return resolved;
   };
 
-  const pages = new Map<string, any>(
-    Object.values(payload.query?.pages ?? {}).map((page: any) => [page.title, page]),
-  );
+  const pages = new Map<string, any>();
+  for (const payload of payloads) {
+    for (const page of Object.values(payload.query?.pages ?? {}) as any[]) {
+      pages.set(page.title, page);
+    }
+  }
   const result = new Map<string, WikipediaImage>();
   for (const item of dailyVehicles) {
     if (item.imageUrl && item.imageSourcePage) {
@@ -299,17 +424,13 @@ const main = async () => {
     const location = locations[index % locations.length];
     const year = item.year - generation * 2;
     const mileage = item.mileage + generation * 18000 + (index % 5) * 900;
-    const price = Math.round(item.price * (generation === 0 ? 1 : generation === 1 ? 0.9 : 0.82));
+    const price = clampPriceToBrandRange(
+      item.make,
+      Math.round(item.price * (generation === 0 ? 1 : generation === 1 ? 0.9 : 0.82)),
+    );
     const title = `${year} ${item.make} ${item.model}`;
     const marker = `[${MARKET_MARKER}:${String(index + 1).padStart(2, '0')}]`;
-    const description = [
-      marker,
-      'TIN DỮ LIỆU DEMO - không phải xe thật đang được một cá nhân rao bán.',
-      `${title}, địa điểm mô phỏng: ${location}. Giá hiển thị là giá rao giả lập để kiểm thử giao diện, không phải bản tin giá thị trường.`,
-      `Thông tin mô phỏng: odo ${mileage.toLocaleString('vi-VN')} km, kiểu xe ${item.bodyType}, nhiên liệu ${item.fuelType}, hộp số ${item.transmission}.`,
-      `Ảnh đại diện đúng dòng ${item.make} ${item.model} lấy từ Wikipedia/Wikimedia Commons; màu sắc, đời xe hoặc phiên bản trong ảnh có thể khác dữ liệu mô phỏng.`,
-      `Nguồn ảnh: ${verifiedImage.sourcePage}`,
-    ].join('\n\n');
+    const description = `${marker}\n\n${buildCatalogDescription(item, title, price, location, verifiedImage)}`;
 
     const garageVehicle = await prisma.garageVehicle.create({
       data: {
@@ -337,7 +458,7 @@ const main = async () => {
         description,
         price: formatPrice(price),
         location,
-        category: 'Daily',
+        category: item.category ?? 'Daily',
         status: 'Active Listing',
         sellerId: owner.id,
         vehicleId: garageVehicle.id,
