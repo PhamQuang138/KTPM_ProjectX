@@ -30,6 +30,35 @@ const getRating = async (targetUserId, viewerId) => {
     };
 };
 exports.userService = {
+    getOwnSettings(userId) {
+        return prisma_1.prisma.user.findUniqueOrThrow({
+            where: { id: userId },
+            select: {
+                themePreference: true,
+                displayDensity: true,
+                fontScale: true,
+                autoOpenChatbot: true,
+                notifySocial: true,
+                notifyMarketplace: true,
+                notifyMessages: true,
+            },
+        });
+    },
+    updateOwnSettings(userId, input) {
+        return prisma_1.prisma.user.update({
+            where: { id: userId },
+            data: input,
+            select: {
+                themePreference: true,
+                displayDensity: true,
+                fontScale: true,
+                autoOpenChatbot: true,
+                notifySocial: true,
+                notifyMarketplace: true,
+                notifyMessages: true,
+            },
+        });
+    },
     getFollowSuggestions(viewerId) {
         return prisma_1.prisma.user.findMany({
             where: {

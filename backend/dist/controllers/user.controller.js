@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userController = exports.updateProfileSchema = exports.rateUserSchema = void 0;
+exports.userController = exports.updateSettingsSchema = exports.updateProfileSchema = exports.rateUserSchema = void 0;
 const zod_1 = require("zod");
 const user_service_1 = require("../services/user.service");
 exports.rateUserSchema = zod_1.z.object({
@@ -13,7 +13,22 @@ exports.updateProfileSchema = zod_1.z.object({
     location: zod_1.z.string().trim().max(120).nullable().optional(),
     focusBrands: zod_1.z.array(zod_1.z.string().trim().min(1).max(40)).max(12).optional(),
 });
+exports.updateSettingsSchema = zod_1.z.object({
+    themePreference: zod_1.z.enum(['system', 'dark', 'light']).optional(),
+    displayDensity: zod_1.z.enum(['comfortable', 'compact']).optional(),
+    fontScale: zod_1.z.enum(['small', 'normal', 'large']).optional(),
+    autoOpenChatbot: zod_1.z.boolean().optional(),
+    notifySocial: zod_1.z.boolean().optional(),
+    notifyMarketplace: zod_1.z.boolean().optional(),
+    notifyMessages: zod_1.z.boolean().optional(),
+});
 exports.userController = {
+    async getOwnSettings(req, res) {
+        return res.json({ data: await user_service_1.userService.getOwnSettings(req.user.id) });
+    },
+    async updateOwnSettings(req, res) {
+        return res.json({ data: await user_service_1.userService.updateOwnSettings(req.user.id, req.body) });
+    },
     async getFollowSuggestions(req, res) {
         return res.json({ data: await user_service_1.userService.getFollowSuggestions(req.user.id) });
     },

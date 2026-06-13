@@ -178,11 +178,26 @@ Database:
   npm run db:generate --workspace backend
   npm run db:migrate:deploy --workspace backend
   npm run db:seed --workspace backend
+  npm run db:seed-daily-content --workspace backend
   npm run db:ensure-admin --workspace backend
   npm run db:studio --workspace backend
 
 Luu y: db:seed co the reset du lieu ung dung, khong chay tren database dung
 chung neu chua thong nhat.
+
+db:seed-daily-content tao lai 45 bai cong dong khong trung tieu de va 100 tin
+cho xe pho thong. Bai cong dong seed khong gan anh tuy tien. Tin xe dung anh
+dai dien dung dong xe tu Wikipedia/Wikimedia Commons, co ghi ro nguon va canh
+bao day la du lieu demo. Script xoa cac seed cu va tin cua tai khoan
+@carhub-demo.com truoc khi tao lai; khong xoa tin cua tai khoan nguoi dung.
+
+Cai dat nguoi dung:
+
+- Trang /settings luu tuy chon theo tai khoan trong PostgreSQL.
+- Ho tro giao dien sang/toi/theo he thong, mat do hien thi va co chu.
+- Co the tu dong mo tro ly AI mot lan trong moi phien trinh duyet.
+- Co the bat/tat thong bao cong dong, cho xe va tin nhan rieng.
+- Khi thay doi schema, chay db:migrate:deploy va db:generate truoc khi build.
 
 6. BIEN MOI TRUONG BACKEND QUAN TRONG
 

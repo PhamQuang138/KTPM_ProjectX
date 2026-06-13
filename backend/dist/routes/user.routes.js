@@ -7,6 +7,8 @@ const auth_1 = require("../middlewares/auth");
 const validateRequest_1 = require("../middlewares/validateRequest");
 exports.userRouter = (0, express_1.Router)();
 exports.userRouter.patch('/me/profile', auth_1.requireAuth, (0, validateRequest_1.validateBody)(user_controller_1.updateProfileSchema), user_controller_1.userController.updateOwnProfile);
+exports.userRouter.get('/me/settings', auth_1.requireAuth, user_controller_1.userController.getOwnSettings);
+exports.userRouter.patch('/me/settings', auth_1.requireAuth, (0, validateRequest_1.validateBody)(user_controller_1.updateSettingsSchema), user_controller_1.userController.updateOwnSettings);
 exports.userRouter.get('/search/accounts', auth_1.requireAuth, user_controller_1.userController.searchUsers);
 exports.userRouter.get('/suggestions/follow', auth_1.requireAuth, user_controller_1.userController.getFollowSuggestions);
 exports.userRouter.get('/:id', auth_1.optionalAuth, user_controller_1.userController.getPublicProfile);

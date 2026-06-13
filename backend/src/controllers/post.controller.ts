@@ -87,8 +87,8 @@ const mapCommunityPost = (post: Awaited<ReturnType<typeof postDbService.list>>[n
   likes: post._count.likes,
   comments: post._count.comments,
   shares: post._count.shares,
-  isLikedInitial: post.likes.length > 0,
-  isBookmarkedInitial: post.bookmarks.length > 0,
+  isLikedInitial: (post.likes?.length ?? 0) > 0,
+  isBookmarkedInitial: (post.bookmarks?.length ?? 0) > 0,
   commentItems: post.comments.map((comment) => ({
     id: comment.id,
     content: comment.content,
@@ -119,11 +119,16 @@ export const postController = {
   },
 
   async listCommunity(req: AuthenticatedRequest, res: Response) {
+    const requestedLimit = Number(req.query.limit);
+    const limit = Number.isInteger(requestedLimit)
+      ? Math.min(Math.max(requestedLimit, 1), 100)
+      : 40;
     const posts = await postDbService.list({
       status: PostStatus.PUBLISHED,
       authorId: req.query.authorId?.toString(),
       viewerId: req.user?.id,
       prioritizeTrustedAuthors: !req.query.authorId,
+      limit,
     });
 
     return res.json({

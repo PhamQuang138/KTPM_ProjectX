@@ -32,6 +32,13 @@ model User {
   location  String?
   focusBrands String[] @default([])
   isVerifiedProfessional Boolean @default(false)
+  themePreference String @default("system")
+  displayDensity String @default("comfortable")
+  fontScale String @default("normal")
+  autoOpenChatbot Boolean @default(false)
+  notifySocial Boolean @default(true)
+  notifyMarketplace Boolean @default(true)
+  notifyMessages Boolean @default(true)
   role      UserRole @default(USER)
   posts     Post[]
   postLikes PostLike[]

@@ -27,6 +27,7 @@ rectangle "CARHUB GARAGE" {
   usecase "Nhan tin va\nnhan thong bao" as O_Message
   usecase "Tim xe bang AI" as O_AI
   usecase "Doc bai chuyen de" as O_Article
+  usecase "Quan ly cai dat\nca nhan" as O_Settings
   usecase "Quan tri he thong" as O_Admin
   usecase "Luu tru anh" as O_Upload
   usecase "Khoi phuc mat khau" as O_Reset
@@ -43,6 +44,7 @@ Member --> O_Garage
 Member --> O_Market
 Member --> O_Message
 Member --> O_AI
+Member --> O_Settings
 
 Admin --> O_Admin
 OpenRouter --> O_AI
@@ -85,6 +87,15 @@ rectangle "CARHUB GARAGE" {
     usecase "Danh gia thanh vien" as A_Rate
   }
 
+  package "Cai dat ca nhan" {
+    usecase "Chon giao dien\nsang / toi / he thong" as S_Theme
+    usecase "Chon mat do hien thi" as S_Density
+    usecase "Chon co chu" as S_Font
+    usecase "Tu dong mo tro ly AI" as S_AI
+    usecase "Bat / tat thong bao\ncong dong, cho xe, tin nhan" as S_Notify
+    usecase "Dong bo cai dat\ntheo tai khoan" as S_Sync
+  }
+
   package "Cong dong" {
     usecase "Xem feed" as C_Feed
     usecase "Dang bai viet" as C_Create
@@ -121,6 +132,17 @@ Member --> C_Comment
 Member --> C_Bookmark
 Member --> C_Share
 Member --> C_Favorites
+Member --> S_Theme
+Member --> S_Density
+Member --> S_Font
+Member --> S_AI
+Member --> S_Notify
+
+S_Theme .> S_Sync : <<include>>
+S_Density .> S_Sync : <<include>>
+S_Font .> S_Sync : <<include>>
+S_AI .> S_Sync : <<include>>
+S_Notify .> S_Sync : <<include>>
 
 A_Reset .> A_SendCode : <<include>>
 A_SendCode --> SMTP
@@ -181,6 +203,7 @@ rectangle "CARHUB GARAGE" {
     usecase "Xem thong bao" as X_Notify
     usecase "Danh dau tat ca da doc" as X_ReadAll
     usecase "Tao thong bao tu tuong tac" as X_CreateNotify
+    usecase "Kiem tra tuy chon\nnhan thong bao" as X_CheckPreference
   }
 
   package "Tro ly tim xe AI" {
@@ -229,6 +252,7 @@ X_Share .> X_Message : <<include>>
 M_Favorite .> X_CreateNotify : <<extend>>
 M_Comment .> X_CreateNotify : <<extend>>
 X_Message .> X_CreateNotify : <<extend>>
+X_CreateNotify .> X_CheckPreference : <<include>>
 
 AI_Text .> AI_Intent : <<include>>
 AI_Image .> U_Upload : <<include>>
@@ -245,6 +269,11 @@ end note
 note bottom of G_Delete
   Xoa xe se xoa cac listing lien quan
   trong Prisma transaction.
+end note
+
+note bottom of M_Search
+  Du lieu demo chua 100 tin xe pho thong.
+  Anh dai dien phai dung dong xe va co nguon.
 end note
 @enduml
 

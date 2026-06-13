@@ -75,6 +75,7 @@ exports.postDbService = {
             orderBy: {
                 createdAt: 'desc',
             },
+            take: input.limit,
         });
         if (!input.prioritizeTrustedAuthors)
             return posts;

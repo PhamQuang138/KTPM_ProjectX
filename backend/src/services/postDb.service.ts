@@ -22,6 +22,7 @@ export interface ListPostInput {
   authorId?: string;
   viewerId?: string;
   prioritizeTrustedAuthors?: boolean;
+  limit?: number;
 }
 
 const postInclude = {
@@ -99,6 +100,7 @@ export const postDbService = {
       orderBy: {
         createdAt: 'desc',
       },
+      take: input.limit,
     });
     if (!input.prioritizeTrustedAuthors) return posts;
     return posts.sort((left, right) => {

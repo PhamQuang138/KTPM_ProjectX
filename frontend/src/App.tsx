@@ -12,6 +12,8 @@ import Favorites from './pages/Favorites';
 import MessageDock from './components/MessageDock';
 import ArticleDetail from './pages/ArticleDetail';
 import ChatbotDock from './components/ChatbotDock';
+import Settings from './pages/Settings';
+import SettingsBootstrap from './components/SettingsBootstrap';
 
 export default function App() {
   return (
@@ -28,9 +30,11 @@ export default function App() {
         <Route path="/favorites" element={<Navigate to="/liked" replace />} />
         <Route path="/profile/:id" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <SettingsBootstrap />
       <ChatbotDock />
       <MessageDock />
     </Router>

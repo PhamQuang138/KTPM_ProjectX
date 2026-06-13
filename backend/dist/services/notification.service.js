@@ -3,9 +3,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.notificationService = void 0;
 const prisma_1 = require("../config/prisma");
 exports.notificationService = {
-    create(input) {
+    async create(input) {
         if (input.actorId && input.actorId === input.recipientId)
             return Promise.resolve(null);
+        const preferences = await prisma_1.prisma.user.findUnique({
+            where: { id: input.recipientId },
+            select: { notifySocial: true, notifyMarketplace: true, notifyMessages: true },
+        });
+        if (!preferences)
+            return null;
+        if (input.type === 'message' && !preferences.notifyMessages)
+            return null;
+        if (input.type === 'marketplace' && !preferences.notifyMarketplace)
+            return null;
+        if (['like', 'comment', 'follow'].includes(input.type) && !preferences.notifySocial)
+            return null;
         return prisma_1.prisma.notification.create({ data: input });
     },
     async list(userId) {

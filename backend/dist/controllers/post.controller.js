@@ -73,8 +73,8 @@ const mapCommunityPost = (post) => ({
     likes: post._count.likes,
     comments: post._count.comments,
     shares: post._count.shares,
-    isLikedInitial: post.likes.length > 0,
-    isBookmarkedInitial: post.bookmarks.length > 0,
+    isLikedInitial: (post.likes?.length ?? 0) > 0,
+    isBookmarkedInitial: (post.bookmarks?.length ?? 0) > 0,
     commentItems: post.comments.map((comment) => ({
         id: comment.id,
         content: comment.content,
@@ -102,11 +102,16 @@ exports.postController = {
         return res.json({ data: posts });
     },
     async listCommunity(req, res) {
+        const requestedLimit = Number(req.query.limit);
+        const limit = Number.isInteger(requestedLimit)
+            ? Math.min(Math.max(requestedLimit, 1), 100)
+            : 40;
         const posts = await postDb_service_1.postDbService.list({
             status: client_1.PostStatus.PUBLISHED,
             authorId: req.query.authorId?.toString(),
             viewerId: req.user?.id,
             prioritizeTrustedAuthors: !req.query.authorId,
+            limit,
         });
         return res.json({
             data: posts.map(mapCommunityPost),

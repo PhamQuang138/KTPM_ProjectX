@@ -18,7 +18,7 @@ const navItems = [
   { icon: Car, label: 'Garage của tôi', path: '/garage' },
   { icon: Heart, label: 'Đã thích', path: '/liked' },
   { icon: Bookmark, label: 'Đã lưu', path: '/saved' },
-  { icon: Settings, label: 'Cài đặt', path: '#' },
+  { icon: Settings, label: 'Cài đặt', path: '/settings' },
 ];
 
 export default function Sidebar() {

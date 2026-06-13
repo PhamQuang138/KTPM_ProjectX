@@ -31,6 +31,11 @@ const isAllowedOrigin = (origin) => corsOrigin === '*' ||
         return new RegExp(`^${escapedPattern}$`).test(origin);
     });
 exports.app = (0, express_1.default)();
+// Vercel forwards the real client IP through its proxy. Express-rate-limit
+// requires trust proxy so it can validate and use X-Forwarded-For correctly.
+if (isProduction) {
+    exports.app.set('trust proxy', 1);
+}
 exports.app.use((req, _res, next) => {
     const apiPathIndex = req.url.indexOf('/api/');
     if (apiPathIndex > 0) {

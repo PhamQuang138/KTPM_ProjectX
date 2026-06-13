@@ -31,6 +31,12 @@ const isAllowedOrigin = (origin: string): boolean =>
 
 export const app = express();
 
+// Vercel forwards the real client IP through its proxy. Express-rate-limit
+// requires trust proxy so it can validate and use X-Forwarded-For correctly.
+if (isProduction) {
+  app.set('trust proxy', 1);
+}
+
 app.use((req, _res, next) => {
   const apiPathIndex = req.url.indexOf('/api/');
 

@@ -15,7 +15,25 @@ export const updateProfileSchema = z.object({
   focusBrands: z.array(z.string().trim().min(1).max(40)).max(12).optional(),
 });
 
+export const updateSettingsSchema = z.object({
+  themePreference: z.enum(['system', 'dark', 'light']).optional(),
+  displayDensity: z.enum(['comfortable', 'compact']).optional(),
+  fontScale: z.enum(['small', 'normal', 'large']).optional(),
+  autoOpenChatbot: z.boolean().optional(),
+  notifySocial: z.boolean().optional(),
+  notifyMarketplace: z.boolean().optional(),
+  notifyMessages: z.boolean().optional(),
+});
+
 export const userController = {
+  async getOwnSettings(req: AuthenticatedRequest, res: Response) {
+    return res.json({data: await userService.getOwnSettings(req.user!.id)});
+  },
+
+  async updateOwnSettings(req: AuthenticatedRequest, res: Response) {
+    return res.json({data: await userService.updateOwnSettings(req.user!.id, req.body)});
+  },
+
   async getFollowSuggestions(req: AuthenticatedRequest, res: Response) {
     return res.json({data: await userService.getFollowSuggestions(req.user!.id)});
   },

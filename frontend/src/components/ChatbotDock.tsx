@@ -5,6 +5,7 @@ import {apiRequest} from '../lib/api';
 import {uploadImage} from '../lib/imageUpload';
 import {useAuthStore} from '../store/useAuthStore';
 import {useMessageStore} from '../store/useMessageStore';
+import {useSettingsStore} from '../store/useSettingsStore';
 
 interface AiListing {
   id: string;
@@ -56,6 +57,7 @@ export default function ChatbotDock() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isMessageDockOpen = useMessageStore((state) => state.isOpen);
   const closeMessageDock = useMessageStore((state) => state.close);
+  const autoOpenChatbot = useSettingsStore((state) => state.settings.autoOpenChatbot);
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -69,6 +71,15 @@ export default function ChatbotDock() {
   useEffect(() => {
     if (isMessageDockOpen) setIsOpen(false);
   }, [isMessageDockOpen]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !autoOpenChatbot) return;
+    const sessionKey = 'carhub_chatbot_auto_opened';
+    if (!sessionStorage.getItem(sessionKey)) {
+      sessionStorage.setItem(sessionKey, '1');
+      setIsOpen(true);
+    }
+  }, [autoOpenChatbot, isAuthenticated]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({top: scrollRef.current.scrollHeight, behavior: 'smooth'});

@@ -10,8 +10,16 @@ export interface CreateNotificationInput {
 }
 
 export const notificationService = {
-  create(input: CreateNotificationInput) {
+  async create(input: CreateNotificationInput) {
     if (input.actorId && input.actorId === input.recipientId) return Promise.resolve(null);
+    const preferences = await prisma.user.findUnique({
+      where: {id: input.recipientId},
+      select: {notifySocial: true, notifyMarketplace: true, notifyMessages: true},
+    });
+    if (!preferences) return null;
+    if (input.type === 'message' && !preferences.notifyMessages) return null;
+    if (input.type === 'marketplace' && !preferences.notifyMarketplace) return null;
+    if (['like', 'comment', 'follow'].includes(input.type) && !preferences.notifySocial) return null;
     return prisma.notification.create({data: input});
   },
 

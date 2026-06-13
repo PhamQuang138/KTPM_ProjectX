@@ -30,6 +30,48 @@ const getRating = async (targetUserId: string, viewerId?: string) => {
 };
 
 export const userService = {
+  getOwnSettings(userId: string) {
+    return prisma.user.findUniqueOrThrow({
+      where: {id: userId},
+      select: {
+        themePreference: true,
+        displayDensity: true,
+        fontScale: true,
+        autoOpenChatbot: true,
+        notifySocial: true,
+        notifyMarketplace: true,
+        notifyMessages: true,
+      },
+    });
+  },
+
+  updateOwnSettings(
+    userId: string,
+    input: {
+      themePreference?: string;
+      displayDensity?: string;
+      fontScale?: string;
+      autoOpenChatbot?: boolean;
+      notifySocial?: boolean;
+      notifyMarketplace?: boolean;
+      notifyMessages?: boolean;
+    },
+  ) {
+    return prisma.user.update({
+      where: {id: userId},
+      data: input,
+      select: {
+        themePreference: true,
+        displayDensity: true,
+        fontScale: true,
+        autoOpenChatbot: true,
+        notifySocial: true,
+        notifyMarketplace: true,
+        notifyMessages: true,
+      },
+    });
+  },
+
   getFollowSuggestions(viewerId: string) {
     return prisma.user.findMany({
       where: {
