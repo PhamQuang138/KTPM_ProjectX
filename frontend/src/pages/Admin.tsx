@@ -239,8 +239,55 @@ function ActionButton({children, onClick, danger = false}: {children: string; on
   );
 }
 
+function Pagination({
+  page,
+  pageSize,
+  total,
+  onChange,
+}: {
+  page: number;
+  pageSize: number;
+  total: number;
+  onChange: (page: number) => void;
+}) {
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const start = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const end = Math.min(page * pageSize, total);
+
+  return (
+    <div className="flex items-center justify-between border-t border-white/10 px-5 py-4">
+      <p className="text-xs text-on-surface-variant">{start}-{end} / {total}</p>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          title="Trang trước"
+          disabled={page <= 1}
+          onClick={() => onChange(Math.max(1, page - 1))}
+          className="interactive-icon disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <span className="min-w-20 text-center text-xs text-on-surface">Trang {page}/{totalPages}</span>
+        <button
+          type="button"
+          title="Trang sau"
+          disabled={page >= totalPages}
+          onClick={() => onChange(Math.min(totalPages, page + 1))}
+          className="interactive-icon disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+type AdminSection = 'posts' | 'vehicles' | 'garage' | 'articles' | 'comments' | 'ratings' | 'follows';
+
 export default function Admin() {
   const usersPerPage = 10;
+  const contentPerPage = 8;
+  const activityPerPage = 6;
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [posts, setPosts] = useState<AdminPost[]>([]);
@@ -253,6 +300,15 @@ export default function Admin() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [userPage, setUserPage] = useState(1);
+  const [sectionPages, setSectionPages] = useState<Record<AdminSection, number>>({
+    posts: 1,
+    vehicles: 1,
+    garage: 1,
+    articles: 1,
+    comments: 1,
+    ratings: 1,
+    follows: 1,
+  });
 
   const loadAdminData = async () => {
     setError('');
@@ -374,10 +430,43 @@ export default function Admin() {
     .slice(0, 6);
   const userTotalPages = Math.max(1, Math.ceil(users.length / usersPerPage));
   const visibleUsers = users.slice((userPage - 1) * usersPerPage, userPage * usersPerPage);
+  const pageItems = <T,>(items: T[], section: AdminSection, pageSize: number) =>
+    items.slice((sectionPages[section] - 1) * pageSize, sectionPages[section] * pageSize);
+  const visiblePosts = pageItems(posts, 'posts', contentPerPage);
+  const visibleVehicles = pageItems(vehicles, 'vehicles', contentPerPage);
+  const visibleGarageVehicles = pageItems(garageVehicles, 'garage', contentPerPage);
+  const visibleArticles = pageItems(articles, 'articles', contentPerPage);
+  const visibleComments = pageItems(comments, 'comments', activityPerPage);
+  const visibleRatings = pageItems(ratings, 'ratings', activityPerPage);
+  const visibleFollows = pageItems(follows, 'follows', activityPerPage);
+  const updateSectionPage = (section: AdminSection, page: number) =>
+    setSectionPages((current) => ({...current, [section]: page}));
 
   useEffect(() => {
     if (userPage > userTotalPages) setUserPage(userTotalPages);
   }, [userPage, userTotalPages]);
+
+  useEffect(() => {
+    const totals: Record<AdminSection, number> = {
+      posts: posts.length,
+      vehicles: vehicles.length,
+      garage: garageVehicles.length,
+      articles: articles.length,
+      comments: comments.length,
+      ratings: ratings.length,
+      follows: follows.length,
+    };
+    setSectionPages((current) => {
+      const next = {...current};
+      (Object.keys(next) as AdminSection[]).forEach((section) => {
+        const pageSize = ['comments', 'ratings', 'follows'].includes(section)
+          ? activityPerPage
+          : contentPerPage;
+        next[section] = Math.min(next[section], Math.max(1, Math.ceil(totals[section] / pageSize)));
+      });
+      return next;
+    });
+  }, [articles.length, comments.length, follows.length, garageVehicles.length, posts.length, ratings.length, vehicles.length]);
 
   return (
     <div className="min-h-screen bg-background text-on-background">
@@ -570,7 +659,7 @@ export default function Admin() {
               <FileText className="h-5 w-5 text-on-surface-variant" />
             </div>
             <div className="divide-y divide-white/10">
-              {posts.slice(0, 8).map((post) => (
+              {visiblePosts.map((post) => (
                 <div key={post.id} className="p-5">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
@@ -589,7 +678,9 @@ export default function Admin() {
                   </div>
                 </div>
               ))}
+              {posts.length === 0 && <p className="p-5 text-sm text-on-surface-variant">Chưa có bài đăng cộng đồng.</p>}
             </div>
+            <Pagination page={sectionPages.posts} pageSize={contentPerPage} total={posts.length} onChange={(page) => updateSectionPage('posts', page)} />
           </div>
 
           <div className="rounded-lg border border-white/10 bg-surface-container-low shadow-lg">
@@ -601,7 +692,7 @@ export default function Admin() {
               <Car className="h-5 w-5 text-on-surface-variant" />
             </div>
             <div className="divide-y divide-white/10">
-              {vehicles.slice(0, 8).map((vehicle) => (
+              {visibleVehicles.map((vehicle) => (
                 <div key={vehicle.id} className="p-5">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -619,6 +710,7 @@ export default function Admin() {
               ))}
               {vehicles.length === 0 && <p className="p-5 text-sm text-on-surface-variant">Chưa có tin bán xe.</p>}
             </div>
+            <Pagination page={sectionPages.vehicles} pageSize={contentPerPage} total={vehicles.length} onChange={(page) => updateSectionPage('vehicles', page)} />
           </div>
 
           <div className="rounded-lg border border-white/10 bg-surface-container-low shadow-lg">
@@ -630,7 +722,7 @@ export default function Admin() {
               <Gauge className="h-5 w-5 text-on-surface-variant" />
             </div>
             <div className="divide-y divide-white/10">
-              {garageVehicles.slice(0, 8).map((vehicle) => (
+              {visibleGarageVehicles.map((vehicle) => (
                 <div key={vehicle.id} className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-semibold text-on-surface">{vehicle.title}</p>
@@ -646,6 +738,7 @@ export default function Admin() {
               ))}
               {garageVehicles.length === 0 && <p className="p-5 text-sm text-on-surface-variant">Chưa có xe trong Garage.</p>}
             </div>
+            <Pagination page={sectionPages.garage} pageSize={contentPerPage} total={garageVehicles.length} onChange={(page) => updateSectionPage('garage', page)} />
           </div>
 
           <div className="rounded-lg border border-white/10 bg-surface-container-low shadow-lg">
@@ -657,7 +750,7 @@ export default function Admin() {
               <Newspaper className="h-5 w-5 text-on-surface-variant" />
             </div>
             <div className="divide-y divide-white/10">
-              {articles.map((article) => (
+              {visibleArticles.map((article) => (
                 <div key={article.id} className="p-5">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
@@ -674,7 +767,9 @@ export default function Admin() {
                   </div>
                 </div>
               ))}
+              {articles.length === 0 && <p className="p-5 text-sm text-on-surface-variant">Chưa có bài chuyên đề.</p>}
             </div>
+            <Pagination page={sectionPages.articles} pageSize={contentPerPage} total={articles.length} onChange={(page) => updateSectionPage('articles', page)} />
           </div>
         </section>
 
@@ -684,7 +779,7 @@ export default function Admin() {
               <MessageSquare className="h-4 w-4" /> Bình luận
             </h2>
             <div className="space-y-3">
-              {comments.slice(0, 6).map((comment) => (
+              {visibleComments.map((comment) => (
                 <div key={comment.id} className="rounded-md bg-white/5 p-3">
                   <p className="line-clamp-2 text-sm text-on-surface">{comment.content}</p>
                   <div className="mt-2 flex items-center justify-between gap-2">
@@ -693,7 +788,9 @@ export default function Admin() {
                   </div>
                 </div>
               ))}
+              {comments.length === 0 && <p className="text-sm text-on-surface-variant">Chưa có bình luận.</p>}
             </div>
+            <Pagination page={sectionPages.comments} pageSize={activityPerPage} total={comments.length} onChange={(page) => updateSectionPage('comments', page)} />
           </div>
 
           <div className="rounded-lg border border-white/10 bg-surface-container-low p-6 shadow-lg">
@@ -701,13 +798,15 @@ export default function Admin() {
               <Star className="h-4 w-4" /> Đánh giá
             </h2>
             <div className="space-y-3">
-              {ratings.slice(0, 6).map((rating) => (
+              {visibleRatings.map((rating) => (
                 <div key={rating.id} className="flex items-center justify-between rounded-md bg-white/5 p-3">
                   <p className="text-sm text-on-surface">{rating.rater.name} đánh giá {rating.targetUser.name}: {rating.score}/5</p>
                   <button onClick={() => deleteResource(`/admin/ratings/${rating.id}`)} className="text-[10px] font-bold uppercase text-red-400">Xóa</button>
                 </div>
               ))}
+              {ratings.length === 0 && <p className="text-sm text-on-surface-variant">Chưa có đánh giá.</p>}
             </div>
+            <Pagination page={sectionPages.ratings} pageSize={activityPerPage} total={ratings.length} onChange={(page) => updateSectionPage('ratings', page)} />
           </div>
 
           <div className="rounded-lg border border-white/10 bg-surface-container-low p-6 shadow-lg">
@@ -715,13 +814,15 @@ export default function Admin() {
               <Users className="h-4 w-4" /> Theo dõi
             </h2>
             <div className="space-y-3">
-              {follows.slice(0, 6).map((follow) => (
+              {visibleFollows.map((follow) => (
                 <div key={follow.id} className="flex items-center justify-between rounded-md bg-white/5 p-3">
                   <p className="text-sm text-on-surface">{follow.follower.name} theo dõi {follow.following.name}</p>
                   <button onClick={() => deleteResource(`/admin/follows/${follow.id}`)} className="text-[10px] font-bold uppercase text-red-400">Xóa</button>
                 </div>
               ))}
+              {follows.length === 0 && <p className="text-sm text-on-surface-variant">Chưa có lượt theo dõi.</p>}
             </div>
+            <Pagination page={sectionPages.follows} pageSize={activityPerPage} total={follows.length} onChange={(page) => updateSectionPage('follows', page)} />
           </div>
         </section>
       </main>
