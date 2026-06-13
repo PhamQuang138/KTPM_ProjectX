@@ -109,6 +109,97 @@ interface ConversationMessage {
   content: string;
 }
 
+interface OpenRouterPayload {
+  error?: {message?: string};
+  choices?: Array<{
+    finish_reason?: string | null;
+    message?: {
+      content?: string | Array<{type?: string; text?: string}> | null;
+      refusal?: string | null;
+    };
+  }>;
+}
+
+const extractResponseText = (payload: OpenRouterPayload): string => {
+  const content = payload.choices?.[0]?.message?.content;
+  if (typeof content === 'string') return content.trim();
+  if (Array.isArray(content)) {
+    return content
+      .map((item) => item.text ?? '')
+      .join('')
+      .trim();
+  }
+  return '';
+};
+
+const parseIntentJson = (content: string): VehicleIntent => {
+  const normalized = content
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/, '')
+    .trim();
+  return vehicleIntentSchema.parse(JSON.parse(normalized));
+};
+
+const fallbackIntent = (message: string, history: ConversationMessage[]): VehicleIntent => {
+  const conversation = normalize([
+    ...history.filter((item) => item.role === 'user').map((item) => item.content),
+    message,
+  ].join(' '));
+  const current = normalize(message);
+  const knownMakes = [
+    'Toyota', 'Honda', 'Mazda', 'Mitsubishi', 'Nissan', 'Suzuki', 'Subaru', 'Lexus',
+    'Hyundai', 'Kia', 'Genesis', 'Ford', 'VinFast',
+  ];
+  const makes = knownMakes.filter((make) => conversation.includes(normalize(make)));
+  if (current.includes('xe nhat') || current.includes('nhat ban')) {
+    makes.push('Toyota', 'Honda', 'Mazda', 'Mitsubishi', 'Nissan', 'Suzuki', 'Subaru', 'Lexus');
+  }
+  if (current.includes('xe han') || current.includes('han quoc')) {
+    makes.push('Hyundai', 'Kia', 'Genesis');
+  }
+
+  const bodyTypes = [
+    ['SUV', ['suv']],
+    ['Sedan', ['sedan']],
+    ['Crossover', ['crossover']],
+    ['Hatchback', ['hatchback']],
+    ['Pickup', ['ban tai', 'pickup']],
+    ['MPV', ['mpv', '7 cho']],
+  ].filter(([, aliases]) => (aliases as string[]).some((alias) => conversation.includes(alias)))
+    .map(([bodyType]) => bodyType as string);
+  const limitMatch = current.match(/\b(\d{1,2})\s*(?:xe|chiec|ket qua)?\b/);
+  const underMillions = current.match(/(?:duoi|toi da|khong qua)\s*(\d{2,4})\s*trieu/);
+  const rangeMillions = current.match(/(?:tu|khoang)\s*(\d{2,4})\s*(?:den|-)\s*(\d{2,4})\s*trieu/);
+  const asksForGoodValue = ['gia tot', 'gia hop ly', 'dang tien'].some((phrase) => current.includes(phrase));
+
+  return vehicleIntentSchema.parse({
+    answer: 'Tôi sẽ dùng các tiêu chí trong cuộc trò chuyện để tìm xe phù hợp trong chợ xe.',
+    shouldSearch: true,
+    filters: {
+      makes: [...new Set(makes)],
+      models: [],
+      bodyTypes,
+      conditions: [],
+      fuelTypes: [],
+      transmissions: [],
+      minYear: null,
+      maxYear: null,
+      minPriceVnd: rangeMillions ? Number(rangeMillions[1]) * 1_000_000 : asksForGoodValue ? 500_000_000 : null,
+      maxPriceVnd: rangeMillions
+        ? Number(rangeMillions[2]) * 1_000_000
+        : underMillions
+          ? Number(underMillions[1]) * 1_000_000
+          : asksForGoodValue
+            ? 1_000_000_000
+            : null,
+      location: null,
+      keywords: [],
+      limit: limitMatch ? Math.min(Number(limitMatch[1]), 20) : null,
+    },
+    imageAnalysis: null,
+  });
+};
+
 const imageUrlAllowed = (imageUrl: string) => {
   const url = new URL(imageUrl);
   const configuredHost = process.env.PUBLIC_BACKEND_URL
@@ -157,20 +248,7 @@ const analyzeRequest = async (
     });
   }
 
-  const response = await fetch(OPENROUTER_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer':
-        process.env.OPENROUTER_SITE_URL?.trim() ||
-        process.env.PUBLIC_BACKEND_URL?.trim() ||
-        'http://localhost:3000',
-      'X-Title': process.env.OPENROUTER_APP_NAME?.trim() || 'CarHub Garage',
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
+  const messages = [
         {
           role: 'system',
           content: `Bạn là trợ lý tìm xe của CarHub.
@@ -208,35 +286,63 @@ Nếu có ảnh, hãy nhận dạng thận trọng; model/năm không chắc th�
         },
         ...history.map((item) => ({role: item.role, content: item.content})),
         {role: 'user', content: userContent},
-      ],
-      temperature: 0.1,
-      max_tokens: 800,
-      reasoning: {effort: 'low', exclude: true},
-      response_format: {
-        type: 'json_schema',
-        json_schema: {
-          name: 'vehicle_search_intent',
-          strict: true,
-          schema: responseJsonSchema,
-        },
-      },
-      plugins: [{id: 'response-healing'}],
-    }),
-    signal: AbortSignal.timeout(75_000),
-  });
+      ];
 
-  const payload = await response.json() as {
-    error?: {message?: string};
-    choices?: Array<{message?: {content?: string | null}}>;
-  };
-  if (!response.ok) {
-    throw new Error(`OPENROUTER_HTTP_${response.status}:${payload.error?.message ?? response.statusText}`);
+  let lastEmptyReason = 'unknown';
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const response = await fetch(OPENROUTER_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer':
+          process.env.OPENROUTER_SITE_URL?.trim() ||
+          process.env.PUBLIC_BACKEND_URL?.trim() ||
+          'http://localhost:3000',
+        'X-Title': process.env.OPENROUTER_APP_NAME?.trim() || 'CarHub Garage',
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.1,
+        max_tokens: attempt === 0 ? 1400 : 1800,
+        reasoning: {max_tokens: attempt === 0 ? 160 : 96, exclude: true},
+        response_format: {
+          type: 'json_schema',
+          json_schema: {
+            name: 'vehicle_search_intent',
+            strict: true,
+            schema: responseJsonSchema,
+          },
+        },
+        plugins: [{id: 'response-healing'}],
+      }),
+      signal: AbortSignal.timeout(75_000),
+    });
+
+    const payload = await response.json() as OpenRouterPayload;
+    if (!response.ok) {
+      throw new Error(`OPENROUTER_HTTP_${response.status}:${payload.error?.message ?? response.statusText}`);
+    }
+
+    const content = extractResponseText(payload);
+    if (content) {
+      try {
+        return parseIntentJson(content);
+      } catch (error) {
+        lastEmptyReason = 'invalid_structured_content';
+        console.warn(`OPENROUTER INVALID RESPONSE attempt=${attempt + 1}`, error);
+        continue;
+      }
+    }
+
+    const choice = payload.choices?.[0];
+    lastEmptyReason = choice?.message?.refusal || choice?.finish_reason || 'missing_content';
+    console.warn(`OPENROUTER EMPTY RESPONSE attempt=${attempt + 1} reason=${lastEmptyReason}`);
   }
 
-  const content = payload.choices?.[0]?.message?.content;
-  if (!content) throw new Error('OPENROUTER_EMPTY_RESPONSE');
-
-  return vehicleIntentSchema.parse(JSON.parse(content));
+  console.warn(`OPENROUTER fallback intent used reason=${lastEmptyReason}`);
+  return fallbackIntent(message, history);
 };
 
 const matchesAny = (value: string | null | undefined, expected: string[]) => {

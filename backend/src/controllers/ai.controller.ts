@@ -50,6 +50,12 @@ export const aiController = {
         });
       }
 
+      if (errorText.startsWith('OPENROUTER_EMPTY_RESPONSE')) {
+        return res.status(502).json({
+          message: 'Model AI chưa trả về nội dung. Hệ thống đã thử lại nhưng chưa thành công, vui lòng gửi lại câu hỏi.',
+        });
+      }
+
       return res.status(500).json({
         message: errorText || 'Lỗi không xác định từ AI',
       });
