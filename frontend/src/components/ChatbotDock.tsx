@@ -49,7 +49,7 @@ interface ChatItem {
 const welcomeMessage: ChatItem = {
   id: 'welcome',
   role: 'assistant',
-  content: 'Chào bạn, tôi có thể tìm xe trong Marketplace bằng yêu cầu tiếng Việt hoặc bằng ảnh.',
+  content: 'Chào bạn, tôi có thể tìm xe theo ngân sách VND, ghi nhớ các câu hỏi nối tiếp hoặc nhận diện xe bằng ảnh. Ví dụ: “Tìm SUV giá tốt”, rồi hỏi tiếp “còn xe Nhật thì sao?”.',
 };
 
 export default function ChatbotDock() {
@@ -137,11 +137,16 @@ export default function ChatbotDock() {
 
     try {
       const uploaded = selectedImage ? await uploadImage(selectedImage) : undefined;
+      const history = items
+        .filter((item) => item.id !== welcomeMessage.id)
+        .slice(-10)
+        .map((item) => ({role: item.role, content: item.content}));
       const result = await apiRequest<AiResponse>('/ai/chat', {
         method: 'POST',
         body: JSON.stringify({
           message: nextMessage,
           imageUrl: uploaded?.url,
+          history,
         }),
       });
       setItems((current) => [
@@ -288,7 +293,7 @@ export default function ChatbotDock() {
               onChange={(event) => setMessage(event.target.value)}
               rows={1}
               maxLength={2000}
-              placeholder="Ví dụ: Tìm SUV Toyota từ năm 2021..."
+              placeholder="Ví dụ: Tìm SUV giá tốt khoảng 500 triệu đến 1 tỷ..."
               className="max-h-28 min-h-11 min-w-0 flex-1 resize-none rounded-xl border border-white/10 bg-background px-4 py-3 text-sm outline-none focus:border-primary"
             />
             <button

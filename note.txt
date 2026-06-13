@@ -199,6 +199,15 @@ Cai dat nguoi dung:
 - Co the bat/tat thong bao cong dong, cho xe va tin nhan rieng.
 - Khi thay doi schema, chay db:migrate:deploy va db:generate truoc khi build.
 
+Chatbot tim xe:
+
+- Gia va bo loc ngan sach su dung VND qua minPriceVnd/maxPriceVnd.
+- Khi hoi "gia tot", "gia hop ly" hoac "dang tien" ma chua neu ngan sach,
+  chatbot tham khao khoang 500 trieu den 1 ty dong.
+- Frontend gui toi da 10 luot hoi dap gan nhat de chatbot hieu cau noi tiep.
+- Bo loc hang, kieu xe, nhien lieu, hop so, nam va gia la dieu kien bat buoc;
+  diem xep hang khong duoc phep dua xe sai bo loc vao ket qua.
+
 6. BIEN MOI TRUONG BACKEND QUAN TRONG
 
 Core:

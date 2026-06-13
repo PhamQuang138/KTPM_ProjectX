@@ -6,6 +6,10 @@ import {aiService} from '../services/ai.service';
 export const aiChatSchema = z.object({
   message: z.string().trim().max(2000).default(''),
   imageUrl: z.string().url().max(2048).optional(),
+  history: z.array(z.object({
+    role: z.enum(['user', 'assistant']),
+    content: z.string().trim().min(1).max(2000),
+  })).max(10).default([]),
 }).refine((input) => Boolean(input.message || input.imageUrl), {
   message: 'Cần nhập câu hỏi hoặc chọn một ảnh',
 });
@@ -14,7 +18,7 @@ export const aiController = {
   async chat(req: AuthenticatedRequest, res: Response) {
     try {
       return res.json({
-        data: await aiService.chat(req.body.message, req.body.imageUrl),
+        data: await aiService.chat(req.body.message, req.body.imageUrl, req.body.history),
       });
     } catch (error) {
       const errorText = error instanceof Error ? error.message : String(error);
