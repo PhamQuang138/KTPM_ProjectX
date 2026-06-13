@@ -262,6 +262,8 @@ const fallbackIntent = (message: string, history: ConversationMessage[]): Vehicl
   const underMillions = current.match(/(?:duoi|toi da|khong qua)\s*(\d{2,4})\s*trieu/);
   const rangeMillions = current.match(/(?:tu|khoang)\s*(\d{2,4})\s*(?:den|-)\s*(\d{2,4})\s*trieu/);
   const billionDecimal = current.match(/(\d+)\s*(?:ty|ti)\s*(\d{1,2})?/);
+  const overBillion = current.match(/(?:tren|hon|tu)\s*(\d+)\s*(?:ty|ti)(?:\s*(\d{1,2}))?/);
+  const overMillions = current.match(/(?:tren|hon|tu)\s*(\d{2,4})\s*trieu/);
   const aroundBillion = /(?:tren duoi|khoang|tam|xap xi)/.test(current) && billionDecimal
     ? (Number(billionDecimal[1]) + Number(`0.${billionDecimal[2] ?? 0}`)) * 1_000_000_000
     : null;
@@ -302,11 +304,15 @@ const fallbackIntent = (message: string, history: ConversationMessage[]): Vehicl
       maxYear: null,
       minPriceVnd: rangeMillions
         ? Number(rangeMillions[1]) * 1_000_000
-        : aroundBillion
-          ? Math.round(aroundBillion * 0.8)
-          : asksForGoodValue
-            ? 500_000_000
-            : null,
+        : overBillion
+          ? Math.round((Number(overBillion[1]) + Number(`0.${overBillion[2] ?? 0}`)) * 1_000_000_000)
+          : overMillions
+            ? Number(overMillions[1]) * 1_000_000
+            : aroundBillion
+              ? Math.round(aroundBillion * 0.8)
+              : asksForGoodValue
+                ? 500_000_000
+                : null,
       maxPriceVnd: rangeMillions
         ? Number(rangeMillions[2]) * 1_000_000
         : underMillions
@@ -331,7 +337,7 @@ const shouldUseLocalSearch = (message: string): boolean => {
     ['tim', 'goi y', 'cho toi', 'can mua', 'dat nhat', 're nhat', 'cao nhat', 'thap nhat']
       .some((word) => normalizedMessage.includes(word)) ||
     ['tìm', 'gợi ý', 'cho tôi', 'cần mua'].some((word) => rawMessage.includes(word));
-  const hasStructuredFilter = [
+  const hasStructuredFilter = ['hon', 'tren', 'duoi', 'khoang', 'tu', 'den', 'den khoang', 'khoang den', 'khoang tu', 'tren duoi',
     'xe chau au', 'chau au', 'xe nhat', 'xe han', 'suv', 'sedan', 'ban tai',
     'trieu', 'ty', 'ti', 'gia', 'duoi', 'khoang', 'tren duoi', 'dat nhat', 're nhat',
   ].some((word) => normalizedMessage.includes(word)) ||
