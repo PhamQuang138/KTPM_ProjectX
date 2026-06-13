@@ -49,6 +49,9 @@ interface UserRating {
   myRating: number | null;
 }
 
+const normalizeDescription = (value?: string) =>
+  value?.replace(/\s+/g, ' ').trim().toLocaleLowerCase('vi-VN') ?? '';
+
 export default function VehicleDetail() {
   const {id} = useParams();
   const currentUser = useAuthStore((state) => state.user);
@@ -120,6 +123,11 @@ export default function VehicleDetail() {
     ? [...new Set([vehicle.vehicle?.image, ...(vehicle.vehicle?.images ?? [])].filter((image): image is string => Boolean(image)))]
     : [];
   const selectedIndex = Math.max(0, gallery.indexOf(selectedImage));
+  const listingDescription = vehicle?.description?.trim() ?? '';
+  const garageDescription = vehicle?.vehicle?.description?.trim() ?? '';
+  const showGarageDescription =
+    Boolean(garageDescription) &&
+    normalizeDescription(garageDescription) !== normalizeDescription(listingDescription);
 
   return (
     <div className="min-h-screen bg-background text-on-background">
@@ -166,9 +174,11 @@ export default function VehicleDetail() {
                 </div>
                 <h1 className="font-display text-4xl font-bold tracking-tight">{vehicle.title}</h1>
                 <p className="font-mono text-primary text-2xl font-bold mt-4">{vehicle.price}</p>
-                <p className="text-sm text-on-surface-variant leading-relaxed mt-5">{vehicle.description}</p>
-                {vehicle.vehicle?.description && (
-                  <p className="text-sm text-on-surface-variant leading-relaxed mt-3">{vehicle.vehicle.description}</p>
+                {listingDescription && (
+                  <p className="whitespace-pre-line text-sm text-on-surface-variant leading-relaxed mt-5">{listingDescription}</p>
+                )}
+                {showGarageDescription && (
+                  <p className="whitespace-pre-line text-sm text-on-surface-variant leading-relaxed mt-3">{garageDescription}</p>
                 )}
                 <p className="flex items-center gap-2 text-sm text-on-surface-variant mt-3">
                   <MapPin className="w-4 h-4" />
