@@ -81,6 +81,9 @@ Engagement:
 Tai khoan va ho so:
 - Dang ky, dang nhap, dang xuat tai /api/auth.
 - Quen mat khau tao ma co thoi han va co the gui qua SMTP.
+- Trang xac thuc chi hien cac chuc nang da co API: dang nhap, dang ky, quen mat
+  khau va dat lai mat khau. Google/Apple login, ghi nho 30 ngay va nut ho tro
+  tam an cho den khi co xu ly backend thuc te.
 - JWT duoc frontend luu trong localStorage va gui bang Authorization Bearer.
 - Thanh vien cap nhat bio, location, focusBrands, avatar va banner.
 - Co the tim tai khoan, xem profile, theo doi/bo theo doi va danh gia thanh vien.

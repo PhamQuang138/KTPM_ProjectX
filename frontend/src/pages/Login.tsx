@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowLeft, Eye, EyeOff, Headset } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { apiRequest } from '../lib/api';
@@ -287,15 +287,6 @@ export default function Login() {
               </div>
             )}
 
-            {mode !== 'forgot' && mode !== 'reset' && (
-            <div className="flex items-center">
-              <input className="w-4 h-4 bg-surface-container-high border-outline rounded focus:ring-primary text-primary transition-all cursor-pointer" id="remember" type="checkbox" />
-              <label className="ml-3 font-mono text-[10px] uppercase tracking-widest text-on-surface-variant select-none cursor-pointer hover:text-on-surface transition-colors" htmlFor="remember">
-                Stay signed in for 30 days
-              </label>
-            </div>
-            )}
-
             <button
               className="relative overflow-hidden w-full py-5 bg-primary text-on-primary font-mono text-[10px] uppercase tracking-[0.3em] rounded-xl hover:scale-[1.01] active:scale-[0.98] transition-all shadow-xl shadow-primary/10 shimmer-effect disabled:opacity-60 disabled:cursor-not-allowed"
               type="submit"
@@ -322,23 +313,6 @@ export default function Login() {
             )}
           </form>
 
-          {/* Divider */}
-          <div className="relative flex items-center py-4">
-            <div className="flex-grow border-t border-outline-variant/30"></div>
-            <span className="flex-shrink mx-4 font-mono text-[8px] text-on-surface-variant uppercase tracking-[0.3em]">Or Continue With</span>
-            <div className="flex-grow border-t border-outline-variant/30"></div>
-          </div>
-
-          {/* Social Logins */}
-          <div className="grid grid-cols-2 gap-4">
-            <button className="flex items-center justify-center space-x-3 py-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all active:scale-95 group">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-on-surface group-hover:text-primary transition-colors">Google</span>
-            </button>
-            <button className="flex items-center justify-center space-x-3 py-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all active:scale-95 group">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-on-surface group-hover:text-primary transition-colors">Apple</span>
-            </button>
-          </div>
-
           {/* Footer Support */}
           <div className="pt-8 flex justify-center">
             <p className="font-mono text-[9px] text-on-surface-variant/40 uppercase tracking-[0.4em]">
@@ -348,10 +322,6 @@ export default function Login() {
         </div>
       </section>
 
-      {/* Support FAB */}
-      <button className="fixed bottom-8 right-8 w-14 h-14 bg-surface-container-high text-primary rounded-full flex items-center justify-center shadow-2xl border border-white/10 hover:scale-110 active:scale-95 transition-all group z-50">
-        <Headset className="w-6 h-6 transition-transform duration-500 group-hover:rotate-12" />
-      </button>
     </main>
   );
 }
