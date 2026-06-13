@@ -95,7 +95,49 @@ const responseJsonSchema = {
 };
 
 const normalize = (value?: string | null) =>
-  value?.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim() ?? '';
+  value
+    ?.normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .toLowerCase()
+    .trim() ?? '';
+
+const makeAliases = new Map<string, string[]>([
+  ['Toyota', ['toyota']],
+  ['Honda', ['honda']],
+  ['Mazda', ['mazda']],
+  ['Mitsubishi', ['mitsubishi']],
+  ['Nissan', ['nissan']],
+  ['Suzuki', ['suzuki']],
+  ['Subaru', ['subaru']],
+  ['Lexus', ['lexus']],
+  ['Hyundai', ['hyundai']],
+  ['Kia', ['kia']],
+  ['Genesis', ['genesis']],
+  ['Ford', ['ford']],
+  ['VinFast', ['vinfast', 'vin fast']],
+  ['BMW', ['bmw']],
+  ['Mercedes-Benz', ['mercedes-benz', 'mercedes benz', 'mercedes', 'mec']],
+  ['Audi', ['audi']],
+  ['Volkswagen', ['volkswagen', 'vw']],
+  ['Volvo', ['volvo']],
+  ['Peugeot', ['peugeot']],
+  ['Renault', ['renault']],
+  ['Porsche', ['porsche']],
+  ['Land Rover', ['land rover', 'range rover']],
+  ['Bentley', ['bentley']],
+  ['Ferrari', ['ferrari']],
+  ['Lamborghini', ['lamborghini', 'lambo']],
+  ['McLaren', ['mclaren']],
+  ['Aston Martin', ['aston martin', 'aston']],
+]);
+
+const extractMakes = (message: string): string[] => {
+  const normalized = normalize(message);
+  return [...makeAliases.entries()]
+    .filter(([, aliases]) => aliases.some((alias) => normalized.includes(alias)))
+    .map(([make]) => make);
+};
 
 const parseVndPrice = (value: string): number | null => {
   const digits = value.replace(/[^\d]/g, '');
@@ -186,18 +228,15 @@ const parseIntentJson = (content: string): VehicleIntent => {
 };
 
 const fallbackIntent = (message: string, history: ConversationMessage[]): VehicleIntent => {
-  const conversation = normalize([
-    ...history.filter((item) => item.role === 'user').map((item) => item.content),
-    message,
-  ].join(' '));
+  const previousUserMessages = history.filter((item) => item.role === 'user');
+  const conversation = normalize([...previousUserMessages.map((item) => item.content), message].join(' '));
   const current = normalize(message);
-  const knownMakes = [
-    'Toyota', 'Honda', 'Mazda', 'Mitsubishi', 'Nissan', 'Suzuki', 'Subaru', 'Lexus',
-    'Hyundai', 'Kia', 'Genesis', 'Ford', 'VinFast', 'BMW', 'Mercedes-Benz', 'Audi',
-    'Volkswagen', 'Volvo', 'Peugeot', 'Renault', 'Porsche', 'Land Rover', 'Bentley',
-    'Ferrari', 'Lamborghini', 'McLaren', 'Aston Martin',
-  ];
-  const makes = knownMakes.filter((make) => conversation.includes(normalize(make)));
+  const currentMakes = extractMakes(message);
+  const inheritedMakes = [...previousUserMessages]
+    .reverse()
+    .map((item) => extractMakes(item.content))
+    .find((items) => items.length) ?? [];
+  const makes = currentMakes.length ? currentMakes : inheritedMakes;
   if (current.includes('xe nhat') || current.includes('nhat ban')) {
     makes.push('Toyota', 'Honda', 'Mazda', 'Mitsubishi', 'Nissan', 'Suzuki', 'Subaru', 'Lexus');
   }
@@ -235,12 +274,22 @@ const fallbackIntent = (message: string, history: ConversationMessage[]): Vehicl
         ? ' Hàn Quốc'
         : '';
   const requestedCount = resolveRequestedLimit(message, history);
+  const wantsHighestPrice = ['dat nhat', 'gia cao nhat', 'cao gia nhat', 'mac nhat']
+    .some((phrase) => current.includes(phrase));
+  const wantsLowestPrice = ['re nhat', 'gia thap nhat', 'thap gia nhat']
+    .some((phrase) => current.includes(phrase));
   const budgetLabel = aroundBillion
     ? ` trong khoảng ${(aroundBillion * 0.8 / 1_000_000_000).toLocaleString('vi-VN')} đến ${(aroundBillion * 1.2 / 1_000_000_000).toLocaleString('vi-VN')} tỷ đồng`
     : '';
+  const makeLabel = makes.length === 1 ? ` ${makes[0]}` : regionLabel;
+  const orderingLabel = wantsHighestPrice
+    ? ' và xếp theo giá từ cao xuống thấp'
+    : wantsLowestPrice
+      ? ' và xếp theo giá từ thấp lên cao'
+      : '';
 
   return vehicleIntentSchema.parse({
-    answer: `Mình sẽ chọn ${requestedCount ? `đúng ${requestedCount} ` : ''}mẫu xe${regionLabel}${budgetLabel} phù hợp nhất cho bạn.`,
+    answer: `Mình sẽ lọc ${requestedCount ? `đúng ${requestedCount} ` : ''}mẫu xe${makeLabel}${budgetLabel}${orderingLabel}.`,
     shouldSearch: true,
     filters: {
       makes: [...new Set(makes)],
@@ -279,15 +328,16 @@ const shouldUseLocalSearch = (message: string): boolean => {
   const normalizedMessage = normalize(message);
   const rawMessage = message.toLowerCase();
   const hasSearchIntent =
-    ['tim', 'goi y', 'cho toi', 'can mua'].some((word) => normalizedMessage.includes(word)) ||
+    ['tim', 'goi y', 'cho toi', 'can mua', 'dat nhat', 're nhat', 'cao nhat', 'thap nhat']
+      .some((word) => normalizedMessage.includes(word)) ||
     ['tìm', 'gợi ý', 'cho tôi', 'cần mua'].some((word) => rawMessage.includes(word));
   const hasStructuredFilter = [
     'xe chau au', 'chau au', 'xe nhat', 'xe han', 'suv', 'sedan', 'ban tai',
-    'trieu', 'ty', 'ti', 'gia', 'duoi', 'khoang', 'tren duoi',
+    'trieu', 'ty', 'ti', 'gia', 'duoi', 'khoang', 'tren duoi', 'dat nhat', 're nhat',
   ].some((word) => normalizedMessage.includes(word)) ||
     ['châu âu', 'xe nhật', 'xe hàn', 'triệu', 'tỷ', 'tỉ', 'giá', 'dưới', 'khoảng', 'trên dưới']
       .some((word) => rawMessage.includes(word));
-  return hasSearchIntent && hasStructuredFilter;
+  return hasSearchIntent && (hasStructuredFilter || extractMakes(message).length > 0);
 };
 
 const imageUrlAllowed = (imageUrl: string) => {
@@ -468,6 +518,10 @@ export const aiService = {
     if (regionalMakes.length) {
       intent.filters.makes = [...new Set([...intent.filters.makes, ...regionalMakes])];
     }
+    const explicitMakes = extractMakes(message);
+    if (explicitMakes.length) {
+      intent.filters.makes = explicitMakes;
+    }
     const asksForGoodValue = [
       'gia tot',
       'gia hop ly',
@@ -495,6 +549,17 @@ export const aiService = {
     const minYear = intent.filters.minYear ?? imageAnalysis?.estimatedYearFrom ?? null;
     const maxYear = intent.filters.maxYear ?? imageAnalysis?.estimatedYearTo ?? null;
     const limit = Math.min(Math.max(intent.filters.limit ?? 6, 1), 20);
+    const wantsHighestPrice = [
+      'dat nhat',
+      'gia cao nhat',
+      'cao gia nhat',
+      'mac nhat',
+    ].some((phrase) => normalizedMessage.includes(phrase));
+    const wantsLowestPrice = [
+      're nhat',
+      'gia thap nhat',
+      'thap gia nhat',
+    ].some((phrase) => normalizedMessage.includes(phrase));
     const candidates = await prisma.vehicleListing.findMany({
       where: {status: {not: 'Hidden'}},
       include: {
@@ -511,7 +576,7 @@ export const aiService = {
         _count: {select: {favorites: true, comments: true}},
       },
       orderBy: {createdAt: 'desc'},
-      take: 120,
+      take: 300,
     });
 
     const keywords = [
@@ -520,9 +585,7 @@ export const aiService = {
       ...models,
       ...bodyTypes,
     ].map(normalize).filter(Boolean);
-    const requireDistinctModels =
-      normalizedMessage.includes('mau xe') ||
-      message.toLowerCase().includes('mẫu xe');
+    const requireDistinctModels = /\bmau\b/.test(normalizedMessage);
     const seenModels = new Set<string>();
 
     const ranked = candidates
@@ -574,7 +637,13 @@ export const aiService = {
         if (intent.filters.maxPriceVnd && priceVnd && priceVnd > intent.filters.maxPriceVnd) return false;
         return score > 0 || (!keywords.length && !makes.length && !models.length);
       })
-      .sort((left, right) => right.score - left.score)
+      .sort((left, right) => {
+        const leftPrice = parseVndPrice(left.listing.price) ?? 0;
+        const rightPrice = parseVndPrice(right.listing.price) ?? 0;
+        if (wantsHighestPrice) return rightPrice - leftPrice;
+        if (wantsLowestPrice) return leftPrice - rightPrice;
+        return right.score - left.score;
+      })
       .filter(({listing}) => {
         if (!requireDistinctModels) return true;
         const key = normalize(`${listing.vehicle?.make} ${listing.vehicle?.model}`);
@@ -599,7 +668,11 @@ export const aiService = {
       }));
 
     const resultSummary = ranked.length
-      ? ` Tôi tìm thấy ${ranked.length} tin phù hợp nhất trong chợ xe.`
+      ? wantsHighestPrice
+        ? ` Đây là ${ranked.length} mẫu có giá cao nhất đang có trong chợ xe.`
+        : wantsLowestPrice
+          ? ` Đây là ${ranked.length} mẫu có giá thấp nhất đang có trong chợ xe.`
+          : ` Tôi tìm thấy ${ranked.length} tin phù hợp nhất trong chợ xe.`
       : ' Hiện chưa có tin xe nào khớp đủ gần với yêu cầu này.';
     const budgetSummary = asksForGoodValue
       ? ' Với nhu cầu tìm xe giá tốt nhưng chưa nêu ngân sách, khoảng 500 triệu đến 1 tỷ đồng là mức tham khảo hợp lý để có nhiều lựa chọn xe phổ thông đời tương đối mới.'
