@@ -26,7 +26,7 @@ Dự án được xây dựng theo mô hình monorepo với frontend và backend
 ## Database
 
 * PostgreSQL
-* Neon PostgreSQL (khuyến nghị)
+* Neon PostgreSQL 
 
 ## AI
 
