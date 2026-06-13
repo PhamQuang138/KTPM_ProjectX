@@ -5,6 +5,7 @@ import { ArrowLeft, Eye, EyeOff, Headset } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { apiRequest } from '../lib/api';
+import BrandLogo from '../components/BrandLogo';
 
 type AuthMode = 'login' | 'signup' | 'forgot' | 'reset';
 
@@ -146,7 +147,7 @@ export default function Login() {
               Back to Explore
             </Link>
             <div className="flex items-center justify-between">
-              <Link to="/" className="font-display text-2xl font-bold tracking-tighter text-on-background">CarHub</Link>
+              <BrandLogo imageClassName="h-12 w-12" />
               <button
                 type="button"
                 onClick={() => {

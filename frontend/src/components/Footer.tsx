@@ -1,4 +1,5 @@
 import {Link} from 'react-router-dom';
+import BrandLogo from './BrandLogo';
 
 export default function Footer({hideLogo}: {hideLogo?: boolean}) {
   return (
@@ -6,7 +7,7 @@ export default function Footer({hideLogo}: {hideLogo?: boolean}) {
       {!hideLogo && (
         <div className="mx-auto grid max-w-container-max grid-cols-1 gap-12 px-6 py-16 md:grid-cols-2 md:px-margin-desktop">
           <div className="space-y-6">
-            <h3 className="font-display text-3xl font-bold tracking-tighter text-on-surface">CarHub</h3>
+            <BrandLogo imageClassName="h-14 w-14" />
             <p className="max-w-sm text-sm leading-relaxed text-secondary opacity-80">
               Cộng đồng dành cho người yêu xe: chia sẻ bài viết, quản lý Garage, mua bán và trao đổi trực tiếp.
             </p>

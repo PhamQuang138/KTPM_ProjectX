@@ -1,4 +1,4 @@
-import { Search, User, Bell, PlusCircle, Zap, Menu, LogOut, MessageCircle, BadgeCheck, X } from 'lucide-react';
+import { Search, User, Bell, PlusCircle, Menu, LogOut, MessageCircle, BadgeCheck, X } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -9,6 +9,7 @@ import { useSidebarStore } from '../store/useSidebarStore';
 import { useAuthStore } from '../store/useAuthStore';
 import {useMessageStore} from '../store/useMessageStore';
 import {apiRequest} from '../lib/api';
+import BrandLogo from './BrandLogo';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -99,17 +100,7 @@ export default function TopNav({ title }: { title?: string }) {
               <Menu className="w-5 h-5" />
             </motion.button>
           )}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform shadow-lg shadow-primary/20">
-              <Zap className="w-6 h-6 text-on-primary fill-current" />
-            </div>
-            <div className="flex flex-col">
-              <h2 className="font-display text-xl text-on-background font-bold tracking-tighter uppercase whitespace-nowrap leading-none">
-                CarHub
-              </h2>
-              <span className="text-[8px] font-mono uppercase tracking-[0.3em] text-primary font-bold opacity-60">Mạng lưới xe</span>
-            </div>
-          </Link>
+          <BrandLogo showTagline />
         </div>
         
         <div className="flex items-center space-x-6">

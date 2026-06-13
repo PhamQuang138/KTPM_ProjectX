@@ -5,6 +5,7 @@ import { twMerge } from 'tailwind-merge';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSidebarStore } from '../store/useSidebarStore';
 import { useAuthStore } from '../store/useAuthStore';
+import BrandLogo from './BrandLogo';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -43,12 +44,7 @@ export default function Sidebar() {
           className="fixed left-0 top-0 h-screen w-64 bg-surface-container backdrop-blur-md border-r border-white/5 shadow-xl py-4 z-50 flex flex-col"
         >
           <div className="px-6 py-8 mb-8 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform shadow-lg shadow-primary/20">
-                <Zap className="w-6 h-6 text-on-primary fill-current" />
-              </div>
-              <span className="font-display text-2xl text-on-background tracking-tighter font-bold">CarHub</span>
-            </Link>
+            <BrandLogo imageClassName="h-11 w-11" />
             <button 
               onClick={toggle}
               className="p-2 rounded-xl hover:bg-white/5 text-on-surface-variant hover:text-primary transition-colors h-10 w-10 flex items-center justify-center"

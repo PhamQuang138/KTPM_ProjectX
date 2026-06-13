@@ -1,7 +1,6 @@
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { 
-  Zap, 
   ArrowRight, 
   ShoppingBag, 
   Users, 
@@ -135,10 +134,10 @@ export default function Home() {
                initial={{ opacity: 0, y: 20 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ duration: 0.6, delay: 0.1 }}
-               className="font-display text-6xl md:text-8xl font-bold tracking-tighter leading-[0.85] mb-8"
+               className="hero-title mb-9"
              >
-               MUA BÁN, KẾT NỐI <br />
-               <span className="text-primary italic">VÀ CHIA SẺ ĐAM MÊ</span>
+               <span>MUA BÁN, KẾT NỐI</span>
+               <span className="hero-title-accent">VÀ CHIA SẺ ĐAM MÊ</span>
              </motion.h1>
 
              <motion.p 
