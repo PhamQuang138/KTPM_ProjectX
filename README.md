@@ -1,256 +1,289 @@
 # CarHub Garage
 
-CarHub Garage is a full-stack web application for vehicle marketplace listings and automotive community posts.
+CarHub Garage là nền tảng web full-stack dành cho cộng đồng yêu ô tô, kết hợp giữa mạng xã hội chia sẻ nội dung, quản lý Garage cá nhân, chợ mua bán xe và trợ lý tìm xe bằng AI.
 
-## Project Structure
+Dự án được xây dựng theo mô hình monorepo với frontend và backend tách biệt, sử dụng PostgreSQL để lưu trữ dữ liệu, OpenRouter cho tính năng AI và Vercel Blob để lưu trữ hình ảnh trên môi trường production.
 
-- `frontend`: React + Vite + TypeScript
-- `backend`: Node.js + Express + TypeScript
-- Database: PostgreSQL + Prisma ORM
+---
 
-## Main Features
+# Công nghệ sử dụng
 
-### User
+## Frontend
 
-Account management:
+* React 19
+* Vite
+* TypeScript
+* Tailwind CSS
+* Zustand
 
-- Register account
-- Login
-- Logout
+## Backend
 
-Community:
+* Node.js
+* Express
+* TypeScript
+* Prisma ORM
 
-- Create sharing posts
-- Upload/add images to posts
-- View community post feed
-- Read automotive editorial articles
+## Database
 
-Marketplace:
+* PostgreSQL
+* Neon PostgreSQL (khuyến nghị)
 
-- Create vehicle sale listings
-- Manage vehicles in personal Garage
-- View vehicles currently for sale
-- Search and view vehicle information
+## AI
 
-### Admin
+* OpenRouter
+* Hỗ trợ tìm kiếm xe bằng ngôn ngữ tự nhiên và nhận diện xe từ hình ảnh
 
-- Manage users
-- Manage community posts
-- Manage vehicle listings
-- Moderate system content
+## Lưu trữ hình ảnh
 
-Admin login is configured with `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `backend/.env`.
+* Vercel Blob Storage
 
-Admin page:
+---
 
-```txt
-http://localhost:3000/admin
-```
+# Chức năng chính
 
-## Requirements
+## Quản lý tài khoản
 
-- Node.js
-- npm
-- PostgreSQL
+Người dùng có thể:
 
-## Install
+* Đăng ký tài khoản
+* Đăng nhập, đăng xuất
+* Quên mật khẩu và đặt lại mật khẩu
+* Cập nhật thông tin cá nhân
+* Thay đổi ảnh đại diện và ảnh bìa
+* Theo dõi thành viên khác
+* Đánh giá thành viên
+* Nhận huy hiệu xác thực (Verified)
 
-From the repository root:
+---
+
+## Cộng đồng ô tô
+
+Người dùng có thể:
+
+* Tạo bài viết chia sẻ
+* Đăng nhiều hình ảnh trong một bài viết
+* Thích bài viết
+* Bình luận bài viết
+* Lưu bài viết
+* Chia sẻ bài viết
+* Xem bảng tin cộng đồng
+* Đọc các bài viết chuyên đề về ô tô
+
+---
+
+## Garage cá nhân
+
+Người dùng có thể:
+
+* Thêm xe vào Garage cá nhân
+* Quản lý thông tin xe
+* Cập nhật hoặc xóa xe
+* Lưu trữ nhiều hình ảnh cho mỗi xe
+
+Garage đóng vai trò là nơi quản lý các phương tiện đang sở hữu trước khi đưa lên Marketplace.
+
+---
+
+## Marketplace
+
+Người dùng có thể:
+
+* Đăng tin bán xe
+* Tạo tin bán trực tiếp từ Garage
+* Chỉnh sửa hoặc xóa tin bán
+* Đánh dấu xe đã bán
+* Tìm kiếm xe theo nhiều tiêu chí
+* Lưu tin yêu thích
+* Bình luận trên tin bán
+* Đánh giá người bán
+
+Hệ thống hỗ trợ:
+
+* Tìm kiếm theo hãng xe
+* Kiểu xe
+* Năm sản xuất
+* Nhiên liệu
+* Hộp số
+* Tình trạng xe
+* Sắp xếp theo mới nhất hoặc phổ biến nhất
+
+---
+
+## Nhắn tin
+
+Người dùng có thể:
+
+* Tạo cuộc trò chuyện với thành viên khác
+* Liên hệ trực tiếp với người bán từ tin đăng
+* Gửi và nhận tin nhắn
+* Theo dõi trạng thái đã đọc
+
+---
+
+## Thông báo
+
+Hệ thống hỗ trợ thông báo cho các hoạt động:
+
+* Like bài viết
+* Bình luận
+* Theo dõi tài khoản
+* Tương tác Marketplace
+* Tin nhắn mới
+
+---
+
+## Trợ lý AI tìm xe
+
+CarHub tích hợp chatbot AI hỗ trợ:
+
+* Tìm xe bằng tiếng Việt tự nhiên
+* Tìm xe theo ngân sách
+* Tìm xe theo nhu cầu sử dụng
+* So sánh các mẫu xe
+* Nhận diện xe từ hình ảnh
+* Hiểu hội thoại nhiều lượt
+* Đề xuất xe phù hợp từ dữ liệu thực trong hệ thống
+
+Ví dụ:
+
+* "Tìm SUV dưới 1 tỷ"
+* "Xe Nhật nào đáng mua?"
+* "Cho tôi 3 xe gia đình dưới 800 triệu"
+* "Chiếc xe trong ảnh là gì?"
+
+AI chỉ hỗ trợ phân tích và tìm kiếm, không tự tạo dữ liệu hoặc tin đăng giả.
+
+---
+
+## Quản trị hệ thống
+
+Tài khoản quản trị có thể:
+
+* Quản lý người dùng
+* Quản lý bài viết cộng đồng
+* Quản lý Garage
+* Quản lý tin đăng Marketplace
+* Quản lý bài viết chuyên đề
+* Xác thực tài khoản
+* Kiểm duyệt nội dung hệ thống
+
+---
+
+# Cài đặt dự án
+
+## Yêu cầu
+
+* Node.js 20 trở lên
+* PostgreSQL hoặc Neon PostgreSQL
+* npm
+
+## Cài đặt thư viện
+
+Tại thư mục gốc của dự án:
 
 ```bash
 npm install
 ```
 
-## Environment
+---
 
-Create:
+# Cấu hình môi trường
 
-```txt
+Tạo file:
+
+```text
 backend/.env
 ```
 
-Use `backend/.env.example` as a template:
+Sử dụng file:
 
-```env
-NODE_ENV=development
-PORT=4000
-CORS_ORIGIN=http://localhost:3000
-DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@127.0.0.1:5432/carhub?schema=public
-JWT_SECRET=replace-with-a-random-secret-at-least-32-characters
-JWT_EXPIRES_IN=7d
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=replace-with-a-strong-password
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX=100
-LOG_LEVEL=info
+```text
+backend/.env.example
 ```
 
-Generate a local JWT secret in PowerShell:
+làm mẫu cấu hình.
 
-```powershell
-[Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
-```
+---
 
-Replace the example values for `JWT_SECRET` and `ADMIN_PASSWORD` before starting the backend.
+# Cấu hình cơ sở dữ liệu
 
-## Database
-
-Generate Prisma client:
+Tạo Prisma Client:
 
 ```bash
 npm run db:generate --workspace backend
 ```
 
-Run migrations:
+Chạy migration:
 
 ```bash
-npm run db:migrate --workspace backend
+npm run db:migrate:deploy --workspace backend
 ```
 
-Create or update the admin account without deleting user data:
+Tạo tài khoản quản trị:
 
 ```bash
 npm run db:ensure-admin --workspace backend
 ```
 
-Seed demo data. This resets app data:
+Sinh dữ liệu mẫu:
 
 ```bash
 npm run db:seed --workspace backend
 ```
 
-Open Prisma Studio:
+---
+
+# Chạy dự án
+
+Chạy đồng thời frontend và backend:
 
 ```bash
-npm run db:studio --workspace backend
+npm run dev
 ```
 
-## Cloud Database Setup
-
-Recommended provider: Neon PostgreSQL.
-
-1. Create a Neon project.
-2. Click `Connect` in the Neon dashboard.
-3. Copy the direct PostgreSQL connection string. It should look like:
-
-```txt
-postgresql://USER:PASSWORD@HOST.neon.tech/DB_NAME?sslmode=require
-```
-
-4. Paste that value into `backend/.env` as `DATABASE_URL`.
-5. Run:
-
-```bash
-npm run db:generate --workspace backend
-npm run db:migrate --workspace backend
-npm run db:ensure-admin --workspace backend
-```
-
-Use the same `DATABASE_URL` on every teammate's machine to share the same cloud data.
-
-## Run
-
-Backend:
-
-```bash
-npm run dev:backend
-```
-
-Frontend:
+Hoặc chạy riêng:
 
 ```bash
 npm run dev:frontend
+npm run dev:backend
 ```
 
-Frontend URL:
+Sau khi chạy:
 
-```txt
+Frontend:
+
+```text
 http://localhost:3000
 ```
 
-Backend health check:
+Backend:
 
-```txt
+```text
 http://localhost:4000/api/health
 ```
 
-## Demo User
+---
 
-After seeding:
+# Triển khai
 
-```txt
-email: alex@example.com
-password: password123
-```
+Dự án được cấu hình để triển khai trên Vercel theo mô hình Multi-Service:
 
-## API Overview
+* Frontend 
+* Backend 
 
-Authentication:
+Các dịch vụ cần thiết trên môi trường production:
 
-- `POST /api/auth/signup`
-- `POST /api/auth/login`
-- `POST /api/auth/logout`
+* PostgreSQL (Neon)
+* Vercel Blob Storage
+* OpenRouter API
 
-Community posts:
+Backend tự động chạy Prisma Migration trong quá trình build và deploy.
 
-- `GET /api/posts`
-- `POST /api/posts`
-- `GET /api/posts/community`
-- `POST /api/posts/community`
+---
 
-Vehicles:
+# Ghi chú
 
-- `GET /api/vehicles`
-- `POST /api/vehicles`
-- `GET /api/vehicles/images`
-
-Garage:
-
-- `GET /api/garage/vehicles`
-- `POST /api/garage/vehicles`
-
-Articles:
-
-- `GET /api/articles`
-
-Admin:
-
-- `GET /api/admin/dashboard`
-- `GET /api/admin/users`
-- `DELETE /api/admin/users/:id`
-- `GET /api/admin/posts`
-- `PATCH /api/admin/posts/:id/status`
-- `DELETE /api/admin/posts/:id`
-- `GET /api/admin/vehicles`
-- `DELETE /api/admin/vehicles/:id`
-
-## Local Reset
-
-This deletes app-owned tables and data:
-
-```bash
-npm run db:drop-schema --workspace backend
-npm run db:migrate --workspace backend
-npm run db:seed --workspace backend
-```
-# Deploy Vercel Multi-Services
-
-Tạo một Vercel Project với Root Directory là `./` và Application Preset là `Services`.
-File `vercel.json` ở thư mục gốc khai báo:
-
-- Frontend Vite tại `/`
-- Backend Express tại `/api`
-
-Frontend gọi backend cùng domain nên không cần URL backend riêng. Các biến cần import:
-
-- Backend: `backend/.env.vercel`
-- Frontend không cần biến môi trường API vì mặc định dùng `/api`
-
-Kết nối một Vercel Blob Store dạng Public để Vercel tự thêm
-`BLOB_READ_WRITE_TOKEN`. Build backend tự chạy `prisma migrate deploy`.
-
-Health check sau deploy:
-
-```text
-https://TEN-PROJECT.vercel.app/api/health
-```
+* Hình ảnh được lưu trên Vercel Blob, không lưu trực tiếp trong cơ sở dữ liệu.
+* AI chỉ được gọi từ backend để bảo vệ API Key.
+* Dữ liệu trong PostgreSQL chỉ lưu metadata và đường dẫn ảnh.
+* Hệ thống hỗ trợ mở rộng thêm tính năng Marketplace, AI và Social Community trong tương lai.
