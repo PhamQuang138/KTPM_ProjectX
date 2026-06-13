@@ -1,28 +1,17 @@
-console.log("AI SERVICE VERSION 2026-06-11");
-console.log('ALL ENV KEYS:', Object.keys(process.env).sort());
-console.log('GEMINI_API_KEY=', process.env.GEMINI_API_KEY);
-console.log('GOOGLE_API_KEY=', process.env.GOOGLE_API_KEY);
-console.log('GEMINI_MODEL=', process.env.GEMINI_MODEL);
-import dotenv from 'dotenv';
-dotenv.config();
-
-import {GoogleGenAI} from '@google/genai';
 import {z} from 'zod';
 import {prisma} from '../config/prisma';
-const getGeminiClient = () => {
-  const apiKey =
-    process.env.GEMINI_API_KEY?.trim() ||
-    process.env.GOOGLE_API_KEY?.trim() ||
-    process.env.API_KEY?.trim();
 
-  console.log('GEMINI KEY EXISTS =', Boolean(apiKey));
-  console.log('GEMINI MODEL =', process.env.GEMINI_MODEL);
+const OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
+const DEFAULT_OPENROUTER_MODEL = 'nex-agi/nex-n2-pro:free';
 
-  if (!apiKey) {
-    throw new Error('GEMINI_NOT_CONFIGURED');
-  }
+const getOpenRouterConfig = () => {
+  const apiKey = process.env.OPENROUTER_API_KEY?.trim();
+  if (!apiKey) throw new Error('OPENROUTER_NOT_CONFIGURED');
 
-  return new GoogleGenAI({apiKey});
+  return {
+    apiKey,
+    model: process.env.OPENROUTER_MODEL?.trim() || DEFAULT_OPENROUTER_MODEL,
+  };
 };
 const vehicleIntentSchema = z.object({
   answer: z.string().trim().min(1).max(2000),
@@ -129,7 +118,7 @@ const imageUrlAllowed = (imageUrl: string) => {
   );
 };
 
-const loadImagePart = async (imageUrl: string) => {
+const loadImageDataUrl = async (imageUrl: string) => {
   if (!imageUrlAllowed(imageUrl)) throw new Error('IMAGE_URL_NOT_ALLOWED');
   const response = await fetch(imageUrl, {signal: AbortSignal.timeout(12_000)});
   if (!response.ok) throw new Error('IMAGE_DOWNLOAD_FAILED');
@@ -139,27 +128,42 @@ const loadImagePart = async (imageUrl: string) => {
   }
   const bytes = Buffer.from(await response.arrayBuffer());
   if (bytes.length > 4 * 1024 * 1024) throw new Error('IMAGE_TOO_LARGE');
-  return {inlineData: {mimeType, data: bytes.toString('base64')}};
+  return `data:${mimeType};base64,${bytes.toString('base64')}`;
 };
 
 const analyzeRequest = async (message: string, imageUrl?: string): Promise<VehicleIntent> => {
-  const ai = getGeminiClient();
-  const parts: Array<{text: string} | {inlineData: {mimeType: string; data: string}}> = [
-    {
-      text: `Yêu cầu của người dùng: ${message || 'Hãy nhận dạng chiếc xe trong ảnh và tìm xe tương tự.'}`,
-    },
-  ];
-  if (imageUrl) parts.unshift(await loadImagePart(imageUrl));
+  const {apiKey, model} = getOpenRouterConfig();
+  const userContent: Array<
+    {type: 'text'; text: string} |
+    {type: 'image_url'; image_url: {url: string}}
+  > = [{
+    type: 'text',
+    text: `Yêu cầu của người dùng: ${message || 'Hãy nhận dạng chiếc xe trong ảnh và tìm xe tương tự.'}`,
+  }];
+  if (imageUrl) {
+    userContent.push({
+      type: 'image_url',
+      image_url: {url: await loadImageDataUrl(imageUrl)},
+    });
+  }
 
-  const response = await ai.models.generateContent({
-    model: process.env.GEMINI_MODEL?.trim() || 'gemini-2.5-flash',
-    contents: [{role: 'user', parts}],
-    config: {
-      temperature: 0.1,
-      maxOutputTokens: 1200,
-      responseMimeType: 'application/json',
-      responseJsonSchema,
-      systemInstruction: `Bạn là trợ lý tìm xe của CarHub.
+  const response = await fetch(OPENROUTER_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer':
+        process.env.OPENROUTER_SITE_URL?.trim() ||
+        process.env.PUBLIC_BACKEND_URL?.trim() ||
+        'http://localhost:3000',
+      'X-Title': process.env.OPENROUTER_APP_NAME?.trim() || 'CarHub Garage',
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        {
+          role: 'system',
+          content: `Bạn là trợ lý tìm xe của CarHub.
 Phân tích câu hỏi tiếng Việt và ảnh đầu vào thành bộ lọc tìm kiếm.
 Không bịa listing, giá hay người bán. Listing thật sẽ do backend truy vấn sau.
 answer là câu trả lời ngắn bằng tiếng Việt, mô tả điều bạn hiểu và lưu ý độ chắc chắn nếu nhận dạng ảnh.
@@ -183,12 +187,37 @@ Giới hạn tối đa 20 kết quả.
 Không tự suy đoán ngân sách của người dùng.
 Nếu câu hỏi chỉ hỏi kiến thức ô tô, trả lời hữu ích trong answer và đặt shouldSearch=false.
 Nếu có ảnh, hãy nhận dạng thận trọng; model/năm không chắc thì để null hoặc dùng khoảng năm.`,
-
-    },
+        },
+        {role: 'user', content: userContent},
+      ],
+      temperature: 0.1,
+      max_tokens: 1200,
+      reasoning: {effort: 'low', exclude: true},
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'vehicle_search_intent',
+          strict: true,
+          schema: responseJsonSchema,
+        },
+      },
+      plugins: [{id: 'response-healing'}],
+    }),
+    signal: AbortSignal.timeout(45_000),
   });
-  console.log("GEMINI RESPONSE:");
-  console.log(response.text);
-  return vehicleIntentSchema.parse(JSON.parse(response.text || '{}'));
+
+  const payload = await response.json() as {
+    error?: {message?: string};
+    choices?: Array<{message?: {content?: string | null}}>;
+  };
+  if (!response.ok) {
+    throw new Error(`OPENROUTER_HTTP_${response.status}:${payload.error?.message ?? response.statusText}`);
+  }
+
+  const content = payload.choices?.[0]?.message?.content;
+  if (!content) throw new Error('OPENROUTER_EMPTY_RESPONSE');
+
+  return vehicleIntentSchema.parse(JSON.parse(content));
 };
 
 const matchesAny = (value: string | null | undefined, expected: string[]) => {
@@ -314,5 +343,3 @@ export const aiService = {
     };
   },
 };
-
-

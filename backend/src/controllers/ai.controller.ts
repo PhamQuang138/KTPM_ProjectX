@@ -21,26 +21,28 @@ export const aiController = {
 
       console.error('AI CHAT ERROR:', error);
 
-      if (
-        errorText.includes('RESOURCE_EXHAUSTED') ||
-        errorText.includes('Quota exceeded') ||
-        errorText.includes('429')
-      ) {
+      if (errorText.includes('OPENROUTER_HTTP_429')) {
         return res.status(429).json({
           message:
-            'Gemini đã hết quota miễn phí hoặc bị giới hạn tốc độ. Vui lòng thử lại sau hoặc đổi model/nâng hạn mức.',
+            'OpenRouter đang giới hạn tốc độ hoặc model miễn phí tạm hết năng lực. Vui lòng thử lại sau.',
         });
       }
 
-      if (error instanceof Error && error.message === 'GEMINI_NOT_CONFIGURED') {
+      if (error instanceof Error && error.message === 'OPENROUTER_NOT_CONFIGURED') {
         return res.status(503).json({
-          message: 'Chatbot chưa được cấu hình GEMINI_API_KEY',
+          message: 'Chatbot chưa được cấu hình OPENROUTER_API_KEY',
         });
       }
 
       if (error instanceof Error && error.message.startsWith('IMAGE_')) {
         return res.status(400).json({
           message: 'Không thể sử dụng ảnh này để tìm kiếm',
+        });
+      }
+
+      if (errorText.startsWith('OPENROUTER_HTTP_')) {
+        return res.status(502).json({
+          message: 'OpenRouter không thể xử lý yêu cầu lúc này. Vui lòng thử lại sau.',
         });
       }
 

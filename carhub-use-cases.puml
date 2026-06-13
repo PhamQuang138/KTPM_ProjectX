@@ -1,0 +1,313 @@
+' File nay chua 4 diagram. PlantUML se xuat 4 anh khi render ca file.
+
+@startuml CarHub_01_Overview
+title CARHUB GARAGE - USE CASE TONG QUAN
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase BackgroundColor #F7F8FC
+skinparam usecase BorderColor #6677AA
+
+actor "Khach" as Guest
+actor "Thanh vien" as Member
+actor "Quan tri vien" as Admin
+actor "OpenRouter / Nex AI" as OpenRouter
+actor "Vercel Blob" as Blob
+actor "Dich vu SMTP" as SMTP
+
+Member --|> Guest
+Admin --|> Member
+
+rectangle "CARHUB GARAGE" {
+  usecase "Su dung tai khoan\nva ho so" as O_Account
+  usecase "Tham gia cong dong" as O_Community
+  usecase "Quan ly Garage" as O_Garage
+  usecase "Mua ban tren\nMarketplace" as O_Market
+  usecase "Nhan tin va\nnhan thong bao" as O_Message
+  usecase "Tim xe bang AI" as O_AI
+  usecase "Doc bai chuyen de" as O_Article
+  usecase "Quan tri he thong" as O_Admin
+  usecase "Luu tru anh" as O_Upload
+  usecase "Khoi phuc mat khau" as O_Reset
+}
+
+Guest --> O_Account
+Guest --> O_Article
+Guest --> O_Community : xem
+Guest --> O_Market : xem
+Guest --> O_Reset
+
+Member --> O_Community
+Member --> O_Garage
+Member --> O_Market
+Member --> O_Message
+Member --> O_AI
+
+Admin --> O_Admin
+OpenRouter --> O_AI
+Blob --> O_Upload
+SMTP --> O_Reset
+
+O_Upload .> O_Account : <<extend>>
+O_Upload .> O_Community : <<extend>>
+O_Upload .> O_Garage : <<extend>>
+O_Upload .> O_AI : <<extend>>
+@enduml
+
+
+@startuml CarHub_02_Account_Community
+title CARHUB GARAGE - TAI KHOAN, HO SO VA CONG DONG
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase BackgroundColor #F7F8FC
+skinparam usecase BorderColor #6677AA
+
+actor "Khach" as Guest
+actor "Thanh vien" as Member
+actor "Dich vu SMTP" as SMTP
+actor "Vercel Blob" as Blob
+Member --|> Guest
+
+rectangle "CARHUB GARAGE" {
+  package "Tai khoan va ho so" {
+    usecase "Dang ky" as A_SignUp
+    usecase "Dang nhap" as A_Login
+    usecase "Dang xuat" as A_Logout
+    usecase "Khoi phuc mat khau" as A_Reset
+    usecase "Gui ma reset qua email" as A_SendCode
+    usecase "Xem / tim ho so" as A_ViewProfile
+    usecase "Cap nhat bio, location\nva hang xe quan tam" as A_UpdateProfile
+    usecase "Cap nhat avatar / banner" as A_UpdateImage
+    usecase "Theo doi / bo theo doi" as A_Follow
+    usecase "Danh gia thanh vien" as A_Rate
+  }
+
+  package "Cong dong" {
+    usecase "Xem feed" as C_Feed
+    usecase "Dang bai viet" as C_Create
+    usecase "Dinh kem toi da 8 anh" as C_Images
+    usecase "Sua caption" as C_Edit
+    usecase "Xoa bai cua minh" as C_Delete
+    usecase "Thich bai viet" as C_Like
+    usecase "Binh luan" as C_Comment
+    usecase "Luu / bo luu" as C_Bookmark
+    usecase "Chia se bai viet" as C_Share
+    usecase "Xem bai da thich\nhoac da luu" as C_Favorites
+  }
+
+  usecase "Tai anh" as X_Upload
+  usecase "Tao thong bao" as X_Notify
+}
+
+Guest --> A_SignUp
+Guest --> A_Login
+Guest --> A_Reset
+Guest --> A_ViewProfile
+Guest --> C_Feed
+
+Member --> A_Logout
+Member --> A_UpdateProfile
+Member --> A_UpdateImage
+Member --> A_Follow
+Member --> A_Rate
+Member --> C_Create
+Member --> C_Edit
+Member --> C_Delete
+Member --> C_Like
+Member --> C_Comment
+Member --> C_Bookmark
+Member --> C_Share
+Member --> C_Favorites
+
+A_Reset .> A_SendCode : <<include>>
+A_SendCode --> SMTP
+A_UpdateImage .> X_Upload : <<include>>
+C_Images .> X_Upload : <<include>>
+C_Images .> C_Create : <<extend>>
+X_Upload --> Blob
+
+A_Follow .> X_Notify : <<extend>>
+C_Like .> X_Notify : <<extend>>
+C_Comment .> X_Notify : <<extend>>
+@enduml
+
+
+@startuml CarHub_03_Marketplace_AI_Messaging
+title CARHUB GARAGE - GARAGE, MARKETPLACE, AI VA NHAN TIN
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase BackgroundColor #F7F8FC
+skinparam usecase BorderColor #6677AA
+
+actor "Khach" as Guest
+actor "Thanh vien" as Member
+actor "OpenRouter / Nex AI" as OpenRouter
+actor "Vercel Blob" as Blob
+Member --|> Guest
+
+rectangle "CARHUB GARAGE" {
+  package "Garage" {
+    usecase "Xem Garage ca nhan" as G_View
+    usecase "Them xe" as G_Create
+    usecase "Sua thong tin xe" as G_Edit
+    usecase "Xoa xe" as G_Delete
+    usecase "Quan ly toi da\n12 anh moi xe" as G_Images
+  }
+
+  package "Marketplace" {
+    usecase "Tim kiem, loc va\nsap xep tin xe" as M_Search
+    usecase "Xem chi tiet xe" as M_Detail
+    usecase "Tao tin ban tu Garage" as M_Create
+    usecase "Sua tin dang" as M_Edit
+    usecase "Danh dau da ban" as M_Sold
+    usecase "Xoa tin dang" as M_Delete
+    usecase "Luu tin xe" as M_Favorite
+    usecase "Binh luan tin xe" as M_Comment
+    usecase "Danh gia nguoi ban" as M_Rate
+    usecase "Lien he nguoi ban" as M_Contact
+  }
+
+  package "Nhan tin va thong bao" {
+    usecase "Tao tro chuyen truc tiep" as X_Direct
+    usecase "Tao tro chuyen gan listing" as X_ListingChat
+    usecase "Xem danh sach tro chuyen" as X_List
+    usecase "Doc va gui tin nhan" as X_Message
+    usecase "Chia se bai viet qua chat" as X_Share
+    usecase "Xem thong bao" as X_Notify
+    usecase "Danh dau tat ca da doc" as X_ReadAll
+    usecase "Tao thong bao tu tuong tac" as X_CreateNotify
+  }
+
+  package "Tro ly tim xe AI" {
+    usecase "Hoi bang tieng Viet" as AI_Text
+    usecase "Tim xe bang anh" as AI_Image
+    usecase "Phan tich thanh\nbo loc co cau truc" as AI_Intent
+    usecase "Truy van va xep hang\nlisting that" as AI_Rank
+    usecase "Xem xe duoc de xuat" as AI_Result
+  }
+
+  usecase "Tai anh" as U_Upload
+}
+
+Guest --> M_Search
+Guest --> M_Detail
+
+Member --> G_View
+Member --> G_Create
+Member --> G_Edit
+Member --> G_Delete
+Member --> G_Images
+Member --> M_Create
+Member --> M_Edit
+Member --> M_Sold
+Member --> M_Delete
+Member --> M_Favorite
+Member --> M_Comment
+Member --> M_Rate
+Member --> M_Contact
+Member --> X_Direct
+Member --> X_List
+Member --> X_Message
+Member --> X_Share
+Member --> X_Notify
+Member --> X_ReadAll
+Member --> AI_Text
+Member --> AI_Image
+Member --> AI_Result
+
+G_Images .> U_Upload : <<include>>
+U_Upload --> Blob
+M_Create .> G_View : <<include>>
+M_Contact .> X_ListingChat : <<include>>
+X_Share .> X_Message : <<include>>
+
+M_Favorite .> X_CreateNotify : <<extend>>
+M_Comment .> X_CreateNotify : <<extend>>
+X_Message .> X_CreateNotify : <<extend>>
+
+AI_Text .> AI_Intent : <<include>>
+AI_Image .> U_Upload : <<include>>
+AI_Image .> AI_Intent : <<include>>
+AI_Intent --> OpenRouter
+AI_Intent .> AI_Rank : <<include>>
+AI_Rank .> AI_Result : <<include>>
+
+note bottom of AI_Rank
+  Chi truy van listing that trong PostgreSQL.
+  AI khong tu tao tin xe.
+end note
+
+note bottom of G_Delete
+  Xoa xe se xoa cac listing lien quan
+  trong Prisma transaction.
+end note
+@enduml
+
+
+@startuml CarHub_04_Admin
+title CARHUB GARAGE - USE CASE QUAN TRI
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase BackgroundColor #F7F8FC
+skinparam usecase BorderColor #6677AA
+
+actor "Quan tri vien" as Admin
+
+rectangle "CARHUB GARAGE - ADMIN" {
+  usecase "Dang nhap voi quyen ADMIN" as D_Login
+  usecase "Xem dashboard thong ke" as D_Dashboard
+
+  package "Nguoi dung" {
+    usecase "Xem danh sach tai khoan" as D_Users
+    usecase "Bat / tat verified\nprofessional" as D_Verify
+    usecase "Xoa tai khoan" as D_DeleteUser
+    usecase "Bao ve admin cuoi cung" as D_LastAdmin
+  }
+
+  package "Noi dung" {
+    usecase "Duyet trang thai bai viet" as D_PostStatus
+    usecase "Xoa bai viet" as D_DeletePost
+    usecase "Duyet trang thai article" as D_ArticleStatus
+    usecase "Xoa article" as D_DeleteArticle
+    usecase "Xoa comment" as D_DeleteComment
+  }
+
+  package "Garage va Marketplace" {
+    usecase "Cap nhat trang thai listing" as D_ListingStatus
+    usecase "Xoa listing" as D_DeleteListing
+    usecase "Cap nhat trang thai GarageVehicle" as D_GarageStatus
+    usecase "Xoa GarageVehicle" as D_DeleteGarage
+  }
+
+  package "Quan he xa hoi" {
+    usecase "Xem / xoa rating" as D_Rating
+    usecase "Xem / xoa follow" as D_Follow
+  }
+}
+
+Admin --> D_Login
+Admin --> D_Dashboard
+Admin --> D_Users
+Admin --> D_Verify
+Admin --> D_DeleteUser
+Admin --> D_PostStatus
+Admin --> D_DeletePost
+Admin --> D_ArticleStatus
+Admin --> D_DeleteArticle
+Admin --> D_DeleteComment
+Admin --> D_ListingStatus
+Admin --> D_DeleteListing
+Admin --> D_GarageStatus
+Admin --> D_DeleteGarage
+Admin --> D_Rating
+Admin --> D_Follow
+
+D_DeleteUser .> D_LastAdmin : <<include>>
+@enduml

@@ -177,7 +177,7 @@ export default function ChatbotDock() {
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="font-display text-base font-bold">Trợ lý tìm xe</h2>
-              <p className="text-[10px] text-on-surface-variant">Gemini + dữ liệu Marketplace</p>
+              <p className="text-[10px] text-on-surface-variant">Nex AI + dữ liệu Marketplace</p>
             </div>
             <button
               type="button"

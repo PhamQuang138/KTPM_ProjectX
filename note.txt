@@ -1,12 +1,16 @@
 CARHUB - GHI CHU KIEN TRUC VA VAN HANH
-Cap nhat: 10/06/2026
+Cap nhat: 13/06/2026
 
 1. TONG QUAN
 
+CarHub Garage la nen tang full-stack ket hop cong dong oto, Garage ca nhan,
+Marketplace, noi dung chuyen de, nhan tin va tro ly tim xe bang AI.
+
 Du an la monorepo npm workspaces gom:
-- frontend: React 19 + Vite + TypeScript + Tailwind CSS + Zustand.
-- backend: Node.js + Express + TypeScript + Prisma ORM.
-- database: PostgreSQL (dang dung Neon cloud).
+- frontend: React 19 + Vite + TypeScript + Tailwind CSS + Zustand + Motion.
+- backend: Node.js 20+ + Express + TypeScript + Prisma ORM.
+- database: PostgreSQL, hien tai phu hop voi Neon cloud.
+- AI: OpenRouter voi model mac dinh nex-agi/nex-n2-pro:free, chi goi tu backend.
 - luu anh production: Vercel Blob; database chi luu URL va metadata.
 - deploy: Vercel multi-service, frontend tai "/" va backend tai "/api".
 
@@ -15,9 +19,9 @@ Du an la monorepo npm workspaces gom:
 KTPM___/
 |-- frontend/
 |   |-- src/
-|   |   |-- components/       UI dung chung: Sidebar, TopNav, SocialPost, VehicleCard...
+|   |   |-- components/       UI dung chung, chat, thong bao, chatbot...
 |   |   |-- pages/            Home, Feed, Marketplace, Garage, Profile, Admin...
-|   |   |-- lib/              API client va upload anh
+|   |   |-- lib/              API client, xu ly va upload anh
 |   |   |-- store/            Auth, sidebar, message state
 |   |   |-- App.tsx           Router cua ung dung
 |   |   `-- main.tsx          React entrypoint
@@ -26,16 +30,16 @@ KTPM___/
 |   `-- vercel.json
 |-- backend/
 |   |-- prisma/
-|   |   |-- schema.prisma     Schema PostgreSQL
+|   |   |-- schema.prisma     Schema PostgreSQL gom 19 model
 |   |   |-- migrations/       Lich su migration
 |   |   `-- seed.ts           Seed co ban
-|   |-- scripts/              Seed catalog, du lieu chau A, backfill, admin...
+|   |-- scripts/              Seed catalog, backfill, reset va admin
 |   |-- src/
 |   |   |-- config/           Env va Prisma client
-|   |   |-- controllers/      Xu ly HTTP
+|   |   |-- controllers/      Xu ly HTTP va validation schema
 |   |   |-- middlewares/      Auth, validation, upload
 |   |   |-- routes/           Dinh nghia API
-|   |   |-- services/         Business logic va truy van DB
+|   |   |-- services/         Business logic, AI va truy van DB
 |   |   |-- data/             Du lieu seed noi bo
 |   |   |-- app.ts            Express app dung chung local/Vercel
 |   |   `-- local-server.ts   Server listen khi chay local
@@ -45,50 +49,101 @@ KTPM___/
 |   `-- vercel.json
 |-- package.json              Workspace scripts
 |-- vercel.json               Cau hinh Vercel multi-service
+|-- carhub-use-cases.puml     Ma PlantUML cho use case tong the
 `-- note.txt
 
 3. CAC NHOM DU LIEU TRONG POSTGRESQL
 
+He thong hien co 19 model, chia theo cac mien:
+
+Identity:
 - User: tai khoan, mat khau bcrypt, avatar, banner, profile, role, verified.
+- UserFollow, UserRating: theo doi va danh gia thanh vien.
+- PasswordResetToken: ma dat lai mat khau, thoi han va trang thai da dung.
+
+Community:
 - Post + Image: bai cong dong va nhieu anh.
 - PostLike, PostComment, PostBookmark, PostShare: tuong tac bai viet.
-- UserFollow, UserRating: theo doi va danh gia thanh vien.
+- Article: bai viet chuyen de, trang thai DRAFT/PUBLISHED.
+
+Garage va Marketplace:
 - GarageVehicle: xe ca nhan, thong so va danh sach URL anh.
-- VehicleListing: tin dang cho xe, lien ket GarageVehicle.
+- VehicleListing: tin dang ban, co the lien ket GarageVehicle.
 - ListingFavorite, ListingComment: luu va binh luan tin xe.
+- Vehicle: model listing cu van con trong schema de tuong thich du lieu.
+
+Engagement:
 - Conversation + Message: nhan tin truc tiep hoac theo mot tin xe.
-- Notification: thong bao like, comment, follow, marketplace.
-- Article: bai viet chuyen de.
-- PasswordResetToken: ma dat lai mat khau.
+- Notification: thong bao like, comment, follow, marketplace va message.
 
 4. LUONG HOAT DONG CHINH
 
-Tai khoan:
-- Dang ky/dang nhap tai /api/auth.
+Tai khoan va ho so:
+- Dang ky, dang nhap, dang xuat tai /api/auth.
+- Quen mat khau tao ma co thoi han va co the gui qua SMTP.
 - JWT duoc frontend luu trong localStorage va gui bang Authorization Bearer.
+- Thanh vien cap nhat bio, location, focusBrands, avatar va banner.
+- Co the tim tai khoan, xem profile, theo doi/bo theo doi va danh gia thanh vien.
 - USER quan ly noi dung cua minh; ADMIN co quyen quan tri toan he thong.
-- ADMIN va tai khoan verified hien icon BadgeCheck mau xanh.
+- ADMIN va tai khoan verified hien BadgeCheck mau xanh.
 
-Feed:
+Feed cong dong:
 - Tao post gom caption va toi da 8 anh.
 - Tac gia hoac ADMIN co the xoa post.
-- Khi sua post, API chi cho cap nhat truong content/caption; anh va metadata khong bi sua.
-- Ho tro like, comment, bookmark, danh sach da thich va da luu.
+- Khi sua post, API chi cap nhat content/caption; anh khong bi sua kem.
+- Ho tro like, comment, bookmark, share va danh sach da thich/da luu.
+- Bai viet co the duoc chia se vao mot cuoc tro chuyen.
 - Feed uu tien bai cua ADMIN va tai khoan verified.
 
 Garage va cho xe:
 - GarageVehicle la xe ca nhan; VehicleListing la tin dang ban rieng.
-- Co the them, sua, xoa xe; xoa xe se xoa cac listing lien quan trong transaction.
+- Co the them, sua, xoa xe; xoa xe se xoa listing lien quan trong transaction.
 - Mot xe co toi da 12 anh; anh dau tien la anh bia.
-- Co the tao, sua, danh dau da ban va xoa listing.
-- Marketplace co search, filter va phan trang 10 tin/trang.
-- Nhan "Lien he" tao/mo conversation co gan listing de hai ben biet dang trao doi ve xe nao.
+- Co the tao listing tu Garage, sua, danh dau da ban va xoa listing.
+- Marketplace co search, filter, sort va phan trang 10 tin/trang.
+- Bo loc gom category, condition, make, bodyType, fuelType, transmission va nam.
+- Sort ho tro newest, trending va oldest.
+- Thanh vien co the luu tin, binh luan va danh gia nguoi ban.
+
+Nhan tin va thong bao:
+- Co the tao conversation truc tiep giua hai thanh vien.
+- Nhan "Lien he" tao/mo conversation gan voi listing dang quan tam.
+- Moi conversation tai toi da 200 message va danh dau message da doc khi mo.
+- Frontend polling message va danh sach conversation moi 5 giay khi dock dang mo.
+- Gui message, like/comment/follow va tuong tac marketplace co the tao Notification.
+- Nguoi dung xem toi da 50 thong bao moi nhat va danh dau tat ca da doc.
+
+Tro ly tim xe AI:
+- Chatbot chi hien tren frontend khi nguoi dung da dang nhap.
+- Route backend POST /api/ai/chat co requireAuth de bao ve quota OpenRouter.
+- Nguoi dung tim xe bang cau hoi tieng Viet, anh, hoac ket hop ca hai.
+- Frontend nen anh ve WEBP, toi da 1920 px truoc khi upload.
+- Backend dung OpenRouter structured output de tach hang, mau, kieu xe, nam, gia,
+  dia diem, nhien lieu, hop so, tu khoa va so luong mong muon.
+- Neu gia duoc nhap bang VND, prompt yeu cau model quy doi gan dung sang USD.
+- Backend truy van listing that trong PostgreSQL va xep hang theo bo loc,
+  tu khoa, favorite va comment; AI khong tu tao listing.
+- Toi da 20 ket qua; mac dinh 6 ket qua.
+- Anh AI chi duoc tai tu localhost, PUBLIC_BACKEND_URL hoac Vercel Blob;
+  chi chap nhan JPEG, PNG, WEBP va toi da 4 MB o backend.
+
+Quan tri:
+- Dashboard thong ke user, post, garage vehicle, listing, article, comment,
+  rating, follow va trang thai draft/published.
+- Quan ly va xoa user; bat/tat verified professional.
+- Duyet trang thai va xoa post.
+- Cap nhat trang thai/xoa listing va GarageVehicle.
+- Cap nhat trang thai/xoa article.
+- Xoa comment, rating va quan he follow.
+- Khong cho xoa admin cuoi cung.
 
 Anh:
 - Frontend gui file qua /api/uploads/images.
-- Local development luu file trong backend/uploads va Express phuc vu /uploads.
-- Production can BLOB_READ_WRITE_TOKEN de upload Vercel Blob.
-- Database khong luu binary/base64, chi luu URL anh de tiet kiem dung luong Neon.
+- Frontend chap nhan JPG/JPEG/PNG/WEBP toi da 8 MB truoc khi nen.
+- Backend nhan file da xu ly toi da 4 MB bang Multer memory storage.
+- Local development luu file trong uploads/images va Express phuc vu /uploads.
+- Production hoac khi dung database remote bat buoc co BLOB_READ_WRITE_TOKEN.
+- Database khong luu binary/base64, chi luu URL va metadata.
 
 5. CHAY LOCAL
 
@@ -100,6 +155,8 @@ Yeu cau:
 Lenh tai thu muc goc:
 
   npm install
+  npm run db:generate --workspace backend
+  npm run db:migrate:deploy --workspace backend
   npm run dev
 
 Dia chi:
@@ -111,8 +168,9 @@ Chay rieng:
   npm run dev:frontend
   npm run dev:backend
 
-Build:
+Kiem tra va build:
 
+  npm run lint
   npm run build
 
 Database:
@@ -123,47 +181,110 @@ Database:
   npm run db:ensure-admin --workspace backend
   npm run db:studio --workspace backend
 
+Luu y: db:seed co the reset du lieu ung dung, khong chay tren database dung
+chung neu chua thong nhat.
+
 6. BIEN MOI TRUONG BACKEND QUAN TRONG
 
+Core:
 - NODE_ENV=development hoac production
-- PORT=4000 (chi can cho local)
+- PORT=4000, chi can cho local
 - DATABASE_URL=PostgreSQL/Neon connection string
-- CORS_ORIGIN=http://localhost:3000 hoac domain production
+- CORS_ORIGIN=danh sach origin, phan tach bang dau phay
+- PUBLIC_BACKEND_URL=URL public de AI cho phep tai anh tu backend
 - JWT_SECRET=chuoi bi mat it nhat 32 ky tu
 - JWT_EXPIRES_IN=7d
 - ADMIN_USERNAME va ADMIN_PASSWORD
 - RATE_LIMIT_WINDOW_MS va RATE_LIMIT_MAX
-- BLOB_READ_WRITE_TOKEN (production upload)
-- SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM (quen mat khau)
+- LOG_LEVEL
 
-Khong commit backend/.env, token Blob, JWT secret hoac mat khau database.
+AI:
+- OPENROUTER_API_KEY=key tu OpenRouter
+- OPENROUTER_MODEL=nex-agi/nex-n2-pro:free hoac model duoc cau hinh
+- OPENROUTER_SITE_URL=URL cua ung dung, dung cho HTTP-Referer
+- OPENROUTER_APP_NAME=ten ung dung hien tren OpenRouter
+
+Media:
+- BLOB_READ_WRITE_TOKEN, bat buoc tren production/database remote
+
+Email dat lai mat khau:
+- SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM
+
+Khong commit backend/.env, token Blob, OpenRouter key, JWT secret, SMTP password
+hoac mat khau database.
 
 Frontend:
 - Local co the dung VITE_API_URL=/api nho Vite proxy.
-- Vercel multi-service hien tai dung API cung domain; frontend/src/lib/api.ts tu xu ly prefix production.
+- Vercel multi-service dung API cung domain; api.ts tu xu ly prefix production.
 
 7. API CHINH
 
-- /api/health
-- /api/auth
-- /api/users
-- /api/posts
-- /api/garage
-- /api/vehicles
-- /api/articles
-- /api/messages
-- /api/notifications
-- /api/uploads
-- /api/admin
+Public hoac optional auth:
+- GET  /api/health
+- POST /api/auth/signup
+- POST /api/auth/login
+- POST /api/auth/logout
+- POST /api/auth/forgot-password
+- POST /api/auth/reset-password
+- GET  /api/posts
+- GET  /api/posts/community
+- GET  /api/posts/community-overview
+- GET  /api/posts/:id
+- GET  /api/vehicles
+- GET  /api/vehicles/:id
+- GET  /api/articles
+- GET  /api/articles/:id
+- GET  /api/users/:id
+- GET  /api/users/:id/rating
 
-Route CRUD moi can nho:
-- PATCH /api/posts/:id/caption
-- DELETE /api/posts/:id
-- POST/PATCH/DELETE /api/garage/vehicles
-- POST/PATCH/DELETE /api/vehicles
+Can dang nhap:
+- /api/posts/liked, /api/posts/bookmarked
+- POST /api/posts/:id/like
+- POST /api/posts/:id/bookmark
+- POST /api/posts/:id/comments
+- POST /api/posts/:id/share
+- PATCH/DELETE /api/posts/:id
+- PATCH /api/users/me/profile
+- GET /api/users/search/accounts
 - GET /api/users/suggestions/follow
+- POST/DELETE /api/users/:id/follow
+- POST /api/users/:id/rating
+- GET/POST/PATCH/DELETE /api/garage/vehicles
+- POST/PATCH/DELETE /api/vehicles
+- POST /api/vehicles/:id/favorite
+- POST /api/vehicles/:id/comments
+- GET/POST /api/messages
+- GET/POST /api/messages/:id/messages
+- GET /api/notifications
+- POST /api/notifications/read-all
+- POST /api/uploads/images
+- POST /api/ai/chat
 
-8. DEPLOY VERCEL
+Chi ADMIN:
+- GET /api/admin/dashboard
+- Quan ly /api/admin/users va verification
+- Quan ly /api/admin/posts va status
+- Quan ly /api/admin/vehicles va status
+- Quan ly /api/admin/garage-vehicles va status
+- Quan ly /api/admin/articles va status
+- Quan ly /api/admin/comments, ratings va follows
+
+8. BAO MAT VA RANG BUOC
+
+- Helmet dat security headers.
+- CORS chi cho phep origin duoc cau hinh hoac Vercel origin hop le.
+- Rate limit bat tren production; bo qua OPTIONS va health check.
+- JSON body gioi han 5 MB.
+- Zod validate cac body quan trong truoc controller.
+- Route sua/xoa phai kiem tra owner hoac role ADMIN.
+- Conversation va message chi tra cho participant.
+- Khong cho tao conversation voi chinh minh.
+- Password duoc hash bang bcrypt; reset code duoc hash va co expiresAt.
+- Upload kiem tra ca MIME type, extension va kich thuoc.
+- AI image URL co allow-list host, protocol, MIME type va timeout.
+- Khong ghi key, token hoac mat khau vao log.
+
+9. DEPLOY VERCEL
 
 Repository root dung vercel.json voi hai services:
 - frontend root "frontend", routePrefix "/".
@@ -172,12 +293,18 @@ Repository root dung vercel.json voi hai services:
 Can import bien moi truong backend tren Vercel:
 - DATABASE_URL
 - CORS_ORIGIN=https://carhub-community.vercel.app
+- PUBLIC_BACKEND_URL=https://carhub-community.vercel.app
 - JWT_SECRET
 - JWT_EXPIRES_IN
 - ADMIN_USERNAME
 - ADMIN_PASSWORD
 - RATE_LIMIT_WINDOW_MS
 - RATE_LIMIT_MAX
+- LOG_LEVEL
+- OPENROUTER_API_KEY
+- OPENROUTER_MODEL
+- OPENROUTER_SITE_URL
+- OPENROUTER_APP_NAME
 - BLOB_READ_WRITE_TOKEN
 - SMTP_* neu dung email
 
@@ -187,11 +314,15 @@ Sau deploy kiem tra:
 
 Neu thay {"status":"ok",...} thi backend da hoat dong.
 
-9. NGUYEN TAC KHI PHAT TRIEN TIEP
+10. NGUYEN TAC KHI PHAT TRIEN TIEP
 
 - Them model: sua schema.prisma, tao migration, sau do prisma generate.
-- Them API: route -> validation middleware -> controller -> service -> Prisma.
+- Them API theo luong route -> validation -> controller -> service -> Prisma.
 - Khong luu file anh vao PostgreSQL.
+- Khong goi OpenRouter truc tiep tu frontend va khong lo OPENROUTER_API_KEY.
 - Moi route sua/xoa phai kiem tra owner hoac role ADMIN.
-- Dung SocialPost cho bai feed de giu dong bo like/comment/bookmark/edit/delete.
-- Khi sidebar dong/mo, main content phai doi ca margin-left va width de luon can giua.
+- Dung SocialPost cho feed de dong bo like/comment/bookmark/edit/delete.
+- Tao notification qua notificationService va tranh gui cho chinh actor.
+- Thao tac lien quan nhieu bang nen dung Prisma transaction.
+- Khi sidebar dong/mo, main content phai doi ca margin-left va width.
+- Chay npm run lint va npm run build truoc khi merge.
