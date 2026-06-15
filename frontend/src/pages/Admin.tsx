@@ -150,6 +150,23 @@ const countByDay = (items: {createdAt?: string}[]): ChartPoint[] => {
 
 const formatDate = (date: string) => new Date(date).toLocaleDateString('vi-VN');
 
+const statusLabel = (status: string) =>
+  ({
+    DRAFT: 'Bản nháp',
+    PUBLISHED: 'Đã đăng',
+    Hidden: 'Đã ẩn',
+    'Active Listing': 'Đang bán',
+    'In Garage': 'Trong gara',
+    Sold: 'Đã bán',
+  })[status] ?? status;
+
+const conditionLabel = (condition: string) =>
+  ({
+    New: 'Mới',
+    Used: 'Đã qua sử dụng',
+    Project: 'Xe dự án',
+  })[condition] ?? condition;
+
 function StatCard({
   label,
   value,
@@ -470,7 +487,7 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-background text-on-background">
-      <TopNav title="Admin" />
+      <TopNav title="Quản trị viên" />
       <main className="mx-auto max-w-[1500px] px-4 py-8 sm:px-6 lg:px-10">
         <div className="mb-8 rounded-lg border border-white/10 bg-surface-container-low p-6 shadow-lg">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -665,7 +682,7 @@ export default function Admin() {
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-on-surface">{post.title}</p>
                       <p className="mt-1 text-xs text-on-surface-variant">
-                        {post.author.name} - {post.status} - {post._count.likes} likes - {post._count.comments} comments
+                        {post.author.name} - {statusLabel(post.status)} - {post._count.likes} lượt thích - {post._count.comments} bình luận
                       </p>
                       <p className="mt-2 line-clamp-2 text-sm text-on-surface-variant">{post.content}</p>
                     </div>
@@ -687,7 +704,7 @@ export default function Admin() {
             <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
               <div>
                 <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface">Tin đăng chợ xe</h2>
-                <p className="mt-1 text-xs text-on-surface-variant">Kiểm duyệt tin bán xe và dữ liệu Garage.</p>
+                <p className="mt-1 text-xs text-on-surface-variant">Kiểm duyệt tin bán xe và dữ liệu gara.</p>
               </div>
               <Car className="h-5 w-5 text-on-surface-variant" />
             </div>
@@ -697,7 +714,7 @@ export default function Admin() {
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="font-semibold text-on-surface">{vehicle.title} <span className="text-primary">{vehicle.price}</span></p>
-                      <p className="mt-1 text-xs text-on-surface-variant">Người bán: {vehicle.seller.name} - {vehicle.status}</p>
+                      <p className="mt-1 text-xs text-on-surface-variant">Người bán: {vehicle.seller.name} - {statusLabel(vehicle.status)}</p>
                     </div>
                     <div className="flex gap-2">
                       <ActionButton onClick={() => updateStatus(`/admin/vehicles/${vehicle.id}/status`, vehicle.status === 'Hidden' ? 'Active Listing' : 'Hidden')}>
@@ -716,7 +733,7 @@ export default function Admin() {
           <div className="rounded-lg border border-white/10 bg-surface-container-low shadow-lg">
             <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
               <div>
-                <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface">Xe trong Garage</h2>
+                <h2 className="text-sm font-bold uppercase tracking-widest text-on-surface">Xe trong gara</h2>
                 <p className="mt-1 text-xs text-on-surface-variant">Tài sản xe cá nhân của người dùng.</p>
               </div>
               <Gauge className="h-5 w-5 text-on-surface-variant" />
@@ -726,7 +743,7 @@ export default function Admin() {
                 <div key={vehicle.id} className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-semibold text-on-surface">{vehicle.title}</p>
-                    <p className="mt-1 text-xs text-on-surface-variant">Chủ xe: {vehicle.owner.name} - {vehicle.condition} - {vehicle.status}</p>
+                    <p className="mt-1 text-xs text-on-surface-variant">Chủ xe: {vehicle.owner.name} - {conditionLabel(vehicle.condition)} - {statusLabel(vehicle.status)}</p>
                   </div>
                   <div className="flex gap-2">
                     <ActionButton onClick={() => updateStatus(`/admin/garage-vehicles/${vehicle.id}/status`, vehicle.status === 'Hidden' ? 'In Garage' : 'Hidden')}>
@@ -736,7 +753,7 @@ export default function Admin() {
                   </div>
                 </div>
               ))}
-              {garageVehicles.length === 0 && <p className="p-5 text-sm text-on-surface-variant">Chưa có xe trong Garage.</p>}
+              {garageVehicles.length === 0 && <p className="p-5 text-sm text-on-surface-variant">Chưa có xe trong gara.</p>}
             </div>
             <Pagination page={sectionPages.garage} pageSize={contentPerPage} total={garageVehicles.length} onChange={(page) => updateSectionPage('garage', page)} />
           </div>
@@ -755,7 +772,7 @@ export default function Admin() {
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-on-surface">{article.title}</p>
-                      <p className="mt-1 text-xs text-on-surface-variant">{article.author} - {article.category} - {article.status}</p>
+                      <p className="mt-1 text-xs text-on-surface-variant">{article.author} - {article.category} - {statusLabel(article.status)}</p>
                       <p className="mt-2 line-clamp-2 text-sm text-on-surface-variant">{article.excerpt}</p>
                     </div>
                     <div className="flex shrink-0 gap-2">

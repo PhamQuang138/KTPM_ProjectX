@@ -34,8 +34,8 @@ const features = [
   },
   {
     icon: Car,
-    title: 'Garage cá nhân',
-    description: 'Lưu thông tin xe của bạn, quản lý hình ảnh và tạo tin bán trực tiếp từ Garage.',
+    title: 'Gara cá nhân',
+    description: 'Lưu thông tin xe của bạn, quản lý hình ảnh và tạo tin bán trực tiếp từ gara.',
     color: 'bg-orange-500/10 text-orange-400',
     link: '/garage'
   }
@@ -146,7 +146,7 @@ export default function Home() {
                transition={{ duration: 0.6, delay: 0.2 }}
                className="max-w-2xl mx-auto text-on-surface-variant text-lg md:text-xl leading-relaxed mb-12 opacity-80"
              >
-               Một nơi để thành viên chia sẻ bài viết, quản lý Garage, đăng bán xe và trao đổi trực tiếp với nhau.
+               Một nơi để thành viên chia sẻ bài viết, quản lý gara, đăng bán xe và trao đổi trực tiếp với nhau.
              </motion.p>
 
              <motion.div 
@@ -309,7 +309,7 @@ export default function Home() {
                       {overview?.stats.members ?? 0} thành viên đang xây dựng cộng đồng CarHub.
                     </h3>
                     <p className="text-on-surface-variant text-lg leading-relaxed opacity-80">
-                      Dữ liệu tài khoản, bài cộng đồng, Garage, tin bán xe và hội thoại đều được lưu trong hệ thống để người dùng tiếp tục công việc trên mọi thiết bị.
+                      Dữ liệu tài khoản, bài cộng đồng, gara, tin bán xe và hội thoại đều được lưu trong hệ thống để người dùng tiếp tục công việc trên mọi thiết bị.
                     </p>
                  </div>
 

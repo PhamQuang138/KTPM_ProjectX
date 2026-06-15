@@ -281,7 +281,7 @@ export default function SocialPost({
               <span>{timestamp}</span>
               <span>•</span>
               <span className={`px-2 py-0.5 rounded-full border ${getBadgeColor()}`}>
-                {author.role === 'ADMIN' ? 'Admin' : author.isVerified ? 'Đã xác thực' : 'Thành viên'}
+                {author.role === 'ADMIN' ? 'Quản trị viên' : author.isVerified ? 'Đã xác thực' : 'Thành viên'}
               </span>
             </div>
           </div>

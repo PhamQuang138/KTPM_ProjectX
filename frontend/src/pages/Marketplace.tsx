@@ -49,11 +49,46 @@ interface MarketplaceResponse {
   };
 }
 
-const categories = ['', 'Daily', 'Exotics', 'Classics', 'Projects'];
-const conditions = ['', 'New', 'Used', 'Project'];
-const bodyTypes = ['', 'Coupe', 'Sedan', 'SUV', 'Convertible', 'Crossover', 'Hatchback', 'Pickup'];
-const fuelTypes = ['', 'Gasoline', 'Diesel', 'Hybrid', 'Electric'];
-const transmissions = ['', 'Automatic', 'Manual'];
+interface FilterOption {
+  value: string;
+  label: string;
+}
+
+const categories: FilterOption[] = [
+  {value: '', label: 'Tất cả'},
+  {value: 'Daily', label: 'Daily (Xe sử dụng hằng ngày)'},
+  {value: 'Exotics', label: 'Exotics (Xe hạng sang)'},
+  {value: 'Classics', label: 'Classics (Xe cổ)'},
+  {value: 'Projects', label: 'Projects (Xe dự án)'},
+];
+const conditions: FilterOption[] = [
+  {value: '', label: 'Tất cả'},
+  {value: 'New', label: 'New (Mới)'},
+  {value: 'Used', label: 'Used (Đã qua sử dụng)'},
+  {value: 'Project', label: 'Project (Xe dự án)'},
+];
+const bodyTypes: FilterOption[] = [
+  {value: '', label: 'Tất cả'},
+  {value: 'Coupe', label: 'Coupe (Xe hai cửa)'},
+  {value: 'Sedan', label: 'Sedan (Xe bốn cửa)'},
+  {value: 'SUV', label: 'SUV (Xe thể thao đa dụng)'},
+  {value: 'Convertible', label: 'Convertible (Xe mui trần)'},
+  {value: 'Crossover', label: 'Crossover (Xe gầm cao đô thị)'},
+  {value: 'Hatchback', label: 'Hatchback (Xe cửa hậu)'},
+  {value: 'Pickup', label: 'Pickup (Xe bán tải)'},
+];
+const fuelTypes: FilterOption[] = [
+  {value: '', label: 'Tất cả'},
+  {value: 'Gasoline', label: 'Gasoline (Xăng)'},
+  {value: 'Diesel', label: 'Diesel (Dầu)'},
+  {value: 'Hybrid', label: 'Hybrid (Xăng lai điện)'},
+  {value: 'Electric', label: 'Electric (Điện)'},
+];
+const transmissions: FilterOption[] = [
+  {value: '', label: 'Tất cả'},
+  {value: 'Automatic', label: 'Automatic (Số tự động)'},
+  {value: 'Manual', label: 'Manual (Số sàn)'},
+];
 
 export default function Marketplace() {
   const user = useAuthStore((state) => state.user);
@@ -251,11 +286,11 @@ export default function Marketplace() {
   );
 }
 
-function FilterSelect({label, value, values, onChange}: {label: string; value: string; values: string[]; onChange: (value: string) => void}) {
+function FilterSelect({label, value, values, onChange}: {label: string; value: string; values: FilterOption[]; onChange: (value: string) => void}) {
   return (
     <label className="text-xs text-on-surface-variant">{label}
       <select value={value} onChange={(event) => onChange(event.target.value)} className="mt-1 h-10 w-full rounded-lg border border-white/10 bg-surface-container px-3 text-sm text-on-surface">
-        {values.map((item) => <option key={item || 'all'} value={item}>{item || 'Tất cả'}</option>)}
+        {values.map((item) => <option key={item.value || 'all'} value={item.value}>{item.label}</option>)}
       </select>
     </label>
   );

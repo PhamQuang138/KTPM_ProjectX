@@ -3,6 +3,12 @@ import {motion} from 'motion/react';
 import {Link} from 'react-router-dom';
 import {useMemo, useState} from 'react';
 
+const conditionLabels: Record<string, string> = {
+  New: 'Mới',
+  Used: 'Đã qua sử dụng',
+  Project: 'Xe dự án',
+};
+
 export interface VehicleCardProps {
   id: string;
   image: string;
@@ -63,7 +69,7 @@ export default function VehicleCard({
             <span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-2 py-1 text-[10px] text-white">{activeImage + 1}/{gallery.length}</span>
           </>
         )}
-        <span className="badge badge-secondary absolute left-4 top-4">{condition}</span>
+        <span className="badge badge-secondary absolute left-4 top-4">{conditionLabels[condition] ?? condition}</span>
         <button
           type="button"
           onClick={onToggleFavorite}

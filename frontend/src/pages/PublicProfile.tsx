@@ -80,7 +80,7 @@ const listingStatusLabel = (status: string) =>
     'Active Listing': 'Đang bán',
     Sold: 'Đã bán',
     Hidden: 'Đã ẩn',
-    'In Garage': 'Trong Garage',
+    'In Garage': 'Trong gara',
   })[status] ?? status;
 
 export default function PublicProfile() {
@@ -230,7 +230,7 @@ export default function PublicProfile() {
         }}
         className="w-full pb-24 transition-all duration-300 max-lg:!ml-0 max-lg:!w-full"
       >
-        <TopNav title="Profile" />
+        <TopNav title="Hồ sơ" />
 
         <section className="max-w-container-max mx-auto px-4 sm:px-6 md:px-margin-desktop py-4 overflow-hidden">
           <Link to="/market" className="inline-flex items-center gap-2 text-sm text-on-surface-variant hover:text-primary mb-6">
@@ -238,10 +238,10 @@ export default function PublicProfile() {
             Quay lại chợ xe
           </Link>
 
-          {isLoading && <div className="text-on-surface-variant">Loading profile...</div>}
+          {isLoading && <div className="text-on-surface-variant">Đang tải hồ sơ...</div>}
 
           {!isLoading && !profile && (
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-12 text-center">Profile not found.</div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-12 text-center">Không tìm thấy hồ sơ.</div>
           )}
 
           {profile && (
@@ -251,7 +251,7 @@ export default function PublicProfile() {
                   <img
                     src={banner}
                     className="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-1000"
-                    alt={`${profile.name} banner`}
+                    alt={`Ảnh bìa của ${profile.name}`}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
                 </div>
@@ -286,7 +286,7 @@ export default function PublicProfile() {
                         </label>
                       )}
                       {profile.social.followers >= 5 && (
-                        <div className="absolute bottom-4 -right-2 bg-primary p-2 rounded-xl shadow-lg border-2 border-background" title="Popular collector">
+                        <div className="absolute bottom-4 -right-2 bg-primary p-2 rounded-xl shadow-lg border-2 border-background" title="Nhà sưu tầm nổi bật">
                           <Star className="w-4 h-4 text-on-primary fill-current" />
                         </div>
                       )}
@@ -298,7 +298,7 @@ export default function PublicProfile() {
                     <div className="md:mb-4 min-w-0">
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-2 min-w-0">
                         <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight break-words min-w-0">{profile.name}</h1>
-                        <span className="badge-primary">{profile.role === 'ADMIN' ? 'Admin' : 'Thành viên'}</span>
+                        <span className="badge-primary">{profile.role === 'ADMIN' ? 'Quản trị viên' : 'Thành viên'}</span>
                         {(profile.isVerifiedProfessional || profile.role === 'ADMIN') && (
                           <BadgeCheck className="h-6 w-6 text-blue-400" aria-label="Tài khoản đã xác thực" />
                         )}
@@ -418,7 +418,7 @@ export default function PublicProfile() {
                 <div className="lg:col-span-8 space-y-8 min-w-0">
                   <div className="flex gap-8 border-b border-white/10 pb-4 overflow-x-auto scrollbar-hide">
                     {[
-                      {id: 'garage', label: 'Garage', icon: Grid3X3},
+                      {id: 'garage', label: 'Gara', icon: Grid3X3},
                       {id: 'posts', label: 'Bài viết', icon: PenTool},
                       {id: 'marketplace', label: 'Chợ xe', icon: List},
                     ].map((tab) => (
@@ -460,8 +460,8 @@ export default function PublicProfile() {
                         ))}
                         {profile.garageVehicles.length === 0 && (
                           <div className="aspect-[4/3] rounded-[2rem] border border-white/10 bg-white/[0.03] p-8 flex flex-col justify-center text-on-surface-variant">
-                            <p className="font-display text-xl font-bold text-on-surface">Garage đang trống</p>
-                            <p className="text-sm mt-2">Thành viên này chưa thêm xe công khai trong Garage.</p>
+                            <p className="font-display text-xl font-bold text-on-surface">Gara đang trống</p>
+                            <p className="text-sm mt-2">Thành viên này chưa thêm xe công khai trong gara.</p>
                           </div>
                         )}
                       </motion.div>

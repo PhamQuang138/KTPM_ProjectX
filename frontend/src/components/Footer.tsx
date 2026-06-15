@@ -9,7 +9,7 @@ export default function Footer({hideLogo}: {hideLogo?: boolean}) {
           <div className="space-y-6">
             <BrandLogo imageClassName="h-14 w-14" />
             <p className="max-w-sm text-sm leading-relaxed text-secondary opacity-80">
-              Cộng đồng dành cho người yêu xe: chia sẻ bài viết, quản lý Garage, mua bán và trao đổi trực tiếp.
+              Cộng đồng dành cho người yêu xe: chia sẻ bài viết, quản lý gara, mua bán và trao đổi trực tiếp.
             </p>
           </div>
 
@@ -20,7 +20,7 @@ export default function Footer({hideLogo}: {hideLogo?: boolean}) {
                 {[
                   {label: 'Cộng đồng', to: '/feed'},
                   {label: 'Chợ xe', to: '/market'},
-                  {label: 'Garage', to: '/garage'},
+                  {label: 'Gara', to: '/garage'},
                 ].map((item) => (
                   <li key={item.to}>
                     <Link to={item.to} className="inline-block font-mono text-xs uppercase text-secondary transition-all hover:translate-x-1 hover:text-primary">

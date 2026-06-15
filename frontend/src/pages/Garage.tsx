@@ -165,7 +165,7 @@ const categoryLabel = (category: string) =>
   ({
     Daily: 'Xe hằng ngày',
     Classics: 'Xe cổ',
-    Exotics: 'Xe hiệu năng cao',
+    Exotics: 'Xe hạng sang',
     Projects: 'Xe dự án',
   })[category] ?? category;
 
@@ -623,7 +623,7 @@ export default function Garage() {
               <div className="flex flex-col md:flex-row items-center md:items-end gap-6 text-center md:text-left w-full md:w-auto">
                 <div className="relative">
                   <div className="w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] overflow-hidden border-[6px] border-background bg-background p-1.5 shadow-2xl">
-                    <img src={avatar} className="w-full h-full object-cover rounded-[2rem]" alt="Profile" />
+                    <img src={avatar} className="w-full h-full object-cover rounded-[2rem]" alt="Ảnh hồ sơ" />
                     {isUploadingAvatar && (
                       <div className="absolute inset-1.5 flex items-center justify-center rounded-[2rem] bg-black/55">
                         <LoaderCircle className="h-8 w-8 animate-spin text-white" />
@@ -644,7 +644,7 @@ export default function Garage() {
                     />
                   </label>
                   {followersCount >= 5 && (
-                    <div className="absolute bottom-4 -right-2 bg-primary p-2 rounded-xl shadow-lg border-2 border-background" title="Popular collector">
+                    <div className="absolute bottom-4 -right-2 bg-primary p-2 rounded-xl shadow-lg border-2 border-background" title="Nhà sưu tầm nổi bật">
                       <Star className="w-4 h-4 text-on-primary fill-current" />
                     </div>
                   )}
@@ -653,7 +653,7 @@ export default function Garage() {
                 <div className="md:mb-4">
                   <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
                     <h1 className="font-display text-4xl font-bold tracking-tight">{displayName}</h1>
-                    <span className="badge-primary">{user?.role === 'ADMIN' ? 'Admin' : 'Thành viên'}</span>
+                    <span className="badge-primary">{user?.role === 'ADMIN' ? 'Quản trị viên' : 'Thành viên'}</span>
                     {(isVerifiedProfessional || user?.role === 'ADMIN') && (
                       <BadgeCheck className="h-6 w-6 text-blue-400" aria-label="Tài khoản đã xác thực" />
                     )}
@@ -705,7 +705,7 @@ export default function Garage() {
                   </button>
                 </div>
                 <p className="text-sm text-on-surface leading-loose mb-8">
-                  {profileBio || 'Viết vài dòng giới thiệu về Garage, gu xe và phong cách sưu tầm của bạn.'}
+                  {profileBio || 'Viết vài dòng giới thiệu về gara, gu xe và phong cách sưu tầm của bạn.'}
                 </p>
                 
                 <div className="space-y-4 pt-6 border-t border-white/5">
@@ -749,7 +749,7 @@ export default function Garage() {
               {/* Tab Navigation */}
               <div className="flex gap-8 border-b border-white/10 pb-4 overflow-x-auto scrollbar-hide">
                 {[
-                  { id: 'garage', label: 'Garage', icon: Grid3X3 },
+                  { id: 'garage', label: 'Gara', icon: Grid3X3 },
                   { id: 'posts', label: 'Bài viết', icon: PenTool },
                   { id: 'marketplace', label: 'Chợ xe', icon: List },
                 ].map(tab => (
@@ -815,7 +815,7 @@ export default function Garage() {
                     ))}
                     {myVehicles.length === 0 && (
                       <div className="aspect-[4/3] rounded-[2rem] border border-white/10 bg-white/[0.03] p-8 flex flex-col justify-center text-on-surface-variant">
-                        <p className="font-display text-xl font-bold text-on-surface">Garage của bạn đang trống</p>
+                        <p className="font-display text-xl font-bold text-on-surface">Gara của bạn đang trống</p>
                         <p className="text-sm mt-2">Thêm chiếc xe đầu tiên, sau đó đăng lên chợ xe khi bạn sẵn sàng bán.</p>
                       </div>
                     )}
@@ -913,7 +913,7 @@ export default function Garage() {
                      <div className="glass-card p-12 text-center rounded-[2.5rem] border-white/5 opacity-40">
                         <List className="w-8 h-8 mx-auto mb-4" />
                         <p className="font-display text-lg font-bold">Chưa có tin đang bán</p>
-                        <p className="text-xs text-on-surface-variant font-mono uppercase tracking-widest mt-2">Thêm xe vào Garage để bắt đầu đăng bán</p>
+                        <p className="text-xs text-on-surface-variant font-mono uppercase tracking-widest mt-2">Thêm xe vào gara để bắt đầu đăng bán</p>
                         <button onClick={openCreateVehicle} className="mt-8 btn-secondary px-8">Thêm tin đăng</button>
                      </div>
                      )}
@@ -932,7 +932,7 @@ export default function Garage() {
               <div>
                 <h2 className="font-display text-2xl font-bold">{editingVehicle ? 'Sửa xe' : 'Thêm xe'}</h2>
                 <p className="text-sm text-on-surface-variant mt-1">
-                  {editingVehicle ? 'Cập nhật thông tin và hình ảnh xe trong Garage.' : 'Lưu xe vào Garage, sau đó có thể đăng lên chợ xe.'}
+                  {editingVehicle ? 'Cập nhật thông tin và hình ảnh xe trong gara.' : 'Lưu xe vào gara, sau đó có thể đăng lên chợ xe.'}
                 </p>
               </div>
               <button type="button" onClick={closeVehicleModal} className="text-on-surface-variant hover:text-on-surface">Hủy</button>
@@ -941,9 +941,9 @@ export default function Garage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input required placeholder="Tên xe" value={vehicleForm.title} onChange={(event) => setVehicleForm({...vehicleForm, title: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
               <select value={vehicleForm.condition} onChange={(event) => setVehicleForm({...vehicleForm, condition: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
-                <option value="New">Mới</option>
-                <option value="Used">Đã qua sử dụng</option>
-                <option value="Project">Xe dự án</option>
+                <option value="New">New (Mới)</option>
+                <option value="Used">Used (Đã qua sử dụng)</option>
+                <option value="Project">Project (Xe dự án)</option>
               </select>
               <input placeholder="Thông số, cách nhau bằng dấu phẩy" value={vehicleForm.specs} onChange={(event) => setVehicleForm({...vehicleForm, specs: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
             </div>
@@ -953,17 +953,17 @@ export default function Garage() {
               <input required type="number" min="1886" max={new Date().getFullYear() + 1} placeholder="Năm sản xuất" value={vehicleForm.year} onChange={(event) => setVehicleForm({...vehicleForm, year: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
               <input type="number" min="0" placeholder="Số km đã đi" value={vehicleForm.mileage} onChange={(event) => setVehicleForm({...vehicleForm, mileage: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
               <select value={vehicleForm.bodyType} onChange={(event) => setVehicleForm({...vehicleForm, bodyType: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
-                <option value="Coupe">Coupe</option><option value="Sedan">Sedan</option><option value="SUV">SUV</option><option value="Convertible">Mui trần</option><option value="Hatchback">Hatchback</option><option value="Pickup">Bán tải</option>
+                <option value="Coupe">Coupe (Xe hai cửa)</option><option value="Sedan">Sedan (Xe bốn cửa)</option><option value="SUV">SUV (Xe thể thao đa dụng)</option><option value="Convertible">Convertible (Xe mui trần)</option><option value="Hatchback">Hatchback (Xe cửa hậu)</option><option value="Pickup">Pickup (Xe bán tải)</option>
               </select>
               <select value={vehicleForm.fuelType} onChange={(event) => setVehicleForm({...vehicleForm, fuelType: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
-                <option value="Gasoline">Xăng</option><option value="Diesel">Dầu</option><option value="Hybrid">Hybrid</option><option value="Electric">Điện</option>
+                <option value="Gasoline">Gasoline (Xăng)</option><option value="Diesel">Diesel (Dầu)</option><option value="Hybrid">Hybrid (Xăng lai điện)</option><option value="Electric">Electric (Điện)</option>
               </select>
               <select value={vehicleForm.transmission} onChange={(event) => setVehicleForm({...vehicleForm, transmission: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
-                <option value="Automatic">Tự động</option><option value="Manual">Số sàn</option>
+                <option value="Automatic">Automatic (Số tự động)</option><option value="Manual">Manual (Số sàn)</option>
               </select>
             </div>
 
-            <textarea required placeholder="Mô tả xe trong Garage" value={vehicleForm.description} onChange={(event) => setVehicleForm({...vehicleForm, description: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 min-h-24" />
+            <textarea required placeholder="Mô tả xe trong gara" value={vehicleForm.description} onChange={(event) => setVehicleForm({...vehicleForm, description: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 min-h-24" />
             <div className="space-y-4 rounded-2xl border border-white/10 bg-background p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -1042,10 +1042,10 @@ export default function Garage() {
                   <input required placeholder="Giá bán, ví dụ $65,000" value={vehicleForm.price} onChange={(event) => setVehicleForm({...vehicleForm, price: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
                   <input required placeholder="Địa điểm bán" value={vehicleForm.location} onChange={(event) => setVehicleForm({...vehicleForm, location: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
                   <select value={vehicleForm.category} onChange={(event) => setVehicleForm({...vehicleForm, category: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
-                    <option value="Daily">Xe hằng ngày</option>
-                    <option value="Classics">Xe cổ</option>
-                    <option value="Exotics">Xe hiệu năng cao</option>
-                    <option value="Projects">Xe dự án</option>
+                    <option value="Daily">Daily (Xe sử dụng hằng ngày)</option>
+                    <option value="Classics">Classics (Xe cổ)</option>
+                    <option value="Exotics">Exotics (Xe hạng sang)</option>
+                    <option value="Projects">Projects (Xe dự án)</option>
                   </select>
                 </div>
                 <textarea placeholder="Mô tả tin đăng, không bắt buộc" value={vehicleForm.listingDescription} onChange={(event) => setVehicleForm({...vehicleForm, listingDescription: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 min-h-24" />
@@ -1067,7 +1067,7 @@ export default function Garage() {
                     ? 'Lưu thay đổi'
                     : publishToMarketplace
                       ? 'Lưu và đăng bán'
-                      : 'Lưu vào Garage'}
+                      : 'Lưu vào gara'}
             </button>
           </form>
         </div>
@@ -1107,10 +1107,10 @@ export default function Garage() {
                 onChange={(event) => setListingForm({...listingForm, category: event.target.value})}
                 className="bg-background border border-white/10 rounded-xl px-4 py-3"
               >
-                <option value="Daily">Xe hằng ngày</option>
-                <option value="Classics">Xe cổ</option>
-                <option value="Exotics">Xe hiệu năng cao</option>
-                <option value="Projects">Xe dự án</option>
+                <option value="Daily">Daily (Xe sử dụng hằng ngày)</option>
+                <option value="Classics">Classics (Xe cổ)</option>
+                <option value="Exotics">Exotics (Xe hạng sang)</option>
+                <option value="Projects">Projects (Xe dự án)</option>
               </select>
             </div>
 

@@ -113,7 +113,7 @@ export default function Login() {
 
   const description =
     mode === 'login'
-      ? 'Nhập thông tin để truy cập Garage cá nhân.'
+      ? 'Nhập thông tin để truy cập gara cá nhân.'
       : mode === 'signup'
         ? 'Tạo hồ sơ và bắt đầu chia sẻ với cộng đồng.'
         : mode === 'forgot'
@@ -145,7 +145,7 @@ export default function Login() {
             Kỹ thuật chuẩn xác. Trải nghiệm khác biệt.
           </h1>
           <p className="font-sans text-lg text-on-surface-variant/80 leading-relaxed">
-            Không gian dành cho người yêu xe, nơi quản lý Garage, chia sẻ câu chuyện và kết nối giao dịch.
+            Không gian dành cho người yêu xe, nơi quản lý gara, chia sẻ câu chuyện và kết nối giao dịch.
           </p>
         </motion.div>
       </section>

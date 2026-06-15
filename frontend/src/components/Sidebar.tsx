@@ -15,7 +15,7 @@ const navItems = [
   { icon: Home, label: 'Khám phá', path: '/' },
   { icon: Newspaper, label: 'Cộng đồng', path: '/feed' },
   { icon: ShoppingBag, label: 'Chợ xe', path: '/market' },
-  { icon: Car, label: 'Garage của tôi', path: '/garage' },
+  { icon: Car, label: 'Gara của tôi', path: '/garage' },
   { icon: Heart, label: 'Đã thích', path: '/liked' },
   { icon: Bookmark, label: 'Đã lưu', path: '/saved' },
   { icon: Settings, label: 'Cài đặt', path: '/settings' },
@@ -57,7 +57,7 @@ export default function Sidebar() {
             <Link to={isAuthenticated ? '/garage' : '/login'} className="flex items-center space-x-3 group cursor-pointer transition-all duration-300 hover:bg-white/5 p-2 rounded-xl">
               <div className="w-10 h-10 rounded-full overflow-hidden border border-primary/20 bg-surface-container-high transition-transform duration-500 group-hover:scale-110">
                 <img 
-                  alt="User Profile" 
+                  alt="Hồ sơ người dùng"
                   className="w-full h-full object-cover" 
                   src={user?.avatar ?? 'https://i.pravatar.cc/200?u=me'}
                 />
@@ -65,7 +65,7 @@ export default function Sidebar() {
               <div>
                 <p className="font-sans text-sm text-on-surface font-bold leading-tight">{user?.name ?? 'Khách'}</p>
                 <p className="flex items-center gap-1 text-[10px] text-on-surface-variant font-mono uppercase tracking-wider">
-                  {isAuthenticated ? (user?.role === 'ADMIN' ? 'Admin' : 'Thành viên') : 'Đăng nhập'}
+                  {isAuthenticated ? (user?.role === 'ADMIN' ? 'Quản trị viên' : 'Thành viên') : 'Đăng nhập'}
                   {isAuthenticated && (user?.role === 'ADMIN' || user?.isVerifiedProfessional) && <BadgeCheck className="h-3 w-3 text-blue-400" />}
                 </p>
               </div>

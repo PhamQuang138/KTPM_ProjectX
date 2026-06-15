@@ -111,7 +111,7 @@ export default function TopNav({ title }: { title?: string }) {
                 ? [
                     { label: 'Cộng đồng', path: '/feed' },
                     { label: 'Chợ xe', path: '/market' },
-                    { label: 'Garage', path: '/garage' },
+                    { label: 'Gara', path: '/garage' },
                   ]
                 : []),
               ...(user?.role === 'ADMIN' ? [{ label: 'Quản trị', path: '/admin' }] : []),
@@ -236,7 +236,7 @@ export default function TopNav({ title }: { title?: string }) {
                     </p>
                     <p className="truncate text-xs text-on-surface-variant">{account.email}</p>
                   </div>
-                  <span className="badge-secondary">{account.role === 'ADMIN' ? 'Admin' : 'Thành viên'}</span>
+                  <span className="badge-secondary">{account.role === 'ADMIN' ? 'Quản trị viên' : 'Thành viên'}</span>
                 </Link>
               ))}
             </div>
