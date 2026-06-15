@@ -68,7 +68,7 @@ export const vehicleController = {
   async createListing(req: AuthenticatedRequest, res: Response) {
     if (req.body.vehicleId) {
       const vehicle = await vehicleService.getGarageVehicleById(req.body.vehicleId);
-      if (!vehicle) return res.status(404).json({message: 'Garage vehicle not found'});
+      if (!vehicle) return res.status(404).json({message: 'Kh?ng t?m th?y xe trong Garage'});
       if (vehicle.ownerId !== req.user!.id && req.user!.role !== 'ADMIN') {
         return res.status(403).json({message: 'You cannot list another user\'s vehicle'});
       }
@@ -92,7 +92,7 @@ export const vehicleController = {
 
     if (req.body.vehicleId && req.body.vehicleId !== current.vehicleId) {
       const vehicle = await vehicleService.getGarageVehicleById(req.body.vehicleId);
-      if (!vehicle) return res.status(404).json({message: 'Garage vehicle not found'});
+      if (!vehicle) return res.status(404).json({message: 'Kh?ng t?m th?y xe trong Garage'});
       if (vehicle.ownerId !== req.user!.id && req.user!.role !== 'ADMIN') {
         return res.status(403).json({message: 'You cannot attach another user\'s vehicle to this listing'});
       }
@@ -129,7 +129,7 @@ export const vehicleController = {
 
   async updateGarageVehicle(req: AuthenticatedRequest, res: Response) {
     const current = await vehicleService.getGarageVehicleById(req.params.id);
-    if (!current) return res.status(404).json({message: 'Garage vehicle not found'});
+    if (!current) return res.status(404).json({message: 'Kh?ng t?m th?y xe trong Garage'});
     if (current.ownerId !== req.user!.id && req.user!.role !== 'ADMIN') {
       return res.status(403).json({message: 'You cannot update another user\'s vehicle'});
     }
@@ -139,7 +139,7 @@ export const vehicleController = {
 
   async deleteGarageVehicle(req: AuthenticatedRequest, res: Response) {
     const current = await vehicleService.getGarageVehicleById(req.params.id);
-    if (!current) return res.status(404).json({message: 'Garage vehicle not found'});
+    if (!current) return res.status(404).json({message: 'Kh?ng t?m th?y xe trong Garage'});
     if (current.ownerId !== req.user!.id && req.user!.role !== 'ADMIN') {
       return res.status(403).json({message: 'You cannot delete another user\'s vehicle'});
     }

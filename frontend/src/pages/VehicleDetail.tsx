@@ -98,7 +98,7 @@ export default function VehicleDetail() {
       });
       setSellerRating(rating);
     } catch (error) {
-      setRatingError(error instanceof Error ? error.message : 'Unable to rate seller.');
+      setRatingError(error instanceof Error ? error.message : 'Không thể đánh giá người bán.');
     }
   };
 
@@ -132,18 +132,18 @@ export default function VehicleDetail() {
 
   return (
     <div className="min-h-screen bg-background text-on-background">
-      <TopNav title="Vehicle Detail" />
+      <TopNav title="Chi tiết xe" />
       <main className="max-w-container-max mx-auto px-6 md:px-margin-desktop py-10 pb-28">
         <Link to="/market" className="inline-flex items-center gap-2 text-sm text-on-surface-variant hover:text-primary mb-8">
           <ArrowLeft className="w-4 h-4" />
-          Back to marketplace
+          Quay lại chợ xe
         </Link>
 
-        {isLoading && <div className="text-on-surface-variant">Loading listing...</div>}
+        {isLoading && <div className="text-on-surface-variant">Đang tải tin xe...</div>}
 
         {!isLoading && !vehicle && (
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-12 text-center">
-            Listing not found.
+            Không tìm thấy tin xe.
           </div>
         )}
 
@@ -152,7 +152,9 @@ export default function VehicleDetail() {
             <section className="lg:col-span-7 space-y-4">
               <button type="button" onClick={() => setLightboxIndex(selectedIndex)} className="group relative block w-full overflow-hidden rounded-[2rem] border border-white/10 bg-surface-container">
                 <img src={selectedImage || vehicle.vehicle?.image} alt={vehicle.title} className="w-full aspect-[4/3] object-cover" />
-                <span className="absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-black/60 px-3 py-2 text-xs text-white opacity-0 transition group-hover:opacity-100"><ZoomIn className="h-4 w-4" /> Phóng to</span>
+                <span className="absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-black/60 px-3 py-2 text-xs text-white opacity-0 transition group-hover:opacity-100">
+                  <ZoomIn className="h-4 w-4" /> Phóng to
+                </span>
               </button>
               <div className="grid grid-cols-4 gap-3">
                 {gallery.slice(0, 12).map((image, index) => (
@@ -171,16 +173,12 @@ export default function VehicleDetail() {
               <div className="border border-white/10 bg-white/[0.03] rounded-[2rem] p-8">
                 <div className="flex items-center gap-3 mb-4">
                   <span className="badge-primary">{vehicle.status}</span>
-                  <span className="badge-secondary">{vehicle.vehicle?.condition ?? 'Used'}</span>
+                  <span className="badge-secondary">{vehicle.vehicle?.condition ?? 'Đã qua sử dụng'}</span>
                 </div>
                 <h1 className="font-display text-4xl font-bold tracking-tight">{vehicle.title}</h1>
                 <p className="font-mono text-primary text-2xl font-bold mt-4">{vehicle.price}</p>
-                {listingDescription && (
-                  <p className="whitespace-pre-line text-sm text-on-surface-variant leading-relaxed mt-5">{listingDescription}</p>
-                )}
-                {showGarageDescription && (
-                  <p className="whitespace-pre-line text-sm text-on-surface-variant leading-relaxed mt-3">{garageDescription}</p>
-                )}
+                {listingDescription && <p className="whitespace-pre-line text-sm text-on-surface-variant leading-relaxed mt-5">{listingDescription}</p>}
+                {showGarageDescription && <p className="whitespace-pre-line text-sm text-on-surface-variant leading-relaxed mt-3">{garageDescription}</p>}
                 <p className="flex items-center gap-2 text-sm text-on-surface-variant mt-3">
                   <MapPin className="w-4 h-4" />
                   {vehicle.location}
@@ -196,7 +194,7 @@ export default function VehicleDetail() {
               </div>
 
               <div className="border border-white/10 bg-white/[0.03] rounded-[2rem] p-8">
-                <h2 className="font-display text-xl font-bold mb-5">Seller</h2>
+                <h2 className="font-display text-xl font-bold mb-5">Người bán</h2>
                 <Link to={`/profile/${vehicle.seller.id}`} className="flex items-center gap-4 group">
                   <img src={vehicle.seller.avatar ?? 'https://i.pravatar.cc/100?u=seller'} alt={vehicle.seller.name} className="w-14 h-14 rounded-full object-cover border border-white/10" />
                   <div>
@@ -248,9 +246,7 @@ export default function VehicleDetail() {
                   </button>
                 </div>
                 <div className="mt-8 pt-6 border-t border-white/10">
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant mb-3">
-                    Seller Rating
-                  </p>
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant mb-3">Đánh giá người bán</p>
                   <div className="flex items-center gap-2">
                     {[1, 2, 3, 4, 5].map((score) => {
                       const filledScore = sellerRating?.myRating ?? Math.round(sellerRating?.averageRating ?? 0);
@@ -262,21 +258,21 @@ export default function VehicleDetail() {
                           disabled={disabled}
                           onClick={() => handleRateSeller(score)}
                           className="disabled:cursor-not-allowed"
-                          title={disabled ? 'You cannot rate yourself' : `Rate ${score} stars`}
+                          title={disabled ? 'Bạn không thể tự đánh giá' : `Đánh giá ${score} sao`}
                         >
                           <Star className={`w-6 h-6 ${score <= filledScore ? 'fill-primary text-primary' : 'text-on-surface-variant'}`} />
                         </button>
                       );
                     })}
                     <span className="ml-2 text-sm text-on-surface-variant">
-                      {(sellerRating?.averageRating ?? 0).toFixed(1)} / 5 · {sellerRating?.totalRatings ?? 0} votes
+                      {(sellerRating?.averageRating ?? 0).toFixed(1)} / 5 · {sellerRating?.totalRatings ?? 0} lượt đánh giá
                     </span>
                   </div>
                   {sellerRating?.myRating && currentUser?.id !== vehicle.seller.id && (
-                    <p className="text-xs text-primary mt-3">Your vote: {sellerRating.myRating} stars</p>
+                    <p className="text-xs text-primary mt-3">Đánh giá của bạn: {sellerRating.myRating} sao</p>
                   )}
                   {currentUser?.id === vehicle.seller.id && (
-                    <p className="text-xs text-on-surface-variant mt-3">This is your listing, so you cannot rate yourself.</p>
+                    <p className="text-xs text-on-surface-variant mt-3">Đây là tin của bạn nên bạn không thể tự đánh giá.</p>
                   )}
                   {ratingError && <p className="text-xs text-red-300 mt-3">{ratingError}</p>}
                 </div>
@@ -291,22 +287,40 @@ export default function VehicleDetail() {
                         <img src={comment.user.avatar ?? `https://i.pravatar.cc/80?u=${comment.user.email}`} className="h-9 w-9 rounded-full object-cover" alt={comment.user.name} />
                       </Link>
                       <div className="flex-1 rounded-xl bg-surface-container p-3">
-                        <Link to={`/profile/${comment.user.id}`} className="text-xs font-bold hover:text-primary">{comment.user.name}</Link>
+                        <Link to={`/profile/${comment.user.id}`} className="text-xs font-bold hover:text-primary">
+                          {comment.user.name}
+                        </Link>
                         <p className="mt-1 text-sm">{comment.content}</p>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div className="mt-5 flex gap-2">
-                  <input value={commentContent} onChange={(event) => setCommentContent(event.target.value)} placeholder="Hỏi người bán hoặc trao đổi về xe..." className="min-w-0 flex-1 rounded-xl border border-white/10 bg-background px-4 py-3 text-sm" />
-                  <button onClick={() => void addComment()} disabled={!commentContent.trim()} className="btn-primary px-5 disabled:opacity-50">Gửi</button>
+                  <input
+                    value={commentContent}
+                    onChange={(event) => setCommentContent(event.target.value)}
+                    placeholder="Hỏi người bán hoặc trao đổi về xe..."
+                    className="min-w-0 flex-1 rounded-xl border border-white/10 bg-background px-4 py-3 text-sm"
+                  />
+                  <button onClick={() => void addComment()} disabled={!commentContent.trim()} className="btn-primary px-5 disabled:opacity-50">
+                    Gửi
+                  </button>
                 </div>
               </div>
             </aside>
           </div>
         )}
       </main>
-      <ImageLightbox images={gallery} activeIndex={lightboxIndex} onChange={(index) => {setLightboxIndex(index); setSelectedImage(gallery[index] ?? '');}} onClose={() => setLightboxIndex(null)} alt={vehicle?.title ?? 'Ảnh xe'} />
+      <ImageLightbox
+        images={gallery}
+        activeIndex={lightboxIndex}
+        onChange={(index) => {
+          setLightboxIndex(index);
+          setSelectedImage(gallery[index] ?? '');
+        }}
+        onClose={() => setLightboxIndex(null)}
+        alt={vehicle?.title ?? 'Ảnh xe'}
+      />
       <MobileNav />
     </div>
   );

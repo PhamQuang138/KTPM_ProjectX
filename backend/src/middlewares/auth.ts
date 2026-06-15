@@ -17,13 +17,13 @@ export const requireAuth = async (req: AuthenticatedRequest, res: Response, next
   const token = header?.startsWith('Bearer ') ? header.slice(7) : undefined;
 
   if (!token) {
-    return res.status(401).json({message: 'Authentication required'});
+    return res.status(401).json({message: 'Vui l?ng ??ng nh?p'});
   }
 
   try {
     const payload = jwt.verify(token, getJwtSecret()) as {sub?: string};
     if (!payload.sub) {
-      return res.status(401).json({message: 'Invalid token'});
+      return res.status(401).json({message: 'Phi?n ??ng nh?p kh?ng h?p l?'});
     }
 
     const user = await prisma.user.findUnique({
@@ -32,13 +32,13 @@ export const requireAuth = async (req: AuthenticatedRequest, res: Response, next
     });
 
     if (!user) {
-      return res.status(401).json({message: 'User not found'});
+      return res.status(401).json({message: 'Kh?ng t?m th?y ng??i d?ng'});
     }
 
     req.user = user;
     return next();
   } catch {
-    return res.status(401).json({message: 'Invalid token'});
+    return res.status(401).json({message: 'Phi?n ??ng nh?p kh?ng h?p l?'});
   }
 };
 
@@ -65,7 +65,7 @@ export const optionalAuth = async (req: AuthenticatedRequest, _res: Response, ne
 
 export const requireAdmin = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   if (req.user?.role !== 'ADMIN') {
-    return res.status(403).json({message: 'Admin access required'});
+    return res.status(403).json({message: 'B?n c?n quy?n qu?n tr? vi?n'});
   }
 
   return next();

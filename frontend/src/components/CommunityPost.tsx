@@ -69,7 +69,7 @@ export default function CommunityPost({
 
       {image && (
         <div className="mb-4 rounded-xl overflow-hidden border border-white/5 aspect-video sm:aspect-auto">
-          <img src={image} alt="Post content" className="w-full object-cover max-h-[400px]" />
+          <img src={image} alt="N?i dung b?i vi?t" className="w-full object-cover max-h-[400px]" />
         </div>
       )}
 

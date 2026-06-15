@@ -1,10 +1,9 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
-import { useAuthStore } from '../store/useAuthStore';
-import { apiRequest } from '../lib/api';
+import React, {useState} from 'react';
+import {Link, useNavigate} from 'react-router-dom';
+import {motion} from 'motion/react';
+import {ArrowLeft, Eye, EyeOff} from 'lucide-react';
+import {useAuthStore} from '../store/useAuthStore';
+import {apiRequest} from '../lib/api';
 import BrandLogo from '../components/BrandLogo';
 
 type AuthMode = 'login' | 'signup' | 'forgot' | 'reset';
@@ -26,68 +25,12 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   const passwordRules = [
-    { label: 'Trên 8 ký tự', valid: password.length > 8 },
-    { label: 'Có chữ in hoa', valid: /[A-Z]/.test(password) },
-    { label: 'Có chữ thường', valid: /[a-z]/.test(password) },
-    { label: 'Có chữ số', valid: /\d/.test(password) },
-    { label: 'Có ký tự đặc biệt', valid: /[^A-Za-z0-9]/.test(password) },
+    {label: 'Trên 8 ký tự', valid: password.length > 8},
+    {label: 'Có chữ in hoa', valid: /[A-Z]/.test(password)},
+    {label: 'Có chữ thường', valid: /[a-z]/.test(password)},
+    {label: 'Có chữ số', valid: /\d/.test(password)},
+    {label: 'Có ký tự đặc biệt', valid: /[^A-Za-z0-9]/.test(password)},
   ];
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setMessage('');
-    setIsSubmitting(true);
-
-    try {
-      if (mode === 'signup') {
-        if (password !== confirmPassword) {
-          setError('Mật khẩu nhập lại không khớp');
-          return;
-        }
-
-        await signup({
-          name,
-          email,
-          password,
-          avatar: `https://i.pravatar.cc/200?u=${encodeURIComponent(email)}`,
-        });
-
-        navigate('/garage');
-      } else if (mode === 'login') {
-        await login(email, password);
-        navigate('/garage');
-      } else if (mode === 'forgot') {
-        await apiRequest<{ success: boolean; message: string }>('/auth/forgot-password', {
-          method: 'POST',
-          body: JSON.stringify({ email }),
-        });
-
-        setMode('reset');
-        setMessage('OTP has been sent to your email. Enter it below with your new password.');
-      } else {
-        if (password !== confirmPassword) {
-          setError('Passwords do not match');
-          return;
-        }
-
-        await apiRequest<{ success: boolean }>('/auth/reset-password', {
-          method: 'POST',
-          body: JSON.stringify({ email, code: resetCode, password }),
-        });
-
-        setMode('login');
-        setPassword('');
-        setConfirmPassword('');
-        setResetCode('');
-        setMessage('Password has been reset. Please sign in with your new password.');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to complete request');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const switchMode = (nextMode: AuthMode) => {
     setMode(nextMode);
@@ -98,23 +41,84 @@ export default function Login() {
     setResetCode('');
   };
 
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setMessage('');
+    setIsSubmitting(true);
+
+    try {
+      if (mode === 'signup') {
+        if (password !== confirmPassword) {
+          setError('Mật khẩu nhập lại không khớp.');
+          return;
+        }
+
+        await signup({
+          name,
+          email,
+          password,
+          avatar: `https://i.pravatar.cc/200?u=${encodeURIComponent(email)}`,
+        });
+        navigate('/garage');
+        return;
+      }
+
+      if (mode === 'login') {
+        await login(email, password);
+        navigate('/garage');
+        return;
+      }
+
+      if (mode === 'forgot') {
+        await apiRequest<{success: boolean; message: string}>('/auth/forgot-password', {
+          method: 'POST',
+          body: JSON.stringify({email}),
+        });
+        setMode('reset');
+        setMessage('Mã OTP đã được gửi đến email của bạn. Nhập mã bên dưới để đổi sang mật khẩu mới.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setError('Mật khẩu nhập lại không khớp.');
+        return;
+      }
+
+      await apiRequest<{success: boolean}>('/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({email, code: resetCode, password}),
+      });
+
+      setMode('login');
+      setPassword('');
+      setConfirmPassword('');
+      setResetCode('');
+      setMessage('Đã đặt lại mật khẩu. Vui lòng đăng nhập bằng mật khẩu mới.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể hoàn tất yêu cầu.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const title =
     mode === 'login'
-      ? 'Collector Sign In'
+      ? 'Đăng nhập'
       : mode === 'signup'
-        ? 'Create Account'
+        ? 'Tạo tài khoản'
         : mode === 'forgot'
-          ? 'Forgot Password'
-          : 'Reset Password';
+          ? 'Quên mật khẩu'
+          : 'Đặt lại mật khẩu';
 
   const description =
     mode === 'login'
-      ? 'Enter your credentials to access your private garage.'
+      ? 'Nhập thông tin để truy cập Garage cá nhân.'
       : mode === 'signup'
-        ? 'Create your profile and start posting to the community.'
+        ? 'Tạo hồ sơ và bắt đầu chia sẻ với cộng đồng.'
         : mode === 'forgot'
-          ? 'Enter your account email and we will send a 6-digit OTP.'
-          : 'Enter the OTP from your email and choose a new password.';
+          ? 'Nhập email tài khoản, hệ thống sẽ gửi mã OTP 6 chữ số.'
+          : 'Nhập mã OTP từ email và chọn mật khẩu mới.';
 
   return (
     <main className="min-h-screen w-full flex overflow-hidden bg-background">
@@ -123,27 +127,25 @@ export default function Login() {
           <img
             className="w-full h-full object-cover"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5kVwu5SHQh1PJ7LQNALeYFPKycpVdnwgjoVz_D1W2a4Y1YzJkFSvIV-fsKoORr_EwcgQrzeaIzMKThmwG9amhlv-uGXStiielaInrUbmcK_mTlPpCi_odlc-hW9_3I3fA92yBTyZe_OZnaLmgo8U36iaMVaZVom2Sy0EeVUsmSxr1Br_-5ghlmUQnA9HHp0PN-6hl1pM9FwbMw67sLMG_oDoClfyZTSHrcUeAPtU4x2zU8Mi0VOop-2L5g7ad-ZumbqnqUM7WgA"
-            alt="Luxury Automotive"
+            alt="Hình ảnh xe sang"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 1 }}
+          initial={{opacity: 0, y: 20}}
+          animate={{opacity: 1, y: 0}}
+          transition={{delay: 0.5, duration: 1}}
           className="relative z-10 space-y-4 max-w-lg"
         >
           <div className="flex items-center space-x-2">
-            <span className="font-mono text-[10px] text-primary tracking-[0.4em] uppercase">
-              Legacy Defined
-            </span>
+            <span className="font-mono text-[10px] text-primary tracking-[0.4em] uppercase">Dự án đam mê</span>
           </div>
           <h1 className="font-display text-5xl text-on-background tracking-tighter leading-tight">
-            Precision Engineering. Unrivaled Performance.
+            Kỹ thuật chuẩn xác. Trải nghiệm khác biệt.
           </h1>
           <p className="font-sans text-lg text-on-surface-variant/80 leading-relaxed">
-            Welcome to the exclusive circle of automotive connoisseurs. Access the world's most prestigious inventory.
+            Không gian dành cho người yêu xe, nơi quản lý Garage, chia sẻ câu chuyện và kết nối giao dịch.
           </p>
         </motion.div>
       </section>
@@ -156,7 +158,7 @@ export default function Login() {
               className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-on-surface-variant transition-all hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              Back to Explore
+              Quay lại khám phá
             </Link>
 
             <div className="flex items-center justify-between">
@@ -166,17 +168,12 @@ export default function Login() {
                 onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}
                 className="font-mono text-[10px] text-primary uppercase tracking-[0.2em] hover:underline hover:tracking-[0.3em] transition-all"
               >
-                {mode === 'login' ? 'Sign Up' : 'Sign In'}
+                {mode === 'login' ? 'Đăng ký' : 'Đăng nhập'}
               </button>
             </div>
 
-            <h2 className="font-display text-3xl md:text-4xl text-on-surface uppercase tracking-tight">
-              {title}
-            </h2>
-
-            <p className="font-sans text-sm text-on-surface-variant opacity-80">
-              {description}
-            </p>
+            <h2 className="font-display text-3xl md:text-4xl text-on-surface uppercase tracking-tight">{title}</h2>
+            <p className="font-sans text-sm text-on-surface-variant opacity-80">{description}</p>
           </div>
 
           <form className="space-y-8" onSubmit={handleLogin}>
@@ -186,7 +183,7 @@ export default function Login() {
                   <input
                     className="w-full bg-surface-container border-none border-b border-outline/20 focus:border-primary focus:ring-0 text-on-surface font-sans py-4 px-4 transition-all"
                     id="name"
-                    placeholder="DISPLAY NAME"
+                    placeholder="TÊN HIỂN THỊ"
                     type="text"
                     value={name}
                     onChange={(event) => setName(event.target.value)}
@@ -199,7 +196,7 @@ export default function Login() {
                 <input
                   className="w-full bg-surface-container border-none border-b border-outline/20 focus:border-primary focus:ring-0 text-on-surface font-sans py-4 px-4 transition-all"
                   id="email"
-                  placeholder={mode === 'login' ? 'EMAIL OR ADMIN USERNAME' : 'EMAIL ADDRESS'}
+                  placeholder={mode === 'login' ? 'EMAIL HOẶC TÊN ĐĂNG NHẬP' : 'ĐỊA CHỈ EMAIL'}
                   type={mode === 'login' ? 'text' : 'email'}
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
@@ -212,7 +209,7 @@ export default function Login() {
                   <input
                     className="w-full bg-surface-container border-none border-b border-outline/20 focus:border-primary focus:ring-0 text-on-surface font-sans py-4 px-4 transition-all"
                     id="reset-code"
-                    placeholder="6-DIGIT OTP CODE"
+                    placeholder="Mã OTP 6 chữ số"
                     type="text"
                     inputMode="numeric"
                     pattern="[0-9]{6}"
@@ -227,17 +224,14 @@ export default function Login() {
               {mode !== 'forgot' && (
                 <div className="group">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="block font-mono text-[8px] text-on-surface-variant uppercase tracking-widest">
-                      Security
-                    </span>
-
+                    <span className="block font-mono text-[8px] text-on-surface-variant uppercase tracking-widest">Bảo mật</span>
                     {mode === 'login' && (
                       <button
                         type="button"
                         onClick={() => switchMode('forgot')}
                         className="text-[10px] font-mono text-primary uppercase tracking-widest hover:text-on-primary-container transition-colors"
                       >
-                        Forgot Password?
+                        Quên mật khẩu?
                       </button>
                     )}
                   </div>
@@ -246,7 +240,7 @@ export default function Login() {
                     <input
                       className="w-full bg-surface-container border-none border-b border-outline/20 focus:border-primary focus:ring-0 text-on-surface font-sans py-4 pl-4 pr-12 transition-all"
                       id="password"
-                      placeholder={mode === 'reset' ? 'NEW PASSWORD' : 'PASSWORD'}
+                      placeholder={mode === 'reset' ? 'MẬT KHẨU MỚI' : 'MẬT KHẨU'}
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
@@ -254,12 +248,11 @@ export default function Login() {
                       maxLength={128}
                       required
                     />
-
                     <button
                       type="button"
                       onClick={() => setShowPassword((current) => !current)}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant transition-colors hover:text-primary"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -268,10 +261,7 @@ export default function Login() {
                   {(mode === 'signup' || mode === 'reset') && (
                     <div className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                       {passwordRules.map((rule) => (
-                        <span
-                          key={rule.label}
-                          className={`text-xs ${rule.valid ? 'text-green-400' : 'text-on-surface-variant'}`}
-                        >
+                        <span key={rule.label} className={`text-xs ${rule.valid ? 'text-green-400' : 'text-on-surface-variant'}`}>
                           {rule.valid ? '✓' : '○'} {rule.label}
                         </span>
                       ))}
@@ -285,7 +275,7 @@ export default function Login() {
                   <input
                     className="w-full bg-surface-container border-none border-b border-outline/20 focus:border-primary focus:ring-0 text-on-surface font-sans py-4 px-4 transition-all"
                     id="confirm-password"
-                    placeholder={mode === 'signup' ? 'CONFIRM PASSWORD' : 'CONFIRM NEW PASSWORD'}
+                    placeholder={mode === 'signup' ? 'XÁC NHẬN MẬT KHẨU' : 'XÁC NHẬN MẬT KHẨU MỚI'}
                     type={showPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(event) => setConfirmPassword(event.target.value)}
@@ -295,29 +285,16 @@ export default function Login() {
                   />
 
                   {confirmPassword.length > 0 && (
-                    <p
-                      className={`mt-2 text-xs ${
-                        password === confirmPassword ? 'text-green-400' : 'text-red-400'
-                      }`}
-                    >
-                      {password === confirmPassword ? '✓ Mật khẩu khớp' : '✗ Mật khẩu không khớp'}
+                    <p className={`mt-2 text-xs ${password === confirmPassword ? 'text-green-400' : 'text-red-400'}`}>
+                      {password === confirmPassword ? '✓ Mật khẩu khớp' : '✕ Mật khẩu không khớp'}
                     </p>
                   )}
                 </div>
               )}
             </div>
 
-            {message && (
-              <div className="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-300">
-                {message}
-              </div>
-            )}
-
-            {error && (
-              <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-                {error}
-              </div>
-            )}
+            {message && <div className="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-300">{message}</div>}
+            {error && <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
 
             <button
               className="relative overflow-hidden w-full py-5 bg-primary text-on-primary font-mono text-[10px] uppercase tracking-[0.3em] rounded-xl hover:scale-[1.01] active:scale-[0.98] transition-all shadow-xl shadow-primary/10 shimmer-effect disabled:opacity-60 disabled:cursor-not-allowed"
@@ -325,14 +302,14 @@ export default function Login() {
               disabled={isSubmitting}
             >
               {isSubmitting
-                ? 'Please wait...'
+                ? 'Đang xử lý...'
                 : mode === 'login'
-                  ? 'Authorize Access'
+                  ? 'Đăng nhập'
                   : mode === 'signup'
-                    ? 'Create Account'
+                    ? 'Tạo tài khoản'
                     : mode === 'forgot'
-                      ? 'Send OTP'
-                      : 'Reset Password'}
+                      ? 'Gửi OTP'
+                      : 'Đặt lại mật khẩu'}
             </button>
 
             {(mode === 'forgot' || mode === 'reset') && (
@@ -341,14 +318,14 @@ export default function Login() {
                 onClick={() => switchMode('login')}
                 className="w-full text-center font-mono text-[10px] uppercase tracking-[0.2em] text-on-surface-variant hover:text-primary transition-colors"
               >
-                Back to sign in
+                Quay lại đăng nhập
               </button>
             )}
           </form>
 
           <div className="pt-8 flex justify-center">
             <p className="font-mono text-[9px] text-on-surface-variant/40 uppercase tracking-[0.4em]">
-              © {new Date().getFullYear()} CarHub. ALL RIGHTS RESERVED.
+              © {new Date().getFullYear()} CarHub. Bảo lưu mọi quyền.
             </p>
           </div>
         </div>

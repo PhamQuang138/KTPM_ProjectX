@@ -147,6 +147,42 @@ const createVehicleForm = (vehicle?: DbVehicle) => ({
   specs: vehicle?.specs.join(', ') ?? '',
 });
 
+const conditionLabel = (condition: string) =>
+  ({
+    New: 'Mới',
+    Used: 'Đã qua sử dụng',
+    Project: 'Xe dự án',
+  })[condition] ?? condition;
+
+const listingStatusLabel = (status: string) =>
+  ({
+    'Active Listing': 'Đang bán',
+    Sold: 'Đã bán',
+    Hidden: 'Đã ẩn',
+  })[status] ?? status;
+
+const categoryLabel = (category: string) =>
+  ({
+    Daily: 'Xe hằng ngày',
+    Classics: 'Xe cổ',
+    Exotics: 'Xe hiệu năng cao',
+    Projects: 'Xe dự án',
+  })[category] ?? category;
+
+const fuelTypeLabel = (fuelType: string) =>
+  ({
+    Gasoline: 'Xăng',
+    Diesel: 'Dầu',
+    Hybrid: 'Hybrid',
+    Electric: 'Điện',
+  })[fuelType] ?? fuelType;
+
+const transmissionLabel = (transmission: string) =>
+  ({
+    Automatic: 'Tự động',
+    Manual: 'Số sàn',
+  })[transmission] ?? transmission;
+
 export default function Garage() {
   const [activeTab, setActiveTab] = useState('garage');
   const [isAddingVehicle, setIsAddingVehicle] = useState(false);
@@ -659,7 +695,7 @@ export default function Garage() {
             <aside className="lg:col-span-4 space-y-8">
               <div className="glass-card p-8 rounded-[2.5rem] border-white/5">
                 <div className="flex items-center justify-between gap-4 mb-6">
-                  <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant">About Collector</h3>
+                  <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant">Giới thiệu thành viên</h3>
                   <button
                     type="button"
                     onClick={openEditProfile}
@@ -669,13 +705,13 @@ export default function Garage() {
                   </button>
                 </div>
                 <p className="text-sm text-on-surface leading-loose mb-8">
-                  {profileBio || 'Write a short introduction about your garage, your taste in cars, and what kind of collector you are.'}
+                  {profileBio || 'Viết vài dòng giới thiệu về Garage, gu xe và phong cách sưu tầm của bạn.'}
                 </p>
                 
                 <div className="space-y-4 pt-6 border-t border-white/5">
                    <h4 className="text-[10px] font-mono uppercase text-on-surface-variant tracking-widest mb-4">Hãng quan tâm</h4>
                    <div className="flex flex-wrap gap-2">
-                      {(profileFocusBrands.length ? profileFocusBrands : ['Add your brands']).map(b => (
+                      {(profileFocusBrands.length ? profileFocusBrands : ['Thêm hãng yêu thích']).map(b => (
                         <span key={b} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] font-bold">{b}</span>
                       ))}
                    </div>
@@ -683,7 +719,7 @@ export default function Garage() {
               </div>
 
               <div className="glass-card p-8 rounded-[2.5rem] border-white/5">
-                <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] mb-6 text-on-surface-variant">Seller Rating</h3>
+                <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] mb-6 text-on-surface-variant">Đánh giá người bán</h3>
                 <div className="flex items-center gap-2 mb-4">
                   {[1, 2, 3, 4, 5].map((score) => (
                     <Star
@@ -702,7 +738,7 @@ export default function Garage() {
                     <span className="text-base text-on-surface-variant"> / 5</span>
                   </p>
                   <p className="text-xs text-on-surface-variant font-mono uppercase tracking-widest mt-2">
-                    Based on {profileRating?.totalRatings ?? 0} user votes
+                    Dựa trên {profileRating?.totalRatings ?? 0} lượt đánh giá
                   </p>
                 </div>
               </div>
@@ -746,17 +782,17 @@ export default function Garage() {
                       <div key={vehicle.id} className="group relative rounded-[2rem] overflow-hidden border border-white/5 cursor-pointer">
                         <img src={vehicle.image} className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-700" alt={vehicle.title} />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
-                          <p className="text-[10px] font-mono text-primary uppercase font-bold mb-1">{vehicle.condition}</p>
+                          <p className="text-[10px] font-mono text-primary uppercase font-bold mb-1">{conditionLabel(vehicle.condition)}</p>
                           <h4 className="text-xl font-bold text-white mb-1">{vehicle.title}</h4>
                           {vehicle.description && <p className="text-xs text-white/70 line-clamp-2 mb-2">{vehicle.description}</p>}
-                          <span className="text-[10px] text-white/60 font-mono uppercase">{vehicle.status}</span>
+                          <span className="text-[10px] text-white/60 font-mono uppercase">{listingStatusLabel(vehicle.status)}</span>
                           <button
                             type="button"
                             disabled={hasActiveListing(vehicle)}
                             onClick={() => openListingModal(vehicle)}
                             className="mt-4 btn-primary px-4 py-2 text-[10px] w-fit disabled:opacity-60 disabled:cursor-not-allowed"
                           >
-                            {hasActiveListing(vehicle) ? 'Already Listed' : 'List for Sale'}
+                            {hasActiveListing(vehicle) ? 'Đã đăng bán' : 'Đăng bán'}
                           </button>
                           <div className="mt-2 flex gap-2">
                             <button
@@ -779,7 +815,7 @@ export default function Garage() {
                     ))}
                     {myVehicles.length === 0 && (
                       <div className="aspect-[4/3] rounded-[2rem] border border-white/10 bg-white/[0.03] p-8 flex flex-col justify-center text-on-surface-variant">
-                        <p className="font-display text-xl font-bold text-on-surface">Your garage is empty</p>
+                        <p className="font-display text-xl font-bold text-on-surface">Garage của bạn đang trống</p>
                         <p className="text-sm mt-2">Thêm chiếc xe đầu tiên, sau đó đăng lên chợ xe khi bạn sẵn sàng bán.</p>
                       </div>
                     )}
@@ -852,7 +888,7 @@ export default function Garage() {
                            <div key={listing.id} className="rounded-[2rem] border border-white/5 bg-white/[0.03] overflow-hidden">
                              <img src={listing.vehicle?.image ?? 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200'} alt={listing.title} className="aspect-[4/3] w-full object-cover" />
                              <div className="p-6">
-                               <p className="text-[10px] font-mono uppercase text-primary font-bold mb-2">{listing.status}</p>
+                               <p className="text-[10px] font-mono uppercase text-primary font-bold mb-2">{listingStatusLabel(listing.status)}</p>
                                <h3 className="font-display text-xl font-bold">{listing.title}</h3>
                                <p className="font-mono text-primary mt-2">{listing.price}</p>
                                <p className="text-xs text-on-surface-variant mt-2">{listing.location}</p>
@@ -905,11 +941,11 @@ export default function Garage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input required placeholder="Tên xe" value={vehicleForm.title} onChange={(event) => setVehicleForm({...vehicleForm, title: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
               <select value={vehicleForm.condition} onChange={(event) => setVehicleForm({...vehicleForm, condition: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
-                <option>New</option>
-                <option>Used</option>
-                <option>Project</option>
+                <option value="New">Mới</option>
+                <option value="Used">Đã qua sử dụng</option>
+                <option value="Project">Xe dự án</option>
               </select>
-              <input placeholder="Specs, comma separated" value={vehicleForm.specs} onChange={(event) => setVehicleForm({...vehicleForm, specs: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
+              <input placeholder="Thông số, cách nhau bằng dấu phẩy" value={vehicleForm.specs} onChange={(event) => setVehicleForm({...vehicleForm, specs: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
             </div>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               <input required placeholder="Hãng xe" value={vehicleForm.make} onChange={(event) => setVehicleForm({...vehicleForm, make: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
@@ -917,13 +953,13 @@ export default function Garage() {
               <input required type="number" min="1886" max={new Date().getFullYear() + 1} placeholder="Năm sản xuất" value={vehicleForm.year} onChange={(event) => setVehicleForm({...vehicleForm, year: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
               <input type="number" min="0" placeholder="Số km đã đi" value={vehicleForm.mileage} onChange={(event) => setVehicleForm({...vehicleForm, mileage: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
               <select value={vehicleForm.bodyType} onChange={(event) => setVehicleForm({...vehicleForm, bodyType: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
-                <option>Coupe</option><option>Sedan</option><option>SUV</option><option>Convertible</option><option>Hatchback</option><option>Pickup</option>
+                <option value="Coupe">Coupe</option><option value="Sedan">Sedan</option><option value="SUV">SUV</option><option value="Convertible">Mui trần</option><option value="Hatchback">Hatchback</option><option value="Pickup">Bán tải</option>
               </select>
               <select value={vehicleForm.fuelType} onChange={(event) => setVehicleForm({...vehicleForm, fuelType: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
-                <option>Gasoline</option><option>Diesel</option><option>Hybrid</option><option>Electric</option>
+                <option value="Gasoline">Xăng</option><option value="Diesel">Dầu</option><option value="Hybrid">Hybrid</option><option value="Electric">Điện</option>
               </select>
               <select value={vehicleForm.transmission} onChange={(event) => setVehicleForm({...vehicleForm, transmission: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
-                <option>Automatic</option><option>Manual</option>
+                <option value="Automatic">Tự động</option><option value="Manual">Số sàn</option>
               </select>
             </div>
 
@@ -1006,10 +1042,10 @@ export default function Garage() {
                   <input required placeholder="Giá bán, ví dụ $65,000" value={vehicleForm.price} onChange={(event) => setVehicleForm({...vehicleForm, price: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
                   <input required placeholder="Địa điểm bán" value={vehicleForm.location} onChange={(event) => setVehicleForm({...vehicleForm, location: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3" />
                   <select value={vehicleForm.category} onChange={(event) => setVehicleForm({...vehicleForm, category: event.target.value})} className="bg-background border border-white/10 rounded-xl px-4 py-3">
-                    <option>Daily</option>
-                    <option>Classics</option>
-                    <option>Exotics</option>
-                    <option>Projects</option>
+                    <option value="Daily">Xe hằng ngày</option>
+                    <option value="Classics">Xe cổ</option>
+                    <option value="Exotics">Xe hiệu năng cao</option>
+                    <option value="Projects">Xe dự án</option>
                   </select>
                 </div>
                 <textarea placeholder="Mô tả tin đăng, không bắt buộc" value={vehicleForm.listingDescription} onChange={(event) => setVehicleForm({...vehicleForm, listingDescription: event.target.value})} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 min-h-24" />
@@ -1071,10 +1107,10 @@ export default function Garage() {
                 onChange={(event) => setListingForm({...listingForm, category: event.target.value})}
                 className="bg-background border border-white/10 rounded-xl px-4 py-3"
               >
-                <option>Daily</option>
-                <option>Classics</option>
-                <option>Exotics</option>
-                <option>Projects</option>
+                <option value="Daily">Xe hằng ngày</option>
+                <option value="Classics">Xe cổ</option>
+                <option value="Exotics">Xe hiệu năng cao</option>
+                <option value="Projects">Xe dự án</option>
               </select>
             </div>
 
@@ -1084,9 +1120,9 @@ export default function Garage() {
                 onChange={(event) => setListingForm({...listingForm, status: event.target.value})}
                 className="w-full bg-background border border-white/10 rounded-xl px-4 py-3"
               >
-                <option>Active Listing</option>
-                <option>Sold</option>
-                <option>Hidden</option>
+                <option value="Active Listing">Đang bán</option>
+                <option value="Sold">Đã bán</option>
+                <option value="Hidden">Đã ẩn</option>
               </select>
             )}
 

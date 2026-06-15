@@ -71,7 +71,7 @@ app.use(
   rateLimit({
     windowMs: parseNumber(process.env.RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000),
     max: parseNumber(process.env.RATE_LIMIT_MAX, isProduction ? 100 : 5000),
-    message: {message: 'Too many requests. Please wait a moment and try again.'},
+    message: {message: 'B?n thao t?c qu? nhanh. Vui l?ng ch? m?t ch?t r?i th? l?i.'},
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => !isProduction || req.method === 'OPTIONS' || req.path === '/api/health',
@@ -107,7 +107,7 @@ app.get('/health', healthHandler);
 app.use('/', apiRouter);
 
 app.use((_req: Request, res: Response) => {
-  res.status(404).json({message: 'Route not found'});
+  res.status(404).json({message: 'Kh?ng t?m th?y ???ng d?n'});
 });
 
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
@@ -131,7 +131,7 @@ app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   }
 
   const message =
-    process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : 'Internal server error';
+    process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : 'L?i m?y ch? n?i b?';
   res.status(500).json({message});
 });
 

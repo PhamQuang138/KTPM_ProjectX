@@ -68,6 +68,21 @@ interface PublicProfileData {
   };
 }
 
+const conditionLabel = (condition: string) =>
+  ({
+    New: 'Mới',
+    Used: 'Đã qua sử dụng',
+    Project: 'Xe dự án',
+  })[condition] ?? condition;
+
+const listingStatusLabel = (status: string) =>
+  ({
+    'Active Listing': 'Đang bán',
+    Sold: 'Đã bán',
+    Hidden: 'Đã ẩn',
+    'In Garage': 'Trong Garage',
+  })[status] ?? status;
+
 export default function PublicProfile() {
   const {id} = useParams();
   const currentUser = useAuthStore((state) => state.user);
@@ -220,7 +235,7 @@ export default function PublicProfile() {
         <section className="max-w-container-max mx-auto px-4 sm:px-6 md:px-margin-desktop py-4 overflow-hidden">
           <Link to="/market" className="inline-flex items-center gap-2 text-sm text-on-surface-variant hover:text-primary mb-6">
             <ArrowLeft className="w-4 h-4" />
-            Back to marketplace
+            Quay lại chợ xe
           </Link>
 
           {isLoading && <div className="text-on-surface-variant">Loading profile...</div>}
@@ -345,15 +360,15 @@ export default function PublicProfile() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-12 md:mt-24">
                 <aside className="lg:col-span-4 space-y-8 min-w-0">
                   <div className="glass-card p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border-white/5 min-w-0">
-                    <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-6">About Collector</h3>
+                    <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-6">Giới thiệu thành viên</h3>
                     <p className="text-sm text-on-surface leading-loose mb-8 break-words">
-                      {profile.bio || 'This collector has not written an introduction yet.'}
+                      {profile.bio || 'Thành viên này chưa viết phần giới thiệu.'}
                     </p>
 
                     <div className="space-y-4 pt-6 border-t border-white/5">
-                      <h4 className="text-[10px] font-mono uppercase text-on-surface-variant tracking-widest mb-4">Focus Brands</h4>
+                      <h4 className="text-[10px] font-mono uppercase text-on-surface-variant tracking-widest mb-4">Hãng quan tâm</h4>
                       <div className="flex flex-wrap gap-2">
-                        {(profile.focusBrands.length ? profile.focusBrands : ['No brands yet']).map((brand) => (
+                        {(profile.focusBrands.length ? profile.focusBrands : ['Chưa chọn hãng']).map((brand) => (
                           <span key={brand} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] font-bold">
                             {brand}
                           </span>
@@ -363,7 +378,7 @@ export default function PublicProfile() {
                   </div>
 
                   <div className="glass-card p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border-white/5">
-                    <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] mb-6 text-on-surface-variant">Seller Rating</h3>
+                    <h3 className="font-display text-xs font-bold uppercase tracking-[0.2em] mb-6 text-on-surface-variant">Đánh giá người bán</h3>
                     <div className="flex items-center gap-2 mb-4 flex-wrap">
                       {[1, 2, 3, 4, 5].map((score) => {
                         const filledScore = profile.rating.myRating ?? Math.round(profile.rating.averageRating);
@@ -374,7 +389,7 @@ export default function PublicProfile() {
                             type="button"
                             disabled={disabled}
                             onClick={() => handleRateUser(score)}
-                            title={disabled ? 'You cannot rate yourself' : `Rate ${score} stars`}
+                            title={disabled ? 'Bạn không thể tự đánh giá' : `Đánh giá ${score} sao`}
                           >
                             <Star className={`w-7 h-7 ${score <= filledScore ? 'fill-primary text-primary' : 'text-on-surface-variant'}`} />
                           </button>
@@ -387,13 +402,13 @@ export default function PublicProfile() {
                         <span className="text-base text-on-surface-variant"> / 5</span>
                       </p>
                       <p className="text-xs text-on-surface-variant font-mono uppercase tracking-widest mt-2">
-                        Based on {profile.rating.totalRatings} user votes
+                        Dựa trên {profile.rating.totalRatings} lượt đánh giá
                       </p>
                       {profile.rating.myRating && currentUser?.id !== profile.id && (
-                        <p className="text-xs text-primary mt-3">Your vote: {profile.rating.myRating} stars</p>
+                        <p className="text-xs text-primary mt-3">Đánh giá c?a b?n: {profile.rating.myRating} sao</p>
                       )}
                       {currentUser?.id === profile.id && (
-                        <p className="text-xs text-on-surface-variant mt-3">This is your profile, so you cannot rate yourself.</p>
+                        <p className="text-xs text-on-surface-variant mt-3">Đây là hồ sơ của bạn nên bạn không thể tự đánh giá.</p>
                       )}
                       {ratingError && <p className="text-xs text-red-300 mt-3">{ratingError}</p>}
                     </div>
@@ -436,17 +451,17 @@ export default function PublicProfile() {
                           <div key={vehicle.id} className="group relative rounded-[2rem] overflow-hidden border border-white/5">
                             <img src={vehicle.image} className="w-full aspect-[4/3] object-cover group-hover:scale-105 transition-transform duration-700" alt={vehicle.title} />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
-                              <p className="text-[10px] font-mono text-primary uppercase font-bold mb-1">{vehicle.condition}</p>
+                              <p className="text-[10px] font-mono text-primary uppercase font-bold mb-1">{conditionLabel(vehicle.condition)}</p>
                               <h4 className="text-xl font-bold text-white mb-1 break-words">{vehicle.title}</h4>
                               {vehicle.description && <p className="text-xs text-white/70 line-clamp-2 mb-2">{vehicle.description}</p>}
-                              <span className="text-[10px] text-white/60 font-mono uppercase">{vehicle.status}</span>
+                              <span className="text-[10px] text-white/60 font-mono uppercase">{listingStatusLabel(vehicle.status)}</span>
                             </div>
                           </div>
                         ))}
                         {profile.garageVehicles.length === 0 && (
                           <div className="aspect-[4/3] rounded-[2rem] border border-white/10 bg-white/[0.03] p-8 flex flex-col justify-center text-on-surface-variant">
                             <p className="font-display text-xl font-bold text-on-surface">Garage đang trống</p>
-                            <p className="text-sm mt-2">This collector has not added public garage vehicles yet.</p>
+                            <p className="text-sm mt-2">Thành viên này chưa thêm xe công khai trong Garage.</p>
                           </div>
                         )}
                       </motion.div>
@@ -472,7 +487,7 @@ export default function PublicProfile() {
                         ))}
                         {socialPosts.length === 0 && (
                           <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-8 text-on-surface-variant">
-                            This collector has not published any posts yet.
+                            Thành viên này chưa đăng bài viết nào.
                           </div>
                         )}
                       </motion.div>
@@ -496,7 +511,7 @@ export default function PublicProfile() {
                                   className="aspect-[4/3] w-full object-cover"
                                 />
                                 <div className="p-6">
-                                  <p className="text-[10px] font-mono uppercase text-primary font-bold mb-2">{listing.status}</p>
+                                  <p className="text-[10px] font-mono uppercase text-primary font-bold mb-2">{listingStatusLabel(listing.status)}</p>
                                   <h3 className="font-display text-xl font-bold break-words">{listing.title}</h3>
                                   <p className="font-mono text-primary mt-2">{listing.price}</p>
                                   <p className="text-xs text-on-surface-variant mt-2">{listing.location}</p>
@@ -511,8 +526,8 @@ export default function PublicProfile() {
                         ) : (
                           <div className="glass-card p-12 text-center rounded-[2.5rem] border-white/5 opacity-60">
                             <List className="w-8 h-8 mx-auto mb-4" />
-                            <p className="font-display text-lg font-bold">No Active Listings</p>
-                            <p className="text-xs text-on-surface-variant font-mono uppercase tracking-widest mt-2">This collector has no active marketplace listings.</p>
+                            <p className="font-display text-lg font-bold">Chưa có tin đang bán</p>
+                            <p className="text-xs text-on-surface-variant font-mono uppercase tracking-widest mt-2">Thành viên này chưa có tin bán xe đang hoạt động.</p>
                           </div>
                         )}
                       </motion.div>
