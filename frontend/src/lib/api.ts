@@ -1,8 +1,5 @@
 const configuredApiUrl = import.meta.env.VITE_API_URL;
-const API_BASE_URL =
-  import.meta.env.PROD && (!configuredApiUrl || configuredApiUrl === '/api')
-    ? '/api/api'
-    : configuredApiUrl ?? '/api';
+const API_BASE_URL = (configuredApiUrl || '/api').replace(/\/+$/, '');
 
 export async function apiRequest<T>(path: string, options?: RequestInit): Promise<T> {
   const token = localStorage.getItem('auth_token');
