@@ -6,7 +6,6 @@ const COMMUNITY_MARKER = 'CARHUB_DAILY_COMMUNITY_V1';
 const MARKET_MARKER = 'CARHUB_DAILY_MARKET_V1';
 const LEGACY_COMMUNITY_MARKER = 'CARHUB_COMMUNITY_SEED_V2';
 const COMMUNITY_POST_COUNT = 45;
-const MARKET_LISTING_COUNT = 150;
 
 const locations = [
   'Hà Nội',
@@ -121,7 +120,20 @@ const dailyVehicles: DailyVehicle[] = [
   {make: 'Kia', model: 'Morning', wikipediaPage: 'Kia Picanto', year: 2022, price: 359, bodyType: 'Hatchback', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 30000, specs: []},
   {make: 'Kia', model: 'Soluto', wikipediaPage: 'Kia Pegas', year: 2021, price: 359, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 44000, specs: []},
   {make: 'Kia', model: 'K3', wikipediaPage: 'Kia Forte', year: 2022, price: 560, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 26000, specs: []},
-  {make: 'Kia', model: 'Seltos', wikipediaPage: 'Kia Seltos', year: 2022, price: 610, bodyType: 'Crossover', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 33000, specs: []},
+  {
+    make: 'Kia',
+    model: 'Seltos',
+    wikipediaPage: 'Kia Seltos',
+    imageUrl: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Kia%20Seltos.png',
+    imageSourcePage: 'https://commons.wikimedia.org/wiki/File:Kia_Seltos.png',
+    year: 2022,
+    price: 610,
+    bodyType: 'Crossover',
+    fuelType: 'Gasoline',
+    transmission: 'Automatic',
+    mileage: 33000,
+    specs: [],
+  },
   {make: 'Kia', model: 'Sportage', wikipediaPage: 'Kia Sportage', year: 2023, price: 820, bodyType: 'SUV', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 17000, specs: []},
   {make: 'Kia', model: 'Carnival', wikipediaPage: 'Kia Carnival', year: 2022, price: 1100, bodyType: 'MPV', fuelType: 'Diesel', transmission: 'Automatic', mileage: 39000, specs: []},
   {make: 'Mazda', model: 'Mazda2', wikipediaPage: 'Mazda2', year: 2021, price: 420, bodyType: 'Sedan', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 37000, specs: []},
@@ -220,6 +232,7 @@ const dailyVehicles: DailyVehicle[] = [
   {make: 'McLaren', model: '720S', wikipediaPage: 'McLaren 720S', year: 2023, price: 16000, bodyType: 'Coupe', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
   {make: 'Aston Martin', model: 'DB12', wikipediaPage: 'Aston Martin DB12', year: 2024, price: 16800, bodyType: 'Coupe', fuelType: 'Gasoline', transmission: 'Automatic', mileage: 0, specs: [], category: 'Exotics'},
 ];
+const MARKET_LISTING_COUNT = dailyVehicles.length;
 
 const formatPrice = (price: number) =>
   new Intl.NumberFormat('vi-VN', {
