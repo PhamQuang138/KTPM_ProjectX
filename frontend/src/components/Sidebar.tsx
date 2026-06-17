@@ -37,11 +37,11 @@ export default function Sidebar() {
     <AnimatePresence>
       {isOpen && (
         <motion.nav 
-          initial={{ x: '-100%' }}
-          animate={{ x: 0 }}
-          exit={{ x: '-100%' }}
-          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed left-0 top-0 h-screen w-64 bg-surface-container border-r border-white/10 shadow-[8px_0_24px_rgba(0,0,0,0.18)] py-4 z-[70] flex flex-col will-change-transform"
+          initial={{ x: '-100%', opacity: 0.98 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: '-100%', opacity: 0.98 }}
+          transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          className="fixed left-0 top-0 h-screen w-64 bg-surface-container/95 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_34%)] border-r border-white/10 shadow-[8px_0_24px_rgba(0,0,0,0.18)] py-4 z-[70] flex flex-col transform-gpu will-change-transform"
         >
           <div className="px-6 py-8 mb-8 flex items-center justify-between">
             <BrandLogo imageClassName="h-11 w-11" />

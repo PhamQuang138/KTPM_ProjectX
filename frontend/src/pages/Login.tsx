@@ -122,37 +122,39 @@ export default function Login() {
 
   return (
     <main className="min-h-screen w-full flex overflow-hidden bg-background">
-      <section className="hidden lg:flex lg:w-[58%] xl:w-[62%] relative flex-col justify-end p-margin-desktop overflow-visible">
+      <section className="hidden lg:flex lg:w-[60%] xl:w-[64%] relative flex-col justify-end p-margin-desktop overflow-visible">
         <div className="absolute inset-0 z-0">
           <img
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-[44%_center] opacity-95"
             src="/images/carhub/auth/login-hero.jpg"
             alt="Hình ảnh xe sang"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/35 to-black/20" />
-          <div className="absolute -right-32 inset-y-0 w-72 bg-gradient-to-l from-surface-container-lowest via-surface-container-lowest/70 to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_38%_48%,transparent_0%,rgba(0,0,0,0.24)_42%,rgba(0,0,0,0.78)_100%)]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-black/20" />
+          <div className="absolute -right-44 inset-y-0 w-[30rem] bg-gradient-to-l from-surface-container-lowest via-surface-container-lowest/80 to-transparent" />
         </div>
 
         <motion.div
           initial={{opacity: 0, y: 20}}
           animate={{opacity: 1, y: 0}}
           transition={{delay: 0.5, duration: 1}}
-          className="relative z-10 space-y-4 max-w-lg"
+          className="relative z-10 max-w-2xl space-y-5"
         >
           <div className="flex items-center space-x-2">
             <span className="font-mono text-[10px] text-primary tracking-[0.4em] uppercase">Dự án đam mê</span>
           </div>
-          <h1 className="font-display text-5xl text-on-background tracking-tighter leading-tight">
+          <h1 className="font-display text-5xl xl:text-6xl text-on-background tracking-tighter leading-[0.95]">
             Kỹ thuật chuẩn xác. Trải nghiệm khác biệt.
           </h1>
-          <p className="font-sans text-lg text-on-surface-variant/80 leading-relaxed">
+          <p className="max-w-xl font-sans text-lg text-on-surface-variant/80 leading-relaxed">
             Không gian dành cho người yêu xe, nơi quản lý gara, chia sẻ câu chuyện và kết nối giao dịch.
           </p>
         </motion.div>
       </section>
 
-      <section className="relative z-10 w-full lg:w-[42%] xl:w-[38%] flex items-center justify-center p-6 sm:p-12 md:p-16 lg:p-20 bg-surface-container-lowest/95 backdrop-blur-sm">
-        <div className="w-full max-w-md flex flex-col space-y-10">
+      <section className="relative z-10 w-full lg:w-[40%] xl:w-[36%] flex items-center justify-center p-5 sm:p-10 md:p-14 lg:p-16 bg-surface-container-lowest/90 backdrop-blur-md">
+        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-background/35 p-6 shadow-2xl shadow-black/25 backdrop-blur-xl sm:p-8">
+          <div className="flex flex-col space-y-10">
           <div className="flex flex-col space-y-2">
             <Link
               to="/"
@@ -319,6 +321,7 @@ export default function Login() {
             <p className="font-mono text-[9px] text-on-surface-variant/40 uppercase tracking-[0.4em]">
               © {new Date().getFullYear()} CarHub. Bảo lưu mọi quyền.
             </p>
+          </div>
           </div>
         </div>
       </section>

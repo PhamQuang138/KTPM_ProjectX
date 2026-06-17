@@ -14,8 +14,12 @@ import {
 import TopNav from '../components/TopNav';
 import Footer from '../components/Footer';
 import { useAuthStore } from '../store/useAuthStore';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { apiRequest } from '../lib/api';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const features = [
   {
@@ -81,11 +85,70 @@ interface HomeArticle {
 }
 
 export default function Home() {
+  const pageRef = useRef<HTMLDivElement | null>(null);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const gatedPath = (path: string) => (isAuthenticated ? path : '/login');
   const [overview, setOverview] = useState<HomeOverview | null>(null);
   const [vehicles, setVehicles] = useState<HomeVehicle[]>([]);
   const [articles, setArticles] = useState<HomeArticle[]>([]);
+
+  useLayoutEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion || !pageRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        '.explore-hero-media',
+        {scale: 1.08, autoAlpha: 0.72},
+        {
+          scale: 1,
+          autoAlpha: 0.95,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '.explore-hero',
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 0.8,
+          },
+        },
+      );
+
+      ScrollTrigger.batch('.explore-reveal', {
+        start: 'top 82%',
+        once: true,
+        onEnter: (elements) => {
+          gsap.to(elements, {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.75,
+            stagger: 0.08,
+            ease: 'power3.out',
+            overwrite: true,
+          });
+        },
+      });
+
+      gsap.utils.toArray<HTMLElement>('.explore-image').forEach((image) => {
+        gsap.fromTo(
+          image,
+          {scale: 0.88, autoAlpha: 0.45},
+          {
+            scale: 1,
+            autoAlpha: 1,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: image,
+              start: 'top 88%',
+              end: 'bottom 28%',
+              scrub: 0.7,
+            },
+          },
+        );
+      });
+    }, pageRef);
+
+    return () => ctx.revert();
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -109,28 +172,25 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-on-background">
+    <div ref={pageRef} className="min-h-screen bg-background text-on-background">
       <TopNav />
       
-      <main>
+      <main className="w-full max-w-full overflow-x-hidden">
         {/* HERO SECTION */}
-        <section className="relative flex min-h-[calc(100vh-76px)] items-center overflow-hidden bg-[#070707] pb-28 pt-20">
+        <section className="explore-hero relative flex min-h-[calc(100vh-76px)] items-center overflow-hidden bg-[#070707] pb-28 pt-20">
           <img
             src="/images/carhub/explore/explore-hero.jpg"
             alt="Cộng đồng ô tô CarHub"
-            className="absolute inset-0 h-full w-full object-cover object-[62%_center] opacity-90"
+            className="explore-hero-media absolute inset-0 h-full w-full object-cover object-[62%_center] opacity-90 will-change-transform"
           />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_45%,transparent_0%,rgba(7,7,7,0.15)_28%,rgba(7,7,7,0.88)_76%)]" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-background" />
           <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-black/85 to-transparent" />
 
-          <div className="absolute left-6 top-1/2 z-10 hidden -translate-y-1/2 flex-col items-center gap-3 lg:flex">
-            {['01', '02', '03', '04'].map((step, index) => (
-              <div key={step} className="flex flex-col items-center gap-3">
-                <span className={`h-2 w-2 rounded-full ${index === 0 ? 'bg-primary' : 'bg-white/25'}`} />
-                {index < 3 && <span className="h-12 w-px bg-white/15" />}
-              </div>
-            ))}
+          <div className="absolute left-6 top-1/2 z-10 hidden h-44 -translate-y-1/2 flex-col items-center justify-between lg:flex">
+            <span className="h-14 w-px bg-gradient-to-b from-primary to-white/15" />
+            <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_18px_rgba(255,255,255,0.45)]" />
+            <span className="h-24 w-px bg-gradient-to-b from-white/15 to-transparent" />
           </div>
 
           <div className="max-w-container-max mx-auto px-6 md:px-margin-desktop relative z-10 text-center">
@@ -138,9 +198,9 @@ export default function Home() {
                initial={{ opacity: 0, y: 20 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ duration: 0.6 }}
-               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8"
+               className="mb-8 inline-flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.35em] text-white/55"
              >
-               <span className="w-2 h-2 bg-primary rounded-full animate-ping" />
+               <span className="h-px w-12 bg-primary" />
                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-on-surface-variant font-bold">Cộng đồng ô tô CarHub</span>
              </motion.div>
 
@@ -148,7 +208,7 @@ export default function Home() {
                initial={{ opacity: 0, y: 20 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ duration: 0.6, delay: 0.1 }}
-               className="hero-title mb-9"
+               className="hero-title mx-auto mb-9 max-w-5xl"
              >
                <span>MUA BÁN, KẾT NỐI</span>
                <span className="hero-title-accent">VÀ CHIA SẺ ĐAM MÊ</span>
@@ -198,7 +258,7 @@ export default function Home() {
         </section>
 
         {/* STATS SECTION */}
-        <section className="py-20 border-y border-white/5 bg-white/[0.02]">
+        <section className="py-24 md:py-32 border-y border-white/5 bg-white/[0.02]">
            <div className="max-w-container-max mx-auto px-6 md:px-margin-desktop">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
                  {stats.map((stat, i) => (
@@ -207,7 +267,7 @@ export default function Home() {
                      initial={{ opacity: 0 }}
                      whileInView={{ opacity: 1 }}
                      viewport={{ once: true }}
-                     className="text-center"
+                     className="explore-reveal text-center opacity-0 translate-y-8"
                    >
                      <p className="font-display text-4xl md:text-5xl font-bold mb-2 tracking-tighter">{stat.value}</p>
                      <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-primary font-bold mb-1">{stat.label}</p>
@@ -219,14 +279,14 @@ export default function Home() {
         </section>
 
         {/* FEATURES OVERVIEW */}
-        <section className="py-32 px-6 md:px-margin-desktop max-w-container-max mx-auto">
+        <section className="py-32 md:py-44 px-6 md:px-margin-desktop max-w-container-max mx-auto">
            <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-16">
               <motion.div
                  initial={{opacity: 0, y: 28}}
                  whileInView={{opacity: 1, y: 0}}
                  viewport={{once: true, amount: 0.45}}
                  transition={{duration: 0.65, ease: [0.22, 1, 0.36, 1]}}
-                 className="max-w-xl"
+                 className="explore-reveal max-w-3xl opacity-0 translate-y-8"
               >
                  <h2 className="text-[10px] font-mono uppercase tracking-[0.3em] text-primary font-bold mb-4">Chức năng chính</h2>
                  <h3 className="font-display text-4xl md:text-5xl font-bold tracking-tighter leading-tight">
@@ -238,7 +298,7 @@ export default function Home() {
               </p>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+           <div className="grid grid-flow-dense grid-cols-1 md:grid-cols-3 gap-8">
               {features.map((f, i) => (
                 <motion.div 
                   key={i}
@@ -247,10 +307,10 @@ export default function Home() {
                   whileInView={{opacity: 1, y: 0}}
                   viewport={{once: true, amount: 0.35}}
                   transition={{duration: 0.55, delay: i * 0.08}}
-                  className="overflow-hidden rounded-[2rem] bg-white/[0.03] border border-white/5 hover:border-primary/20 transition-all group"
+                  className="explore-reveal overflow-hidden rounded-2xl bg-white/[0.03] border border-white/5 hover:border-primary/20 transition-all group opacity-0 translate-y-8"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden bg-black">
-                     <img src={f.image} alt={f.title} className="h-full w-full object-cover opacity-70 transition duration-700 group-hover:scale-105 group-hover:opacity-90" />
+                     <img src={f.image} alt={f.title} className="explore-image h-full w-full object-cover opacity-70 transition duration-700 group-hover:scale-105 group-hover:opacity-90 will-change-transform" />
                      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
                      <div className={`absolute left-5 top-5 w-12 h-12 rounded-2xl ${f.color} flex items-center justify-center border border-white/10 backdrop-blur-md`}>
                         <f.icon className="w-6 h-6" />
@@ -267,7 +327,7 @@ export default function Home() {
         </section>
 
         {/* MARKETPLACE PREVIEW */}
-        <section className="py-32 bg-surface-container/30">
+        <section className="py-32 md:py-44 bg-surface-container/30">
            <div className="max-w-container-max mx-auto px-6 md:px-margin-desktop">
               <div className="flex items-center justify-between mb-12">
                  <motion.div
@@ -275,6 +335,7 @@ export default function Home() {
                     whileInView={{opacity: 1, y: 0}}
                     viewport={{once: true, amount: 0.5}}
                     transition={{duration: 0.6, ease: [0.22, 1, 0.36, 1]}}
+                    className="explore-reveal opacity-0 translate-y-8"
                  >
                     <h3 className="font-display text-3xl font-bold tracking-tight">Tin xe được quan tâm</h3>
                     <p className="text-sm text-on-surface-variant mt-2">Sắp xếp từ dữ liệu lượt lưu và bình luận thực tế</p>
@@ -287,7 +348,7 @@ export default function Home() {
                    <motion.div
                      key={vehicle.id}
                      whileHover={{ scale: 1.02 }}
-                     className="rounded-2xl overflow-hidden border border-white/5 bg-background group cursor-pointer"
+                     className="explore-reveal rounded-2xl overflow-hidden border border-white/5 bg-background group cursor-pointer opacity-0 translate-y-8"
                    >
                      <Link to={gatedPath(`/market/${vehicle.id}`)} className="block">
                        <div className="aspect-video overflow-hidden bg-white/[0.03]">
@@ -306,7 +367,7 @@ export default function Home() {
         </section>
 
         {/* LATEST STORIES & BLOGS */}
-        <section className="py-32 px-6 md:px-margin-desktop max-w-container-max mx-auto">
+        <section className="py-32 md:py-44 px-6 md:px-margin-desktop max-w-container-max mx-auto">
            <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-16">
               <motion.div
                  initial={{opacity: 0, y: 28}}
@@ -346,10 +407,10 @@ export default function Home() {
         <section className="py-32 px-6 md:px-margin-desktop max-w-container-max mx-auto">
            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
               <div className="relative">
-                 <div className="aspect-square rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl">
+                 <div className="aspect-square rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                     <img 
                       src="/images/carhub/explore/feature-garage.jpg" 
-                      className="w-full h-full object-cover opacity-80" 
+                      className="explore-image w-full h-full object-cover opacity-80 will-change-transform" 
                       alt="Enthusiasts"
                     />
                  </div>
@@ -364,7 +425,7 @@ export default function Home() {
                     whileInView={{opacity: 1, y: 0}}
                     viewport={{once: true, amount: 0.45}}
                     transition={{duration: 0.65, ease: [0.22, 1, 0.36, 1]}}
-                    className="space-y-6"
+                    className="explore-reveal space-y-6 opacity-0 translate-y-8"
                  >
                     <h3 className="font-display text-4xl md:text-5xl font-bold tracking-tighter leading-tight">
                       {overview?.stats.members ?? 0} thành viên đang xây dựng cộng đồng CarHub.
