@@ -225,15 +225,6 @@ export default function Login() {
                 <div className="group">
                   <div className="flex justify-between items-center mb-2">
                     <span className="block font-mono text-[8px] text-on-surface-variant uppercase tracking-widest">Bảo mật</span>
-                    {mode === 'login' && (
-                      <button
-                        type="button"
-                        onClick={() => switchMode('forgot')}
-                        className="text-[10px] font-mono text-primary uppercase tracking-widest hover:text-on-primary-container transition-colors"
-                      >
-                        Quên mật khẩu?
-                      </button>
-                    )}
                   </div>
 
                   <div className="relative">

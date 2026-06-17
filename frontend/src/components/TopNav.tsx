@@ -100,7 +100,7 @@ export default function TopNav({ title }: { title?: string }) {
               <Menu className="w-5 h-5" />
             </motion.button>
           )}
-          <BrandLogo showTagline />
+          {!isOpen && <BrandLogo showTagline />}
         </div>
         
         <div className="flex items-center space-x-6">

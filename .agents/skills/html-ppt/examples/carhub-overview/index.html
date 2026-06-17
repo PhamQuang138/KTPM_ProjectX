@@ -1,136 +1,507 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-themes="tokyo-night,dracula,catppuccin-mocha,nord,corporate-clean">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>CarHub Garage - Tong quan san pham va kien truc</title>
+  <title>CarHub Garage - Báo cáo sản phẩm và hệ thống</title>
   <link rel="stylesheet" href="../../assets/fonts.css">
   <link rel="stylesheet" href="../../assets/base.css">
+  <link rel="stylesheet" id="theme-link" href="../../assets/themes/tokyo-night.css">
   <link rel="stylesheet" href="../../assets/animations/animations.css">
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="tpl-product-launch">
+<body class="tpl-carhub-presenter">
 <div class="deck">
-  <section class="slide dark cover" data-title="CarHub Garage">
-    <div class="hero-shot"><div class="car-mark">CH</div></div>
-    <div class="brand">CARHUB / GARAGE</div>
-    <p class="kicker">Product &amp; System Overview · June 2026</p>
-    <h1 class="h1 anim-fade-up" data-anim="fade-up">Mua bán.<br>Kết nối.<br><span class="gradient-text">Chia sẻ đam mê.</span></h1>
-    <p class="lede mt-m" style="max-width:45ch">Một nền tảng full-stack kết hợp cộng đồng ô tô, garage cá nhân và marketplace trong cùng một trải nghiệm.</p>
-    <div class="deck-footer"><span>React · Express · PostgreSQL</span><span class="slide-number"></span></div>
-  </section>
 
-  <section class="slide center tc" data-title="Tầm nhìn">
-    <div class="intro-wrap">
-      <p class="kicker">Tầm nhìn sản phẩm</p>
-      <h1 class="h1 intro-title">Mọi hoạt động về xe.<br><span class="gradient-text">Trong một hệ thống.</span></h1>
-      <p class="lede intro-copy">CarHub nối liền hành trình từ khám phá nội dung, xây dựng hồ sơ uy tín, quản lý xe cá nhân, đăng bán, tìm kiếm đến trao đổi trực tiếp giữa người mua và người bán.</p>
-      <div class="pill-row"><span>Cộng đồng</span><span>Marketplace</span><span>Garage</span><span>Editorial</span><span>AI Search</span></div>
+  <section class="slide cover" data-title="CarHub Garage">
+    <div class="cover-orbit orbit-one"></div>
+    <div class="cover-orbit orbit-two"></div>
+    <p class="kicker">Đồ án kỹ thuật phần mềm · 2026</p>
+    <div class="cover-grid">
+      <div>
+        <div class="brand-lockup"><span>CH</span><b>CARHUB GARAGE</b></div>
+        <h1 class="h1 anim-fade-up" data-anim="fade-up">Mua bán.<br>Kết nối.<br><span class="accent-gradient">Chia sẻ đam mê.</span></h1>
+        <p class="lede">Nền tảng full-stack kết hợp cộng đồng ô tô, Garage cá nhân, Marketplace và trợ lý tìm xe bằng AI.</p>
+      </div>
+      <div class="cover-console">
+        <div class="console-head"><i></i><i></i><i></i><span>carhub.production</span></div>
+        <div class="console-body">
+          <div><small>FRONTEND</small><strong>React 19</strong></div>
+          <div><small>BACKEND</small><strong>Express + Prisma</strong></div>
+          <div><small>DATA</small><strong>Neon PostgreSQL</strong></div>
+          <div><small>AI</small><strong>OpenRouter</strong></div>
+        </div>
+      </div>
     </div>
+    <div class="speaker"><div class="av">CH</div><div><b>Nhóm phát triển CarHub</b><span>Product &amp; System Presentation</span></div></div>
+    <div class="deck-footer"><span>S: presenter · F: fullscreen · O: overview</span><span class="slide-number"></span></div>
+    <aside class="notes">
+      <p>Xin chào thầy cô và các bạn. Hôm nay nhóm trình bày về <strong>CarHub Garage</strong>, một nền tảng dành cho cộng đồng yêu ô tô nhưng không chỉ dừng ở việc đăng bài hay rao bán xe.</p>
+      <p>Ý tưởng chính của nhóm là gom những hoạt động vốn đang rời rạc vào một hành trình thống nhất: người dùng có thể xây dựng hồ sơ, chia sẻ kinh nghiệm, quản lý xe đang sở hữu, tạo tin bán, tìm xe theo nhu cầu và trao đổi trực tiếp với người bán.</p>
+      <p>Trong phần trình bày, nhóm sẽ đi từ bài toán, chức năng, kiến trúc, dữ liệu, AI, bảo mật cho tới triển khai thực tế. Cuối cùng, nhóm sẽ tổng kết những gì hệ thống đã hoàn thành và hướng phát triển tiếp theo.</p>
+    </aside>
   </section>
 
-  <section class="slide" data-title="Hệ sinh thái">
-    <p class="kicker">01 · Hệ sinh thái sản phẩm</p>
-    <h2 class="h2">Ba trụ cột tạo thành<br>một vòng lặp giá trị.</h2>
+  <section class="slide" data-title="Nội dung">
+    <p class="kicker">Lộ trình trình bày</p>
+    <h2 class="h2">Sáu phần, một câu chuyện sản phẩm hoàn chỉnh</h2>
+    <div class="agenda-grid mt-l">
+      <div class="agenda-card"><span>01</span><b>Bài toán &amp; tầm nhìn</b><small>Vì sao cần CarHub?</small></div>
+      <div class="agenda-card"><span>02</span><b>Người dùng &amp; nghiệp vụ</b><small>Ai dùng và dùng thế nào?</small></div>
+      <div class="agenda-card"><span>03</span><b>Trải nghiệm sản phẩm</b><small>Cộng đồng, Garage, chợ xe</small></div>
+      <div class="agenda-card"><span>04</span><b>Kiến trúc &amp; dữ liệu</b><small>Hệ thống được tổ chức ra sao?</small></div>
+      <div class="agenda-card"><span>05</span><b>AI, bảo mật, vận hành</b><small>Điểm kỹ thuật nổi bật</small></div>
+      <div class="agenda-card"><span>06</span><b>Kết quả &amp; định hướng</b><small>Giá trị và bước tiếp theo</small></div>
+    </div>
+    <aside class="notes">
+      <p>Để phần trình bày dễ theo dõi, nhóm chia nội dung thành <strong>sáu phần</strong>. Phần đầu tiên là bài toán và tầm nhìn, tức là lý do CarHub được xây dựng và khoảng trống mà sản phẩm muốn giải quyết.</p>
+      <p>Sau đó nhóm đi vào các tác nhân và nghiệp vụ chính. Đây là phần giúp nhìn hệ thống từ góc độ người dùng trước khi đi sâu vào giao diện và công nghệ.</p>
+      <p>Ba phần tiếp theo tập trung vào trải nghiệm sản phẩm, kiến trúc dữ liệu, AI, bảo mật và triển khai. Phần cuối cùng là kết quả đạt được, hạn chế còn lại và định hướng phát triển. Mạch trình bày này đi từ “tại sao” tới “làm gì”, rồi mới tới “làm như thế nào”.</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-title="Bài toán">
+    <p class="kicker">01 · Bối cảnh</p>
+    <h2 class="h2">Trải nghiệm ô tô đang bị chia nhỏ trên nhiều nền tảng</h2>
     <div class="grid g3 mt-l">
-      <div class="feature-card anim-fade-up"><div class="icon">01</div><h4>Cộng đồng người yêu xe</h4><p class="dim">Đăng bài tối đa 8 ảnh, thích, bình luận, lưu, chia sẻ, theo dõi và đánh giá thành viên.</p><div class="card-tag">DISCOVER</div></div>
-      <div class="feature-card anim-fade-up"><div class="icon">02</div><h4>Garage cá nhân</h4><p class="dim">Lưu hồ sơ xe, thông số, tối đa 12 ảnh và tạo tin bán trực tiếp từ tài sản đang quản lý.</p><div class="card-tag">MANAGE</div></div>
-      <div class="feature-card anim-fade-up"><div class="icon">03</div><h4>Chợ xe cộng đồng</h4><p class="dim">Tìm kiếm đa tiêu chí, sắp xếp xu hướng, lưu tin, bình luận và liên hệ đúng người bán.</p><div class="card-tag">TRANSACT</div></div>
+      <div class="card problem"><span class="num">01</span><h4>Nội dung thiếu ngữ cảnh</h4><p>Bài chia sẻ, đánh giá xe và hồ sơ người viết thường không kết nối với tài sản hoặc tin bán thực tế.</p></div>
+      <div class="card problem"><span class="num">02</span><h4>Mua bán thiếu tin cậy</h4><p>Người mua khó đánh giá người bán, lịch sử hoạt động và mức độ uy tín trong cộng đồng.</p></div>
+      <div class="card problem"><span class="num">03</span><h4>Tìm xe còn máy móc</h4><p>Bộ lọc truyền thống yêu cầu người dùng biết chính xác hãng, kiểu xe, năm và khoảng giá.</p></div>
     </div>
+    <div class="callout mt-l"><strong>Cơ hội:</strong> kết nối nội dung, danh tính, tài sản xe, giao dịch và AI trong cùng một hệ thống.</div>
+    <aside class="notes">
+      <p>Nhóm bắt đầu từ ba vấn đề khá rõ trong trải nghiệm hiện nay. Thứ nhất, nội dung cộng đồng thường đứng riêng. Một người có thể viết bài rất hay nhưng người đọc khó biết họ đang sở hữu xe gì, có hoạt động lâu dài hay không và mức độ uy tín ra sao.</p>
+      <p>Thứ hai, chợ xe thường chỉ tập trung vào tin đăng. Người mua nhìn thấy chiếc xe nhưng thiếu bối cảnh về người bán, lịch sử tương tác và kết nối cộng đồng.</p>
+      <p>Thứ ba, tìm kiếm xe vẫn dựa nhiều vào bộ lọc cứng. Người dùng mới đôi khi chỉ biết rằng mình cần xe gia đình khoảng một tỷ đồng, chứ chưa biết phải chọn SUV, MPV hay mẫu xe cụ thể. <strong>CarHub nối ba mảnh này lại</strong> để tạo trải nghiệm tự nhiên hơn.</p>
+    </aside>
   </section>
 
-  <section class="slide dark" data-title="Hành trình người dùng">
-    <p class="kicker">02 · Hành trình người dùng</p>
-    <h2 class="h2">Từ chiếc xe trong Garage<br>đến một cuộc trò chuyện.</h2>
-    <div class="journey mt-l">
-      <div class="journey-step"><b>1</b><span>Đăng ký<br><small>JWT + hồ sơ</small></span></div><div class="journey-arrow">→</div>
-      <div class="journey-step"><b>2</b><span>Thêm xe<br><small>Ảnh + thông số</small></span></div><div class="journey-arrow">→</div>
-      <div class="journey-step featured"><b>3</b><span>Tạo tin bán<br><small>Liên kết Garage</small></span></div><div class="journey-arrow">→</div>
-      <div class="journey-step"><b>4</b><span>Khám phá<br><small>Search + filter</small></span></div><div class="journey-arrow">→</div>
-      <div class="journey-step"><b>5</b><span>Liên hệ<br><small>Chat theo listing</small></span></div>
+  <section class="slide" data-title="Tầm nhìn">
+    <p class="kicker">02 · Tầm nhìn sản phẩm</p>
+    <h2 class="h2">Một tài khoản, một Garage, một hành trình xuyên suốt</h2>
+    <div class="value-loop mt-l">
+      <div><span>Khám phá</span><b>Feed &amp; chuyên đề</b><small>Học hỏi từ cộng đồng</small></div>
+      <i>→</i>
+      <div><span>Xây dựng</span><b>Hồ sơ &amp; uy tín</b><small>Theo dõi, đánh giá, verified</small></div>
+      <i>→</i>
+      <div class="active"><span>Quản lý</span><b>Garage cá nhân</b><small>Tài sản xe và hình ảnh</small></div>
+      <i>→</i>
+      <div><span>Giao dịch</span><b>Marketplace</b><small>Tìm kiếm, liên hệ, nhắn tin</small></div>
     </div>
-    <div class="dark-insight"><strong>Điểm khác biệt:</strong> cuộc hội thoại được gắn với đúng tin xe, giúp hai bên luôn giữ được ngữ cảnh giao dịch.</div>
+    <p class="big-quote">“Không chỉ là một chợ xe, mà là hệ sinh thái xoay quanh vòng đời sở hữu xe.”</p>
+    <aside class="notes">
+      <p>Tầm nhìn của CarHub là tạo ra <strong>một hành trình xuyên suốt</strong>. Người dùng không cần một ứng dụng để đọc bài, một nơi khác để lưu xe và thêm một nền tảng khác để bán xe.</p>
+      <p>Hành trình bắt đầu từ khám phá nội dung. Khi tương tác lâu dài, người dùng xây dựng được hồ sơ, quan hệ theo dõi và đánh giá. Sau đó Garage trở thành nơi quản lý các xe đang sở hữu. Khi có nhu cầu bán, tin Marketplace được tạo trực tiếp từ chiếc xe đó, không phải nhập lại toàn bộ dữ liệu.</p>
+      <p>Ở chiều ngược lại, người mua có thể xem tin xe, đánh giá người bán, trò chuyện theo đúng listing và tiếp tục theo dõi nhau trong cộng đồng. Đây chính là vòng lặp giá trị mà nhóm muốn xây dựng.</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-title="Tác nhân">
+    <p class="kicker">03 · Tác nhân hệ thống</p>
+    <h2 class="h2">Ba nhóm người dùng, ba mức quyền rõ ràng</h2>
+    <div class="actor-grid mt-l">
+      <div class="actor-card"><div class="actor-icon">G</div><h4>Khách</h4><ul><li>Xem bài cộng đồng</li><li>Đọc chuyên đề</li><li>Xem và tìm tin xe</li><li>Đăng ký, đăng nhập, reset mật khẩu</li></ul></div>
+      <div class="actor-card featured"><div class="actor-icon">M</div><h4>Thành viên</h4><ul><li>Đăng và tương tác nội dung</li><li>Quản lý Garage, tạo listing</li><li>Nhắn tin, thông báo, AI</li><li>Theo dõi và đánh giá thành viên</li></ul></div>
+      <div class="actor-card"><div class="actor-icon">A</div><h4>Quản trị viên</h4><ul><li>Quản lý tài khoản và xác thực</li><li>Kiểm duyệt bài, xe, chuyên đề</li><li>Xử lý bình luận, rating, follow</li><li>Theo dõi dashboard toàn hệ thống</li></ul></div>
+    </div>
+    <aside class="notes">
+      <p>Hệ thống có ba nhóm tác nhân chính. <strong>Khách</strong> được phép xem các nội dung công khai như bài cộng đồng, chuyên đề và tin xe. Những thao tác có ghi dữ liệu hoặc liên quan tới cá nhân sẽ yêu cầu đăng nhập.</p>
+      <p><strong>Thành viên</strong> là nhóm sử dụng đầy đủ sản phẩm: đăng bài, quản lý Garage, tạo tin bán, lưu xe, bình luận, nhắn tin, nhận thông báo và dùng trợ lý AI.</p>
+      <p><strong>Quản trị viên</strong> kế thừa quyền thành viên nhưng có thêm các chức năng kiểm duyệt. Việc phân quyền được xử lý ở backend bằng middleware, không chỉ ẩn nút ở giao diện. Cách tách này giúp hệ thống rõ ràng về trách nhiệm và giảm nguy cơ người dùng thường gọi nhầm API quản trị.</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-title="Hành trình người dùng">
+    <p class="kicker">04 · User journey</p>
+    <h2 class="h2">Từ thành viên mới đến một giao dịch có ngữ cảnh</h2>
+    <div class="timeline mt-l">
+      <div><b>1</b><strong>Tạo tài khoản</strong><span>JWT, hồ sơ, cài đặt</span></div>
+      <div><b>2</b><strong>Tham gia cộng đồng</strong><span>Bài viết, follow, rating</span></div>
+      <div><b>3</b><strong>Thêm xe vào Garage</strong><span>Thông số và tối đa 12 ảnh</span></div>
+      <div><b>4</b><strong>Tạo tin bán</strong><span>Liên kết trực tiếp với xe</span></div>
+      <div><b>5</b><strong>Người mua khám phá</strong><span>Filter hoặc hỏi AI</span></div>
+      <div><b>6</b><strong>Trao đổi</strong><span>Chat gắn listing và chia sẻ</span></div>
+    </div>
+    <aside class="notes">
+      <p>Slide này mô tả một luồng điển hình. Sau khi tạo tài khoản, người dùng có thể hoàn thiện hồ sơ, chọn hãng xe quan tâm và tham gia cộng đồng. Những hoạt động này dần tạo ra mức độ tin cậy cho tài khoản.</p>
+      <p>Khi thêm xe vào Garage, người dùng lưu thông tin kỹ thuật và hình ảnh. Nếu muốn bán, họ tạo listing từ chính xe đó. Người mua có thể tìm bằng bộ lọc truyền thống hoặc hỏi chatbot bằng câu tự nhiên.</p>
+      <p>Điểm quan trọng nhất nằm ở bước cuối: khi bấm liên hệ, cuộc trò chuyện được gắn với đúng tin xe. Hai bên luôn nhìn thấy chiếc xe đang trao đổi. Ngoài ra, người dùng còn có thể chia sẻ bài cộng đồng hoặc tin Marketplace vào một cuộc trò chuyện đã có.</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-title="Tài khoản & hồ sơ">
+    <p class="kicker">05 · Identity</p>
+    <h2 class="h2">Tài khoản không chỉ để đăng nhập, mà còn tạo niềm tin</h2>
+    <div class="grid g2 mt-l">
+      <div class="stack">
+        <div class="feature-row"><span class="dot blue"></span><div><b>Xác thực đầy đủ</b><p>Đăng ký, đăng nhập, đăng xuất, quên và đặt lại mật khẩu bằng mã 6 số.</p></div></div>
+        <div class="feature-row"><span class="dot green"></span><div><b>Hồ sơ cá nhân</b><p>Avatar, banner, bio, vị trí và danh sách hãng xe quan tâm.</p></div></div>
+        <div class="feature-row"><span class="dot orange"></span><div><b>Mạng lưới uy tín</b><p>Theo dõi, bỏ theo dõi, đánh giá thành viên và huy hiệu xác thực.</p></div></div>
+      </div>
+      <div class="profile-mock">
+        <div class="profile-banner"></div>
+        <div class="profile-row"><div class="profile-avatar">DQ</div><div><b>Nguyễn Thành Viên</b><span>@carhub-member · Đã xác thực</span></div></div>
+        <div class="profile-stats"><div><b>12</b><span>Bài viết</span></div><div><b>3</b><span>Garage</span></div><div><b>4.8</b><span>Đánh giá</span></div></div>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>Phần tài khoản được thiết kế theo hai lớp. Lớp thứ nhất là <strong>xác thực</strong>: đăng ký, đăng nhập, đăng xuất và khôi phục mật khẩu. Mật khẩu được hash bằng bcrypt; mã reset được hash, có thời hạn và chỉ dùng một lần.</p>
+      <p>Lớp thứ hai là <strong>danh tính cộng đồng</strong>. Người dùng có avatar, banner, giới thiệu, vị trí và các hãng xe quan tâm. Họ có thể theo dõi và đánh giá nhau. Admin hoặc tài khoản chuyên nghiệp đã xác thực sẽ có huy hiệu riêng.</p>
+      <p>Nhóm đã chủ động ẩn các chức năng giao diện chưa có backend thật, ví dụ đăng nhập Google hoặc Apple. Điều này giúp sản phẩm không tạo kỳ vọng sai và chỉ hiển thị những luồng đang hoạt động hoàn chỉnh.</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-title="Cộng đồng">
+    <p class="kicker">06 · Community</p>
+    <h2 class="h2">Feed cộng đồng là nơi hình thành kiến thức và uy tín</h2>
+    <div class="community-layout mt-l">
+      <div class="post-mock">
+        <div class="post-user"><span>CH</span><div><b>CarHub Member</b><small>2 giờ trước · Đã xác thực</small></div></div>
+        <p>Kinh nghiệm kiểm tra Mazda CX-5 cũ trước khi quyết định mua...</p>
+        <div class="post-image"><span>8 ảnh / bài</span></div>
+        <div class="post-actions"><span>♥ Thích</span><span>◉ Bình luận</span><span>▣ Lưu</span><span>↗ Chia sẻ</span></div>
+      </div>
+      <div class="capability-list">
+        <div><b>01</b><span><strong>Tạo &amp; quản lý bài</strong>Sửa caption, xóa theo owner hoặc ADMIN.</span></div>
+        <div><b>02</b><span><strong>Tương tác đầy đủ</strong>Like, comment, bookmark, share.</span></div>
+        <div><b>03</b><span><strong>Đa hình ảnh</strong>Tối đa 8 ảnh trong một bài.</span></div>
+        <div><b>04</b><span><strong>Chia sẻ vào chat</strong>Gửi bài cho một cuộc trò chuyện đã có.</span></div>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>Cộng đồng là một trụ cột quan trọng vì nó tạo ra nội dung, mối quan hệ và uy tín trước khi phát sinh giao dịch. Mỗi bài có caption, loại nội dung, danh sách ảnh và các chỉ số tương tác.</p>
+      <p>Người dùng có thể thích, bình luận, lưu và chia sẻ. Các danh sách bài đã thích hoặc đã lưu được tách riêng để truy cập lại. Tác giả có quyền sửa caption và xóa bài; quản trị viên cũng có quyền xử lý nội dung vi phạm.</p>
+      <p>Một cải tiến gần đây là chia sẻ bài vào MessageDock. Người dùng chọn cuộc trò chuyện, hệ thống gửi đoạn trích và đường dẫn mở đúng bài. Nhờ vậy nội dung cộng đồng không đứng riêng mà có thể trở thành chủ đề trao đổi giữa các thành viên.</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-title="Garage">
+    <p class="kicker">07 · Personal Garage</p>
+    <h2 class="h2">Garage là nguồn dữ liệu gốc của tài sản xe cá nhân</h2>
+    <div class="garage-grid mt-l">
+      <div class="garage-card featured"><span class="garage-year">2024</span><div class="garage-car">BMW X3</div><small>SUV · Gasoline · Automatic</small><div class="garage-tags"><span>12 ảnh</span><span>In Garage</span></div></div>
+      <div class="garage-flow">
+        <div><b>Thêm xe</b><span>Tiêu đề, mô tả, ảnh, hãng, mẫu, năm, odo và thông số.</span></div>
+        <i>↓</i>
+        <div><b>Cập nhật tài sản</b><span>Sửa dữ liệu, trạng thái và bộ ảnh trong Garage.</span></div>
+        <i>↓</i>
+        <div><b>Đưa lên chợ xe</b><span>Tạo VehicleListing liên kết với GarageVehicle.</span></div>
+      </div>
+    </div>
+    <div class="callout mt-m"><strong>Toàn vẹn dữ liệu:</strong> xóa xe Garage sẽ xóa các listing liên quan trong cùng transaction.</div>
+    <aside class="notes">
+      <p>Garage được xem là <strong>nguồn dữ liệu gốc</strong> cho những chiếc xe người dùng đang quản lý. Mỗi xe có thông tin mô tả, hãng, mẫu, năm sản xuất, số kilomet, kiểu thân xe, nhiên liệu, hộp số, trạng thái và danh sách ảnh.</p>
+      <p>Người dùng có thể thêm, sửa và xóa xe. Khi muốn bán, họ không cần nhập lại mọi thứ mà tạo listing trực tiếp từ GarageVehicle.</p>
+      <p>Ở backend, thao tác xóa xe được đặt trong transaction. Các listing liên quan được xóa trước rồi mới xóa GarageVehicle. Đây là một chi tiết nhỏ nhưng quan trọng, vì nó tránh dữ liệu mồ côi và giữ quan hệ giữa Garage với Marketplace luôn nhất quán.</p>
+    </aside>
   </section>
 
   <section class="slide" data-title="Marketplace">
-    <p class="kicker">03 · Marketplace discovery</p>
-    <h2 class="h2">Tìm đúng xe bằng dữ liệu,<br>không chỉ bằng từ khóa.</h2>
-    <div class="grid g2 mt-l market-layout">
-      <div class="filter-panel"><div class="search-demo">⌕ &nbsp; Tìm theo hãng, mẫu xe, địa điểm...</div><div class="filter-grid"><span>Danh mục</span><span>Tình trạng</span><span>Hãng xe</span><span>Kiểu xe</span><span>Nhiên liệu</span><span>Hộp số</span><span>Từ năm</span><span>Đến năm</span></div></div>
-      <div class="stack"><div class="metric-row"><b>10</b><span>tin mỗi trang<br><small>phân trang phía server</small></span></div><div class="metric-row"><b>3</b><span>chế độ sắp xếp<br><small>mới nhất · xu hướng · cũ nhất</small></span></div><div class="metric-row"><b>7</b><span>ngày dữ liệu thị trường<br><small>tin mới và người bán xác thực</small></span></div></div>
+    <p class="kicker">08 · Marketplace</p>
+    <h2 class="h2">Khám phá 150 tin xe bằng bộ lọc nhiều chiều</h2>
+    <div class="market-layout mt-l">
+      <div class="filter-mock">
+        <div class="search-box">⌕ Tìm theo hãng, mẫu xe, địa điểm...</div>
+        <div class="filter-chips"><span>Danh mục</span><span>Tình trạng</span><span>Hãng xe</span><span>Kiểu xe</span><span>Nhiên liệu</span><span>Hộp số</span><span>Từ năm</span><span>Đến năm</span></div>
+      </div>
+      <div class="market-stats">
+        <div><b>150</b><span>tin xe không trùng tiêu đề</span></div>
+        <div><b>56</b><span>mẫu xe châu Âu</span></div>
+        <div><b>16</b><span>tin thuộc nhóm Exotics</span></div>
+        <div><b>10</b><span>tin mỗi trang</span></div>
+      </div>
     </div>
+    <aside class="notes">
+      <p>Marketplace hiện có catalog 150 tin xe với tiêu đề riêng. Trong đó có 56 mẫu châu Âu và 16 tin thuộc nhóm Exotics. Dữ liệu này được tạo bằng script seed có kiểm tra ảnh, giá và mô tả.</p>
+      <p>Người dùng có thể tìm kiếm tự do và lọc theo danh mục, tình trạng, hãng, kiểu xe, nhiên liệu, hộp số và khoảng năm. Kết quả được phân trang 10 tin mỗi trang và có ba cách sắp xếp: mới nhất, xu hướng và cũ nhất.</p>
+      <p>Mỗi tin cho phép lưu yêu thích, bình luận, đánh giá người bán, liên hệ và chia sẻ vào tin nhắn. Giá hiển thị trực tiếp bằng VND. Các tin catalog ghi rõ đây là dữ liệu tham khảo, không giả làm tin rao trực tiếp của chủ xe.</p>
+    </aside>
   </section>
 
-  <section class="slide dark" data-title="AI Search">
-    <p class="kicker">04 · Trợ lý tìm xe AI</p>
-    <h2 class="h2">Ngôn ngữ tự nhiên<br>trở thành bộ lọc có cấu trúc.</h2>
-    <div class="ai-flow mt-l">
-      <div class="ai-node"><span class="ai-label">INPUT</span><strong>“Tìm 5 SUV hybrid<br>dưới 40.000 USD”</strong><small>Hỗ trợ thêm ảnh xe</small></div>
-      <div class="flow-line">→</div>
-      <div class="ai-node accent"><span class="ai-label">OPENROUTER</span><strong>Ý định + JSON schema</strong><small>Hãng · mẫu · giá · năm · kiểu xe</small></div>
-      <div class="flow-line">→</div>
-      <div class="ai-node"><span class="ai-label">RANKING</span><strong>Prisma query + scoring</strong><small>Chỉ trả listing thật trong database</small></div>
+  <section class="slide" data-title="Chi tiết tin xe">
+    <p class="kicker">09 · Vehicle detail</p>
+    <h2 class="h2">Trang chi tiết tập trung vào quyết định và trao đổi</h2>
+    <div class="detail-grid mt-l">
+      <div class="gallery-mock"><div class="gallery-main">Ảnh đại diện đúng dòng xe</div><div class="thumbs"><span></span><span></span><span></span><span></span></div><small>Mũi tên và lightbox tự bám theo tỷ lệ ảnh thực tế</small></div>
+      <div class="detail-panel">
+        <span class="badge">ACTIVE LISTING</span>
+        <h3>2024 Mercedes-Benz G-Class</h3>
+        <b class="price">10.950.000.000 ₫</b>
+        <p>Mô tả, nguồn ảnh, vị trí và thông số được trình bày một lần, không lặp dữ liệu Garage.</p>
+        <div class="detail-actions"><span>Liên hệ</span><span>Lưu</span><span>Chia sẻ</span></div>
+      </div>
     </div>
-    <div class="guardrail-row"><span>Không bịa listing</span><span>Giới hạn 20 kết quả</span><span>Kiểm soát URL ảnh</span><span>Structured output</span></div>
+    <aside class="notes">
+      <p>Trang chi tiết tin xe là nơi người dùng chuyển từ khám phá sang quyết định. Phần ảnh hỗ trợ nhiều hình, thumbnail và lightbox. Mũi tên điều hướng được đặt theo chính khung ảnh hiển thị nên ảnh ngang, dọc hoặc vuông đều có vị trí phù hợp.</p>
+      <p>Phần thông tin gồm trạng thái, tình trạng xe, tiêu đề, giá, mô tả, vị trí và thông số. Hệ thống có cả mô tả của listing và GarageVehicle, nhưng frontend chỉ hiển thị mô tả thứ hai khi nội dung thực sự khác, tránh lặp hai lần.</p>
+      <p>Ba hành động chính là liên hệ người bán, lưu tin và chia sẻ. Khi chia sẻ, tin nhắn chứa tên xe, giá, đoạn mô tả ngắn và nút mở đúng trang Marketplace.</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-title="Nhắn tin">
+    <p class="kicker">10 · Messaging</p>
+    <h2 class="h2">Trò chuyện luôn giữ đúng ngữ cảnh</h2>
+    <div class="message-layout mt-l">
+      <div class="message-list"><div><span>AV</span><p><b>Anh Việt</b><small>Mercedes-Benz G-Class</small></p></div><div><span>MH</span><p><b>Minh Hoàng</b><small>Trò chuyện trực tiếp</small></p></div><div><span>HL</span><p><b>Hà Linh</b><small>BMW X3</small></p></div></div>
+      <div class="message-window">
+        <div class="listing-context"><b>2024 Mercedes-Benz G-Class</b><span>10.950.000.000 ₫</span></div>
+        <div class="bubble other">Xe này còn không bạn?</div>
+        <div class="bubble mine">Mình muốn trao đổi thêm về phiên bản và lịch xem xe.</div>
+        <div class="bubble other link">Mở tin xe ↗</div>
+      </div>
+      <div class="message-points"><div><b>200</b><span>message gần nhất</span></div><div><b>5s</b><span>chu kỳ polling khi dock mở</span></div><div><b>2</b><span>loại chia sẻ: bài &amp; tin xe</span></div></div>
+    </div>
+    <aside class="notes">
+      <p>CarHub hỗ trợ hai loại conversation: trò chuyện trực tiếp giữa hai thành viên và trò chuyện gắn với một listing. Khi người mua bấm “Liên hệ”, backend tìm hoặc tạo cuộc trò chuyện phù hợp.</p>
+      <p>Nếu conversation gắn với listing, MessageDock luôn hiển thị thẻ xe ở phía trên. Hai bên không phải hỏi lại đang nói về chiếc nào. Hệ thống tải tối đa 200 tin nhắn gần nhất và đánh dấu đã đọc khi mở.</p>
+      <p>Frontend hiện dùng polling năm giây trong lúc dock đang mở. Ngoài tin nhắn chữ, người dùng có thể chia sẻ bài cộng đồng hoặc tin Marketplace. Đường dẫn được render thành nút “Mở bài viết” hoặc “Mở tin xe”, giúp trao đổi nhanh và có ngữ cảnh.</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-title="Thông báo & cài đặt">
+    <p class="kicker">11 · Engagement</p>
+    <h2 class="h2">Thông báo có chọn lọc, cài đặt đồng bộ theo tài khoản</h2>
+    <div class="grid g2 mt-l">
+      <div class="notification-stack">
+        <div><span>♥</span><p><b>Bài viết được thích</b><small>Thông báo cộng đồng</small></p></div>
+        <div><span>↗</span><p><b>Có người theo dõi</b><small>Thông báo tài khoản</small></p></div>
+        <div><span>◉</span><p><b>Tin nhắn mới</b><small>Thông báo hội thoại</small></p></div>
+        <div><span>★</span><p><b>Tương tác tin xe</b><small>Thông báo Marketplace</small></p></div>
+      </div>
+      <div class="settings-stack">
+        <div><b>Giao diện</b><span>Sáng · Tối · Theo hệ thống</span></div>
+        <div><b>Khả năng đọc</b><span>Mật độ hiển thị · Cỡ chữ</span></div>
+        <div><b>Trợ lý AI</b><span>Tự động mở một lần mỗi phiên</span></div>
+        <div><b>Kênh thông báo</b><span>Cộng đồng · Chợ xe · Tin nhắn</span></div>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>Thông báo được tạo từ các sự kiện như like, comment, follow, tương tác Marketplace và message. Service thông báo có kiểm tra để không gửi thông báo cho chính người thực hiện hành động.</p>
+      <p>Người dùng xem tối đa 50 thông báo gần nhất và có thể đánh dấu tất cả đã đọc. Tuy nhiên, không phải ai cũng muốn nhận mọi loại thông báo, vì vậy trang cài đặt cho phép bật hoặc tắt theo từng nhóm.</p>
+      <p>Ngoài thông báo, cài đặt còn gồm theme sáng, tối hoặc theo hệ thống; mật độ giao diện; cỡ chữ; và tùy chọn tự động mở chatbot một lần trong phiên. Các giá trị được lưu theo tài khoản trong PostgreSQL để giữ nhất quán trên nhiều thiết bị.</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-title="AI Search">
+    <p class="kicker">12 · AI vehicle assistant</p>
+    <h2 class="h2">Câu hỏi tự nhiên được chuyển thành bộ lọc VND có cấu trúc</h2>
+    <div class="ai-pipeline mt-l">
+      <div><small>INPUT</small><b>“Tìm 3 mẫu Mercedes đắt nhất”</b><span>Tiếng Việt + lịch sử hội thoại</span></div>
+      <i>→</i>
+      <div class="active"><small>INTENT</small><b>make, limit, sort</b><span>Mercedes-Benz · 3 · price desc</span></div>
+      <i>→</i>
+      <div><small>DATABASE</small><b>Prisma filter</b><span>Lọc cứng đúng hãng và điều kiện</span></div>
+      <i>→</i>
+      <div><small>RESULT</small><b>3 listing thật</b><span>G-Class · EQS · S-Class</span></div>
+    </div>
+    <div class="guardrail-grid mt-l"><span>Không tự tạo listing</span><span>Giá trực tiếp bằng VND</span><span>Hiểu câu hỏi nối tiếp</span><span>Tối đa 20 kết quả</span></div>
+    <aside class="notes">
+      <p>Trợ lý AI của CarHub không hoạt động như chatbot trả lời chung chung. Mục tiêu chính là chuyển yêu cầu tiếng Việt thành bộ lọc có cấu trúc rồi truy vấn dữ liệu thật.</p>
+      <p>Ví dụ với câu “Tìm 3 mẫu Mercedes đắt nhất”, hệ thống nhận diện alias Mercedes thành Mercedes-Benz, đọc số lượng là ba và phát hiện yêu cầu sắp xếp giá giảm dần. Sau đó Prisma lọc cứng theo hãng, sắp xếp toàn bộ catalog và chỉ trả đúng ba listing.</p>
+      <p>Nhóm cũng xử lý các câu như “trên dưới một tỷ rưỡi”, “ba chiếc”, “còn xe Nhật thì sao” hoặc “rẻ hơn”. Giá được hiểu trực tiếp bằng VND, không đổi qua USD. OpenRouter hỗ trợ các trường hợp phức tạp; parser local xử lý nhanh các truy vấn tìm kiếm có cấu trúc.</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-title="AI Guardrails">
+    <p class="kicker">13 · AI reliability</p>
+    <h2 class="h2">AI phân tích ý định, backend giữ quyền quyết định dữ liệu</h2>
+    <div class="rule-stack mt-l">
+      <div><span>01</span><p><b>Structured output</b>OpenRouter trả JSON theo schema, không trả văn bản tự do cho bộ lọc.</p></div>
+      <div><span>02</span><p><b>Hard filtering</b>Hãng, mẫu, kiểu xe, năm, nhiên liệu, hộp số và giá là điều kiện bắt buộc.</p></div>
+      <div><span>03</span><p><b>Local fallback</b>Truy vấn phổ biến được xử lý nội bộ để giảm timeout và phụ thuộc model.</p></div>
+      <div><span>04</span><p><b>Image allow-list</b>Ảnh AI chỉ tải từ host cho phép, đúng MIME và không vượt 4 MB.</p></div>
+    </div>
+    <aside class="notes">
+      <p>Một nguyên tắc quan trọng là <strong>AI không được phép quyết định dữ liệu cuối cùng</strong>. Model chỉ phân tích ý định và trả bộ lọc theo JSON schema. Listing thật luôn do backend truy vấn từ PostgreSQL.</p>
+      <p>Sau khi nhận intent, backend áp dụng hard filter. Nếu người dùng yêu cầu Mercedes thì Toyota hoặc Aston Martin không thể lọt vào kết quả chỉ vì có điểm ranking cao. Với “đắt nhất” hoặc “rẻ nhất”, hệ thống sắp xếp trực tiếp theo giá VND.</p>
+      <p>Nếu OpenRouter chậm hoặc trả rỗng, parser local vẫn xử lý được nhiều câu hỏi phổ biến. Với đầu vào ảnh, backend kiểm tra protocol, hostname, MIME type, timeout và kích thước trước khi gửi sang model. Những guardrail này giúp AI hữu ích nhưng vẫn nằm trong biên kiểm soát.</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-title="Quản trị">
+    <p class="kicker">14 · Administration</p>
+    <h2 class="h2">Một dashboard để theo dõi và kiểm duyệt toàn hệ thống</h2>
+    <div class="admin-grid mt-l">
+      <div class="admin-stat"><b>Users</b><span>Tài khoản · verified · vai trò</span></div>
+      <div class="admin-stat"><b>Posts</b><span>Đăng · ẩn · xóa nội dung</span></div>
+      <div class="admin-stat"><b>Vehicles</b><span>Listing · Garage · trạng thái</span></div>
+      <div class="admin-stat"><b>Editorial</b><span>Chuyên đề draft/published</span></div>
+      <div class="admin-stat"><b>Engagement</b><span>Comment · rating · follow</span></div>
+      <div class="admin-stat"><b>Pagination</b><span>Hiển thị toàn bộ theo từng trang</span></div>
+    </div>
+    <div class="callout mt-l"><strong>Ràng buộc:</strong> admin không thể tự xóa tài khoản của mình hoặc xóa quản trị viên cuối cùng.</div>
+    <aside class="notes">
+      <p>Trang quản trị cung cấp dashboard tổng hợp số user, bài viết, GarageVehicle, listing, article, comment, rating và follow. Các biểu đồ ngắn giúp nhìn hoạt động gần đây.</p>
+      <p>Admin có thể xác thực tài khoản chuyên nghiệp, thay đổi trạng thái hoặc xóa bài, listing, xe Garage và chuyên đề. Bình luận, đánh giá và quan hệ follow cũng có thể được xử lý khi cần.</p>
+      <p>Ban đầu một số khối chỉ hiển thị tám hoặc sáu mục đầu. Nhóm đã bổ sung phân trang độc lập cho từng khu vực để quản trị viên xem được toàn bộ dữ liệu mà giao diện vẫn gọn. Backend còn có ràng buộc không cho admin tự xóa mình và không cho xóa admin cuối cùng.</p>
+    </aside>
   </section>
 
   <section class="slide" data-title="Kiến trúc">
-    <p class="kicker">05 · Kiến trúc hệ thống</p>
-    <h2 class="h2">Monorepo rõ lớp.<br>Triển khai như một sản phẩm.</h2>
+    <p class="kicker">15 · System architecture</p>
+    <h2 class="h2">Monorepo tách lớp, một domain khi lên production</h2>
     <div class="architecture mt-l">
-      <div class="arch-layer"><span>CLIENT</span><strong>React 19 + Vite + TypeScript</strong><small>Router · Zustand · Motion · Tailwind CSS</small></div>
-      <div class="arch-connector">REST / JSON · Bearer JWT</div>
-      <div class="arch-layer api"><span>APPLICATION</span><strong>Express + Controllers + Services</strong><small>Zod validation · Helmet · CORS · rate limiting</small></div>
-      <div class="arch-connector">Prisma ORM</div>
-      <div class="arch-split"><div class="arch-layer"><span>DATA</span><strong>Neon PostgreSQL</strong><small>19 domain models</small></div><div class="arch-layer"><span>MEDIA</span><strong>Vercel Blob</strong><small>URL + metadata only</small></div></div>
+      <div class="arch-box client"><small>CLIENT</small><b>React 19 + Vite + TypeScript</b><span>Pages · Components · Zustand · API client</span></div>
+      <div class="arch-arrow">REST / JSON · Bearer JWT</div>
+      <div class="arch-box api"><small>APPLICATION</small><b>Express + Controllers + Services</b><span>Routes · Zod · Auth middleware · Business logic</span></div>
+      <div class="arch-arrow">Prisma ORM</div>
+      <div class="arch-bottom"><div class="arch-box"><small>DATA</small><b>Neon PostgreSQL</b><span>19 domain models</span></div><div class="arch-box"><small>MEDIA</small><b>Vercel Blob</b><span>URL + metadata</span></div><div class="arch-box"><small>AI</small><b>OpenRouter</b><span>Structured intent analysis</span></div></div>
     </div>
+    <aside class="notes">
+      <p>Về kiến trúc, dự án là một npm monorepo gồm frontend và backend. Frontend dùng React 19, Vite và TypeScript. Zustand quản lý các state dùng chung như xác thực, sidebar, settings và MessageDock.</p>
+      <p>Backend dùng Express. Luồng xử lý tiêu chuẩn là route, validation, controller, service rồi Prisma. Cách tách này giúp phần HTTP, kiểm tra dữ liệu và nghiệp vụ không trộn vào nhau.</p>
+      <p>Dữ liệu nằm trong Neon PostgreSQL. Ảnh production được lưu trên Vercel Blob, database chỉ giữ URL và metadata. OpenRouter là dịch vụ ngoài dành cho AI. Khi deploy, frontend phục vụ ở đường dẫn gốc và backend ở `/api`, vì vậy trình duyệt gọi API cùng domain, đơn giản hơn cho CORS và cấu hình.</p>
+    </aside>
   </section>
 
-  <section class="slide dark" data-title="Mô hình dữ liệu">
-    <p class="kicker">06 · Mô hình dữ liệu</p>
-    <h2 class="h2">Dữ liệu được tổ chức<br>theo bốn miền nghiệp vụ.</h2>
+  <section class="slide" data-title="Cấu trúc mã nguồn">
+    <p class="kicker">16 · Code organization</p>
+    <h2 class="h2">Cấu trúc thư mục phản ánh đúng ranh giới trách nhiệm</h2>
+    <div class="repo-tree mt-l">
+      <div class="tree-root">KTPM___/</div>
+      <div class="tree-cols">
+        <div><b>frontend/</b><span>components/</span><span>pages/</span><span>lib/</span><span>store/</span><small>React UI và client state</small></div>
+        <div><b>backend/</b><span>controllers/</span><span>routes/</span><span>services/</span><span>middlewares/</span><small>API và business logic</small></div>
+        <div><b>prisma/</b><span>schema.prisma</span><span>migrations/</span><span>seed.ts</span><span>scripts/</span><small>Schema và vận hành dữ liệu</small></div>
+        <div><b>root/</b><span>vercel.json</span><span>note.txt</span><span>README.md</span><span>use-cases.puml</span><small>Workspace và tài liệu</small></div>
+      </div>
+    </div>
+    <aside class="notes">
+      <p>Cấu trúc mã nguồn được tổ chức để người mới vào dự án có thể đoán được nơi cần sửa. Ở frontend, component dùng chung nằm trong `components`, trang trong `pages`, API và upload ảnh nằm trong `lib`, còn state dùng chung nằm trong `store`.</p>
+      <p>Ở backend, route định nghĩa endpoint, controller tiếp nhận request, service xử lý nghiệp vụ, middleware đảm nhiệm auth, validation và upload. Prisma schema và migration được đặt riêng để theo dõi thay đổi database.</p>
+      <p>Thư mục gốc chứa cấu hình workspace và Vercel multi-service. `note.txt` là tài liệu vận hành chi tiết, README phục vụ giới thiệu và cài đặt, còn PlantUML mô tả use case. Cách tổ chức này hỗ trợ mở rộng mà không phải dồn toàn bộ logic vào vài file lớn.</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-title="Mô hình dữ liệu">
+    <p class="kicker">17 · Data model</p>
+    <h2 class="h2">19 model được chia thành bốn miền nghiệp vụ</h2>
     <div class="domain-grid mt-l">
-      <div class="domain-card"><b>Identity</b><span>User · Follow · Rating<br>Password reset · Roles</span></div>
-      <div class="domain-card"><b>Community</b><span>Post · Image · Like<br>Comment · Share · Bookmark</span></div>
-      <div class="domain-card featured"><b>Commerce</b><span>GarageVehicle · Listing<br>Favorite · ListingComment</span></div>
-      <div class="domain-card"><b>Engagement</b><span>Conversation · Message<br>Notification · Article</span></div>
+      <div><span>IDENTITY</span><b>User</b><small>Follow · Rating · PasswordResetToken</small></div>
+      <div><span>COMMUNITY</span><b>Post</b><small>Image · Like · Comment · Bookmark · Share · Article</small></div>
+      <div class="featured"><span>COMMERCE</span><b>GarageVehicle</b><small>VehicleListing · Favorite · ListingComment · Vehicle legacy</small></div>
+      <div><span>ENGAGEMENT</span><b>Conversation</b><small>Message · Notification</small></div>
     </div>
-    <p class="schema-note">Cascade và transaction bảo toàn quan hệ; xóa xe Garage sẽ dọn các listing liên quan trong cùng giao dịch.</p>
+    <div class="relation-strip mt-l"><span>User → GarageVehicle → VehicleListing</span><span>User ↔ Conversation ↔ Message</span><span>Post → Interaction models</span></div>
+    <aside class="notes">
+      <p>Database hiện có 19 model và được chia thành bốn miền. Identity gồm User, Follow, Rating và PasswordResetToken. Community gồm Post, Image và các bảng tương tác, cùng Article.</p>
+      <p>Commerce xoay quanh GarageVehicle và VehicleListing. ListingFavorite và ListingComment lưu tương tác trên chợ xe. Model Vehicle cũ vẫn còn để tương thích dữ liệu nhưng luồng chính hiện dùng GarageVehicle.</p>
+      <p>Engagement gồm Conversation, Message và Notification. Các quan hệ được thiết kế để một user có thể vừa là người mua, người bán, tác giả nội dung và thành viên cộng đồng. Prisma giúp biểu diễn quan hệ rõ ràng, còn transaction và cascade được dùng ở các thao tác cần bảo toàn tính nhất quán.</p>
+    </aside>
   </section>
 
-  <section class="slide" data-title="Tin cậy và vận hành">
-    <p class="kicker">07 · Tin cậy &amp; vận hành</p>
-    <h2 class="h2">Bảo vệ dữ liệu từ request<br>đến quyền sở hữu nội dung.</h2>
-    <div class="grid g3 mt-l">
-      <div class="trust-card"><div class="trust-num">AUTH</div><h4>Xác thực và phân quyền</h4><p>JWT, mật khẩu bcrypt, USER/ADMIN, route bảo vệ và kiểm tra owner trước thao tác sửa/xóa.</p></div>
-      <div class="trust-card"><div class="trust-num">API</div><h4>Biên API được kiểm soát</h4><p>Zod validation, Helmet, CORS allow-list, rate limit production và giới hạn JSON 5 MB.</p></div>
-      <div class="trust-card"><div class="trust-num">MEDIA</div><h4>Ảnh tách khỏi database</h4><p>Local lưu trong uploads; production dùng Vercel Blob. PostgreSQL chỉ giữ URL và metadata.</p></div>
+  <section class="slide" data-title="API">
+    <p class="kicker">18 · API surface</p>
+    <h2 class="h2">API được nhóm theo tài nguyên và mức quyền</h2>
+    <div class="api-table mt-l">
+      <div><span>PUBLIC</span><b>/auth · /posts · /vehicles · /articles · /users/:id</b><small>Đăng nhập và đọc dữ liệu công khai</small></div>
+      <div><span>MEMBER</span><b>/garage · /messages · /notifications · /uploads · /ai</b><small>Yêu cầu Bearer JWT</small></div>
+      <div><span>ADMIN</span><b>/admin/users · posts · vehicles · articles · engagement</b><small>Yêu cầu role ADMIN</small></div>
     </div>
+    <div class="request-flow mt-l"><span>Request</span><i>→</i><span>Validation</span><i>→</i><span>Controller</span><i>→</i><span>Service</span><i>→</i><span>Prisma</span></div>
+    <aside class="notes">
+      <p>API được chia theo tài nguyên và mức quyền. Nhóm public cho phép đăng nhập, đọc bài, xem xe, chuyên đề và hồ sơ công khai. Một số route dùng optional auth để trả thêm trạng thái like hoặc bookmark nếu người xem đã đăng nhập.</p>
+      <p>Nhóm member yêu cầu JWT, bao gồm tạo nội dung, quản lý Garage, listing, tin nhắn, notification, upload và AI. Nhóm admin yêu cầu thêm role ADMIN.</p>
+      <p>Mỗi request đi qua validation trước khi vào controller. Controller giữ vai trò mỏng, còn nghiệp vụ nằm trong service. Prisma là lớp truy cập dữ liệu. Cách tổ chức này giúp validation nhất quán, dễ test và hạn chế việc controller vừa xử lý HTTP vừa chứa quá nhiều logic database.</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-title="Bảo mật">
+    <p class="kicker">19 · Security</p>
+    <h2 class="h2">Phòng thủ theo nhiều lớp, từ HTTP tới quyền sở hữu</h2>
+    <div class="security-grid mt-l">
+      <div><span>AUTH</span><b>JWT + bcrypt</b><small>Token có hạn, mật khẩu không lưu dạng rõ</small></div>
+      <div><span>INPUT</span><b>Zod validation</b><small>Body quan trọng được kiểm tra schema</small></div>
+      <div><span>HTTP</span><b>Helmet + CORS</b><small>Security headers và allow-list origin</small></div>
+      <div><span>ABUSE</span><b>Rate limiting</b><small>Bật trên production, bỏ qua health check</small></div>
+      <div><span>OWNERSHIP</span><b>Owner / ADMIN</b><small>Kiểm tra quyền trước sửa hoặc xóa</small></div>
+      <div><span>MEDIA</span><b>MIME + size + host</b><small>Kiểm soát upload và ảnh gửi AI</small></div>
+    </div>
+    <aside class="notes">
+      <p>Bảo mật được triển khai theo nhiều lớp. Ở lớp xác thực, mật khẩu được hash bằng bcrypt và JWT được gửi qua Authorization Bearer. Route quan trọng dùng middleware requireAuth hoặc requireAdmin.</p>
+      <p>Ở lớp input, Zod kiểm tra body trước khi controller xử lý. Helmet thêm security headers, CORS chỉ cho phép origin được cấu hình hoặc Vercel origin hợp lệ. Rate limit được bật trên production.</p>
+      <p>Quan trọng hơn, quyền không chỉ dựa vào việc đã đăng nhập. Các thao tác sửa và xóa còn kiểm tra owner hoặc ADMIN. Conversation chỉ trả cho participant. Upload ảnh kiểm tra MIME, extension và dung lượng. Hệ thống cũng tránh ghi key, token hoặc mật khẩu vào log.</p>
+    </aside>
+  </section>
+
+  <section class="slide" data-title="Media">
+    <p class="kicker">20 · Media pipeline</p>
+    <h2 class="h2">Ảnh được tối ưu trước, lưu ngoài database</h2>
+    <div class="media-flow mt-l">
+      <div><span>1</span><b>Chọn ảnh</b><small>JPG · PNG · WEBP, tối đa 8 MB</small></div>
+      <i>→</i>
+      <div><span>2</span><b>Nén ở frontend</b><small>WEBP, tối đa 1920 px</small></div>
+      <i>→</i>
+      <div><span>3</span><b>Kiểm tra backend</b><small>Multer memory, tối đa 4 MB</small></div>
+      <i>→</i>
+      <div><span>4</span><b>Lưu trữ</b><small>Local uploads hoặc Vercel Blob</small></div>
+      <i>→</i>
+      <div><span>5</span><b>Database</b><small>Chỉ lưu URL và metadata</small></div>
+    </div>
+    <div class="callout mt-l"><strong>Lợi ích:</strong> giảm kích thước database, phục vụ ảnh tốt hơn và phù hợp môi trường serverless.</div>
+    <aside class="notes">
+      <p>Ảnh là phần chiếm dung lượng lớn nhất nên nhóm tách khỏi PostgreSQL. Frontend kiểm tra định dạng và dung lượng ban đầu, sau đó nén ảnh sang WEBP và giới hạn chiều lớn nhất khoảng 1920 pixel.</p>
+      <p>Backend nhận file bằng Multer memory storage, kiểm tra lại MIME và dung lượng tối đa bốn megabyte. Khi chạy local, ảnh có thể lưu trong thư mục uploads. Trên production hoặc khi dùng database remote, ảnh được đưa lên Vercel Blob.</p>
+      <p>Database chỉ giữ URL và metadata. Cách này phù hợp với serverless vì filesystem production không bền vững, đồng thời tránh làm PostgreSQL phình to. Với catalog, ảnh đại diện được lấy từ Wikipedia hoặc Wikimedia Commons và lưu kèm nguồn để dễ kiểm tra.</p>
+    </aside>
   </section>
 
   <section class="slide" data-title="Triển khai">
-    <p class="kicker">08 · Delivery</p>
-    <h2 class="h2">Một lệnh để phát triển.<br>Một domain khi lên production.</h2>
+    <p class="kicker">21 · Delivery &amp; operations</p>
+    <h2 class="h2">Phát triển bằng workspace, triển khai bằng Vercel Services</h2>
     <div class="delivery-grid mt-l">
-      <div class="terminal-box"><div class="terminal-top"><i></i><i></i><i></i><span>carhub / powershell</span></div><pre><code><span>$</span> npm install
-<span>$</span> npm run db:migrate:deploy --workspace backend
-<span>$</span> npm run dev
+      <div class="code-block"><span class="comment"># Cài đặt và chạy local</span>
+<span class="cmd">npm install</span>
+<span class="cmd">npm run db:generate --workspace backend</span>
+<span class="cmd">npm run db:migrate:deploy --workspace backend</span>
+<span class="cmd">npm run dev</span>
 
-frontend  <em>http://localhost:3000</em>
-backend   <em>http://localhost:4000/api/health</em></code></pre></div>
-      <div class="deploy-card"><span class="deploy-label">VERCEL SERVICES</span><div><b>/</b><small>Vite frontend</small></div><div><b>/api</b><small>Express backend</small></div><div><b>Neon</b><small>PostgreSQL cloud</small></div><div><b>Blob</b><small>Production images</small></div></div>
+<span class="comment"># Kiểm tra trước khi deploy</span>
+<span class="flag">npm run lint</span>
+<span class="flag">npm run build</span></div>
+      <div class="deploy-stack">
+        <div><b>/</b><span>Vite frontend</span></div>
+        <div><b>/api</b><span>Express backend</span></div>
+        <div><b>Neon</b><span>PostgreSQL cloud</span></div>
+        <div><b>Blob</b><span>Production media</span></div>
+        <div><b>Health</b><span>/api/health</span></div>
+      </div>
     </div>
+    <aside class="notes">
+      <p>Ở môi trường local, dự án dùng npm workspace. Sau khi cài package, nhóm generate Prisma client, chạy migration và dùng `npm run dev` để khởi động đồng thời frontend với backend.</p>
+      <p>Trước khi merge hoặc deploy, quy trình tối thiểu là chạy lint và build. Những script dữ liệu như seed catalog hoặc audit catalog được tách riêng để có thể chạy lại khi cần.</p>
+      <p>Production dùng Vercel theo mô hình Services. Frontend phục vụ ở `/`, backend ở `/api`, Neon lưu dữ liệu và Vercel Blob lưu ảnh. Build backend chạy migration deploy. Sau khi triển khai, nhóm gọi `/api/health` để xác nhận service, environment và timestamp hoạt động bình thường.</p>
+    </aside>
   </section>
 
-  <section class="slide dark closing" data-title="Kết luận">
-    <p class="kicker">CarHub Garage</p>
-    <div class="closing-grid">
-      <div><h2 class="h2">Không chỉ là<br>một chợ xe.</h2><p class="testimonial">CarHub biến sở hữu xe, nội dung cộng đồng và giao dịch thành một hành trình liền mạch.</p></div>
-      <div class="closing-stats"><div><b>3</b><span>trụ cột sản phẩm</span></div><div><b>11</b><span>nhóm API chính</span></div><div><b>19</b><span>mô hình dữ liệu</span></div><div><b>1</b><span>trải nghiệm thống nhất</span></div></div>
+  <section class="slide" data-title="Kết quả & định hướng">
+    <p class="kicker">22 · Tổng kết</p>
+    <h2 class="h2">CarHub đã hình thành một nền tảng hoàn chỉnh, có thể tiếp tục mở rộng</h2>
+    <div class="closing-layout mt-l">
+      <div class="closing-stats">
+        <div><b>19</b><span>model dữ liệu</span></div>
+        <div><b>150</b><span>tin xe catalog</span></div>
+        <div><b>45</b><span>bài cộng đồng seed</span></div>
+        <div><b>3</b><span>vai trò người dùng</span></div>
+      </div>
+      <div class="roadmap">
+        <div><span>NOW</span><b>Full-stack vận hành</b><small>Community · Garage · Marketplace · AI · Admin</small></div>
+        <div><span>NEXT</span><b>Nâng độ tin cậy giao dịch</b><small>Xác minh xe, lịch sử bảo dưỡng, kiểm định</small></div>
+        <div><span>LATER</span><b>Thông minh hóa trải nghiệm</b><small>Realtime chat, recommendation, analytics</small></div>
+      </div>
     </div>
-    <div class="deck-footer"><span>CARHUB / FULL-STACK AUTOMOTIVE PLATFORM</span><span class="slide-number" data-current="11" data-total="11"></span></div>
+    <p class="closing-quote">CarHub biến nội dung, tài sản xe và giao dịch thành một hành trình liền mạch.</p>
+    <div class="deck-footer"><span>CARHUB GARAGE · Q&amp;A</span><span class="slide-number"></span></div>
+    <aside class="notes">
+      <p>Nhìn lại, CarHub đã hoàn thành một hệ thống full-stack tương đối đầy đủ: xác thực, hồ sơ, cộng đồng, Garage, Marketplace, nhắn tin, thông báo, AI, cài đặt và quản trị.</p>
+      <p>Về kỹ thuật, hệ thống có 19 model dữ liệu, kiến trúc tách lớp, pipeline ảnh phù hợp production, phân quyền rõ ràng và deploy multi-service. Catalog hiện có 150 tin xe cùng dữ liệu cộng đồng để minh họa và kiểm thử.</p>
+      <p>Hướng tiếp theo là nâng độ tin cậy giao dịch bằng xác minh xe, lịch sử bảo dưỡng hoặc tích hợp kiểm định; chuyển messaging sang realtime; và bổ sung recommendation dựa trên hành vi. Thông điệp cuối cùng của nhóm là: <strong>CarHub không chỉ hiển thị xe, mà kết nối con người, nội dung và giao dịch quanh chiếc xe đó.</strong> Xin cảm ơn và mời thầy cô đặt câu hỏi.</p>
+    </aside>
   </section>
+
 </div>
+
+<div class="keyboard-hint">S presenter · T theme · ← → chuyển slide · F toàn màn hình · O tổng quan</div>
 <script src="../../assets/runtime.js"></script>
 </body>
 </html>
