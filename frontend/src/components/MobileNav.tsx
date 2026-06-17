@@ -33,8 +33,10 @@ export default function MobileNav() {
             <Link
               key={item.label}
               to={item.path}
+              aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
               className={cn(
-                "flex flex-col items-center justify-center space-y-1 w-full relative",
+                "flex min-h-14 flex-col items-center justify-center space-y-1 w-full relative rounded-xl transition-colors",
                 isActive ? "text-primary" : "text-on-surface-variant hover:text-on-surface"
               )}
             >

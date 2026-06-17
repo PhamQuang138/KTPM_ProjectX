@@ -95,9 +95,15 @@ export default function Home() {
 
   useLayoutEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion || !pageRef.current) return;
+    if (!pageRef.current) return;
 
     const ctx = gsap.context(() => {
+      if (reduceMotion) {
+        gsap.set('.explore-reveal', {autoAlpha: 1, y: 0});
+        gsap.set('.explore-image, .explore-hero-media', {autoAlpha: 1, scale: 1});
+        return;
+      }
+
       gsap.fromTo(
         '.explore-hero-media',
         {scale: 1.08, autoAlpha: 0.72},
@@ -236,15 +242,16 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-background" />
           <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-black/85 to-transparent" />
 
-          <div className="fixed left-6 top-1/2 z-[65] hidden -translate-y-1/2 flex-col items-center lg:flex">
+          <div className="fixed left-6 top-1/2 z-[65] hidden -translate-y-1/2 flex-col items-center rounded-full border border-white/10 bg-background/45 px-1 py-3 shadow-xl shadow-black/20 backdrop-blur-xl lg:flex">
             <span className="h-10 w-px bg-gradient-to-b from-transparent to-white/15" />
             {exploreSections.map((section, index) => (
               <button
                 key={section.id}
                 type="button"
                 onClick={() => scrollToExploreSection(section.id)}
-                className="group relative flex h-8 w-8 items-center justify-center"
+                className="group relative flex h-8 w-8 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
                 aria-label={`Đi tới ${section.label}`}
+                aria-current={activeExploreSection === section.id ? 'true' : undefined}
                 title={section.label}
               >
                 <span className={`absolute left-1/2 top-0 h-8 w-px -translate-x-1/2 ${index === exploreSections.length - 1 ? 'hidden' : 'bg-white/10'}`} />

@@ -41,13 +41,14 @@ export default function Sidebar() {
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: '-100%', opacity: 0.98 }}
           transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed left-0 top-0 h-screen w-64 bg-surface-container/95 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_34%)] border-r border-white/10 shadow-[8px_0_24px_rgba(0,0,0,0.18)] py-4 z-[70] flex flex-col transform-gpu will-change-transform"
+          className="fixed left-0 top-0 h-dvh w-64 bg-surface-container/95 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_34%)] border-r border-white/10 shadow-[8px_0_24px_rgba(0,0,0,0.18)] py-4 z-[70] flex flex-col transform-gpu will-change-transform"
         >
           <div className="px-6 py-8 mb-8 flex items-center justify-between">
             <BrandLogo imageClassName="h-11 w-11" />
             <button 
               onClick={toggle}
               className="p-2 rounded-xl hover:bg-white/5 text-on-surface-variant hover:text-primary transition-colors h-10 w-10 flex items-center justify-center"
+              aria-label="Đóng menu"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>

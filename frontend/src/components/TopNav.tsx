@@ -96,6 +96,7 @@ export default function TopNav({ title }: { title?: string }) {
               animate={{ opacity: 1, scale: 1 }}
               onClick={toggle}
               className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-on-surface hover:text-primary transition-all border border-white/10"
+              aria-label="Mở menu"
             >
               <Menu className="w-5 h-5" />
             </motion.button>
@@ -144,6 +145,7 @@ export default function TopNav({ title }: { title?: string }) {
                 <button
                   onClick={() => setIsNotificationsOpen(true)}
                   className="relative p-2 text-on-surface hover:text-primary transition-all hover:scale-110"
+                  aria-label="Mở thông báo"
                 >
                   <Bell className="w-5 h-5" />
                   {unreadNotifications > 0 && <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background" />}
