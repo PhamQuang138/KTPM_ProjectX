@@ -178,6 +178,19 @@ export default function Home() {
     {label: 'Tổng tương tác', value: overview?.stats.interactions ?? 0, suffix: 'Thích, bình luận, chia sẻ'},
   ];
 
+  const exploreSections = [
+    {id: 'explore-stats', label: 'Tổng quan'},
+    {id: 'explore-features', label: 'Chức năng'},
+    {id: 'explore-marketplace', label: 'Tin xe'},
+    {id: 'explore-stories', label: 'Chuyên đề'},
+    {id: 'explore-trust', label: 'Cộng đồng'},
+    {id: 'explore-action', label: 'Bắt đầu'},
+  ];
+
+  const scrollToExploreSection = (sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({behavior: 'smooth', block: 'start'});
+  };
+
   return (
     <div ref={pageRef} className="min-h-screen bg-background text-on-background">
       <TopNav />
@@ -194,10 +207,22 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-background" />
           <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-black/85 to-transparent" />
 
-          <div className="absolute left-6 top-1/2 z-10 hidden h-44 -translate-y-1/2 flex-col items-center justify-between lg:flex">
-            <span className="h-14 w-px bg-gradient-to-b from-primary to-white/15" />
-            <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_18px_rgba(255,255,255,0.45)]" />
-            <span className="h-24 w-px bg-gradient-to-b from-white/15 to-transparent" />
+          <div className="absolute left-6 top-1/2 z-10 hidden -translate-y-1/2 flex-col items-center lg:flex">
+            <span className="h-10 w-px bg-gradient-to-b from-transparent to-white/15" />
+            {exploreSections.map((section, index) => (
+              <button
+                key={section.id}
+                type="button"
+                onClick={() => scrollToExploreSection(section.id)}
+                className="group relative flex h-8 w-8 items-center justify-center"
+                aria-label={`Đi tới ${section.label}`}
+                title={section.label}
+              >
+                <span className={`absolute left-1/2 top-0 h-8 w-px -translate-x-1/2 ${index === exploreSections.length - 1 ? 'hidden' : 'bg-white/10'}`} />
+                <span className="relative z-10 h-2 w-2 rounded-full bg-white/45 transition-all duration-300 group-hover:h-3 group-hover:w-3 group-hover:bg-primary group-hover:shadow-[0_0_18px_rgba(255,255,255,0.45)]" />
+              </button>
+            ))}
+            <span className="h-10 w-px bg-gradient-to-b from-white/15 to-transparent" />
           </div>
 
           <div className="max-w-container-max mx-auto px-6 md:px-margin-desktop relative z-10 text-center">
@@ -265,7 +290,7 @@ export default function Home() {
         </section>
 
         {/* STATS SECTION */}
-        <section className="py-24 md:py-32 border-y border-white/5 bg-white/[0.02]">
+        <section id="explore-stats" className="scroll-mt-24 py-24 md:py-32 border-y border-white/5 bg-white/[0.02]">
            <div className="max-w-container-max mx-auto px-6 md:px-margin-desktop">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
                  {stats.map((stat, i) => (
@@ -286,7 +311,7 @@ export default function Home() {
         </section>
 
         {/* FEATURES OVERVIEW */}
-        <section className="py-32 md:py-44 px-6 md:px-margin-desktop max-w-container-max mx-auto">
+        <section id="explore-features" className="scroll-mt-24 py-32 md:py-44 px-6 md:px-margin-desktop max-w-container-max mx-auto">
            <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-16">
               <motion.div
                  initial={{opacity: 0, y: 28}}
@@ -334,7 +359,7 @@ export default function Home() {
         </section>
 
         {/* MARKETPLACE PREVIEW */}
-        <section className="py-32 md:py-44 bg-surface-container/30">
+        <section id="explore-marketplace" className="scroll-mt-24 py-32 md:py-44 bg-surface-container/30">
            <div className="max-w-container-max mx-auto px-6 md:px-margin-desktop">
               <div className="flex items-center justify-between mb-12">
                  <motion.div
@@ -378,7 +403,7 @@ export default function Home() {
         </section>
 
         {/* LATEST STORIES & BLOGS */}
-        <section className="py-32 md:py-44 px-6 md:px-margin-desktop max-w-container-max mx-auto">
+        <section id="explore-stories" className="scroll-mt-24 py-32 md:py-44 px-6 md:px-margin-desktop max-w-container-max mx-auto">
            <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-16">
               <motion.div
                  initial={{opacity: 0, y: 28}}
@@ -415,7 +440,7 @@ export default function Home() {
         </section>
 
         {/* WHY CHOOSE CARHUB */}
-        <section className="py-32 px-6 md:px-margin-desktop max-w-container-max mx-auto">
+        <section id="explore-trust" className="scroll-mt-24 py-32 px-6 md:px-margin-desktop max-w-container-max mx-auto">
            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
               <div className="relative">
                  <div className="aspect-square rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
@@ -468,7 +493,7 @@ export default function Home() {
         </section>
 
         {/* CTA SECTION */}
-        <section className="py-32 px-6 md:px-margin-desktop max-w-container-max mx-auto">
+        <section id="explore-action" className="scroll-mt-24 py-32 px-6 md:px-margin-desktop max-w-container-max mx-auto">
            <div className="p-16 md:p-24 rounded-[4rem] bg-primary relative overflow-hidden text-center group">
               <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
               <h2 className="relative z-10 font-display text-5xl md:text-7xl font-bold text-on-primary tracking-tighter mb-8 max-w-3xl mx-auto">
