@@ -164,6 +164,13 @@ export default function Home() {
       .catch(() => undefined);
   }, []);
 
+  useEffect(() => {
+    if (vehicles.length > 0 || articles.length > 0) {
+      const refreshId = window.setTimeout(() => ScrollTrigger.refresh(), 80);
+      return () => window.clearTimeout(refreshId);
+    }
+  }, [articles.length, vehicles.length]);
+
   const stats = [
     {label: 'Thành viên', value: overview?.stats.members ?? 0, suffix: 'Tài khoản'},
     {label: 'Bài cộng đồng', value: overview?.stats.publishedPosts ?? 0, suffix: 'Đã xuất bản'},
@@ -347,8 +354,12 @@ export default function Home() {
                  {vehicles.map((vehicle) => (
                    <motion.div
                      key={vehicle.id}
+                     initial={{opacity: 0, y: 24}}
+                     whileInView={{opacity: 1, y: 0}}
+                     viewport={{once: true, amount: 0.25}}
+                     transition={{duration: 0.5, ease: [0.22, 1, 0.36, 1]}}
                      whileHover={{ scale: 1.02 }}
-                     className="explore-reveal rounded-2xl overflow-hidden border border-white/5 bg-background group cursor-pointer opacity-0 translate-y-8"
+                     className="rounded-2xl overflow-hidden border border-white/5 bg-background group cursor-pointer"
                    >
                      <Link to={gatedPath(`/market/${vehicle.id}`)} className="block">
                        <div className="aspect-video overflow-hidden bg-white/[0.03]">
