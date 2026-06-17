@@ -126,10 +126,11 @@ export default function Login() {
         <div className="absolute inset-0 z-0">
           <img
             className="w-full h-full object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5kVwu5SHQh1PJ7LQNALeYFPKycpVdnwgjoVz_D1W2a4Y1YzJkFSvIV-fsKoORr_EwcgQrzeaIzMKThmwG9amhlv-uGXStiielaInrUbmcK_mTlPpCi_odlc-hW9_3I3fA92yBTyZe_OZnaLmgo8U36iaMVaZVom2Sy0EeVUsmSxr1Br_-5ghlmUQnA9HHp0PN-6hl1pM9FwbMw67sLMG_oDoClfyZTSHrcUeAPtU4x2zU8Mi0VOop-2L5g7ad-ZumbqnqUM7WgA"
+            src="/images/carhub/auth/login-hero.jpg"
             alt="Hình ảnh xe sang"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/35 to-black/20" />
+          <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l from-background/70 to-transparent" />
         </div>
 
         <motion.div

@@ -111,13 +111,24 @@ export default function Home() {
       
       <main>
         {/* HERO SECTION */}
-        <section className="relative flex min-h-[78vh] items-center overflow-hidden pb-20 pt-20">
+        <section className="relative flex min-h-[calc(100vh-76px)] items-center overflow-hidden bg-[#070707] pb-28 pt-20">
           <img
-            src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=2200"
+            src="/images/carhub/explore/explore-hero.jpg"
             alt="Cộng đồng ô tô CarHub"
-            className="absolute inset-0 h-full w-full object-cover opacity-35"
+            className="absolute inset-0 h-full w-full object-cover object-[62%_center] opacity-90"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/35 via-background/70 to-background" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_45%,transparent_0%,rgba(7,7,7,0.15)_28%,rgba(7,7,7,0.88)_76%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-background" />
+          <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-black/85 to-transparent" />
+
+          <div className="absolute left-6 top-1/2 z-10 hidden -translate-y-1/2 flex-col items-center gap-3 lg:flex">
+            {['01', '02', '03', '04'].map((step, index) => (
+              <div key={step} className="flex flex-col items-center gap-3">
+                <span className={`h-2 w-2 rounded-full ${index === 0 ? 'bg-primary' : 'bg-white/25'}`} />
+                {index < 3 && <span className="h-12 w-px bg-white/15" />}
+              </div>
+            ))}
+          </div>
 
           <div className="max-w-container-max mx-auto px-6 md:px-margin-desktop relative z-10 text-center">
              <motion.div
@@ -163,6 +174,23 @@ export default function Home() {
                  Tham gia cộng đồng
                </Link>
              </motion.div>
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 z-10 border-t border-white/10 bg-black/25 backdrop-blur-sm">
+            <div className="mx-auto grid max-w-container-max gap-3 px-6 py-5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/45 sm:grid-cols-3 md:px-margin-desktop lg:grid-cols-5">
+              {[
+                ['Bộ sưu tập', 'Garage'],
+                ['Kết nối', 'Community'],
+                ['Tin mua bán', 'Marketplace'],
+                ['Tương tác', `${overview?.stats.interactions ?? 0}`],
+                ['Thành viên', `${overview?.stats.members ?? 0}`],
+              ].map(([label, value]) => (
+                <div key={label} className="flex items-center justify-between gap-4 border-white/10 sm:border-r sm:pr-4 last:border-r-0">
+                  <span>{label}</span>
+                  <span className="text-white/80">{value}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -293,7 +321,7 @@ export default function Home() {
               <div className="relative">
                  <div className="aspect-square rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl">
                     <img 
-                      src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200" 
+                      src="/images/carhub/explore/explore-hero.jpg" 
                       className="w-full h-full object-cover opacity-80" 
                       alt="Enthusiasts"
                     />
