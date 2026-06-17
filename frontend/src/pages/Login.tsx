@@ -122,7 +122,7 @@ export default function Login() {
 
   return (
     <main className="min-h-screen w-full flex overflow-hidden bg-background">
-      <section className="hidden lg:flex lg:w-1/2 relative flex-col justify-end p-margin-desktop overflow-hidden">
+      <section className="hidden lg:flex lg:w-[58%] xl:w-[62%] relative flex-col justify-end p-margin-desktop overflow-visible">
         <div className="absolute inset-0 z-0">
           <img
             className="w-full h-full object-cover"
@@ -130,7 +130,7 @@ export default function Login() {
             alt="Hình ảnh xe sang"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/35 to-black/20" />
-          <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l from-background/70 to-transparent" />
+          <div className="absolute -right-32 inset-y-0 w-72 bg-gradient-to-l from-surface-container-lowest via-surface-container-lowest/70 to-transparent" />
         </div>
 
         <motion.div
@@ -151,7 +151,7 @@ export default function Login() {
         </motion.div>
       </section>
 
-      <section className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 md:p-16 lg:p-24 bg-surface-container-lowest">
+      <section className="relative z-10 w-full lg:w-[42%] xl:w-[38%] flex items-center justify-center p-6 sm:p-12 md:p-16 lg:p-20 bg-surface-container-lowest/95 backdrop-blur-sm">
         <div className="w-full max-w-md flex flex-col space-y-10">
           <div className="flex flex-col space-y-2">
             <Link

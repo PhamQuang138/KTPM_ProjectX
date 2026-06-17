@@ -23,21 +23,24 @@ const features = [
     title: 'Chợ xe cộng đồng',
     description: 'Tìm kiếm, lọc và xem chi tiết các tin xe đang được thành viên đăng bán trên hệ thống.',
     color: 'bg-blue-500/10 text-blue-400',
-    link: '/market'
+    link: '/market',
+    image: '/images/carhub/explore/feature-market.jpg'
   },
   {
     icon: Users,
     title: 'Cộng đồng người yêu xe',
     description: 'Đăng bài, chia sẻ nhiều hình ảnh, bình luận, thả tim và theo dõi những thành viên bạn quan tâm.',
     color: 'bg-purple-500/10 text-purple-400',
-    link: '/feed'
+    link: '/feed',
+    image: '/images/carhub/explore/feature-community.jpg'
   },
   {
     icon: Car,
     title: 'Gara cá nhân',
     description: 'Lưu thông tin xe của bạn, quản lý hình ảnh và tạo tin bán trực tiếp từ gara.',
     color: 'bg-orange-500/10 text-orange-400',
-    link: '/garage'
+    link: '/garage',
+    image: '/images/carhub/explore/feature-garage.jpg'
   }
 ];
 
@@ -218,12 +221,18 @@ export default function Home() {
         {/* FEATURES OVERVIEW */}
         <section className="py-32 px-6 md:px-margin-desktop max-w-container-max mx-auto">
            <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-16">
-              <div className="max-w-xl">
+              <motion.div
+                 initial={{opacity: 0, y: 28}}
+                 whileInView={{opacity: 1, y: 0}}
+                 viewport={{once: true, amount: 0.45}}
+                 transition={{duration: 0.65, ease: [0.22, 1, 0.36, 1]}}
+                 className="max-w-xl"
+              >
                  <h2 className="text-[10px] font-mono uppercase tracking-[0.3em] text-primary font-bold mb-4">Chức năng chính</h2>
                  <h3 className="font-display text-4xl md:text-5xl font-bold tracking-tighter leading-tight">
                     Mọi hoạt động về xe. <br /> Trong cùng một hệ thống.
                  </h3>
-              </div>
+              </motion.div>
               <p className="text-on-surface-variant max-w-sm opacity-70">
                  Các nội dung bên dưới được lấy từ tài khoản, bài viết và tin xe đang lưu trong cơ sở dữ liệu CarHub.
               </p>
@@ -234,14 +243,22 @@ export default function Home() {
                 <motion.div 
                   key={i}
                   whileHover={{ y: -8 }}
-                  className="p-10 rounded-[2.5rem] bg-white/[0.03] border border-white/5 hover:border-primary/20 transition-all group"
+                  initial={{opacity: 0, y: 28}}
+                  whileInView={{opacity: 1, y: 0}}
+                  viewport={{once: true, amount: 0.35}}
+                  transition={{duration: 0.55, delay: i * 0.08}}
+                  className="overflow-hidden rounded-[2rem] bg-white/[0.03] border border-white/5 hover:border-primary/20 transition-all group"
                 >
-                  <div className={`w-14 h-14 rounded-2xl ${f.color} flex items-center justify-center mb-8 border border-white/5`}>
-                     <f.icon className="w-7 h-7" />
+                  <div className="relative aspect-[4/3] overflow-hidden bg-black">
+                     <img src={f.image} alt={f.title} className="h-full w-full object-cover opacity-70 transition duration-700 group-hover:scale-105 group-hover:opacity-90" />
+                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+                     <div className={`absolute left-5 top-5 w-12 h-12 rounded-2xl ${f.color} flex items-center justify-center border border-white/10 backdrop-blur-md`}>
+                        <f.icon className="w-6 h-6" />
+                     </div>
                   </div>
-                  <h4 className="text-xl font-bold mb-4">{f.title}</h4>
-                  <p className="text-sm text-on-surface-variant leading-relaxed mb-8 opacity-80">{f.description}</p>
-                  <Link to={gatedPath(f.link)} className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-primary font-bold group-hover:gap-4 transition-all">
+                  <h4 className="px-7 pt-7 text-xl font-bold mb-4">{f.title}</h4>
+                  <p className="px-7 text-sm text-on-surface-variant leading-relaxed mb-8 opacity-80">{f.description}</p>
+                  <Link to={gatedPath(f.link)} className="mx-7 mb-7 flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-primary font-bold group-hover:gap-4 transition-all">
                      Mở chức năng <ChevronRight className="w-4 h-4" />
                   </Link>
                 </motion.div>
@@ -253,10 +270,15 @@ export default function Home() {
         <section className="py-32 bg-surface-container/30">
            <div className="max-w-container-max mx-auto px-6 md:px-margin-desktop">
               <div className="flex items-center justify-between mb-12">
-                 <div>
+                 <motion.div
+                    initial={{opacity: 0, y: 24}}
+                    whileInView={{opacity: 1, y: 0}}
+                    viewport={{once: true, amount: 0.5}}
+                    transition={{duration: 0.6, ease: [0.22, 1, 0.36, 1]}}
+                 >
                     <h3 className="font-display text-3xl font-bold tracking-tight">Tin xe được quan tâm</h3>
                     <p className="text-sm text-on-surface-variant mt-2">Sắp xếp từ dữ liệu lượt lưu và bình luận thực tế</p>
-                 </div>
+                 </motion.div>
                  <Link to={gatedPath('/market')} className="btn-secondary px-6">Xem toàn bộ tin xe</Link>
               </div>
 
@@ -286,12 +308,17 @@ export default function Home() {
         {/* LATEST STORIES & BLOGS */}
         <section className="py-32 px-6 md:px-margin-desktop max-w-container-max mx-auto">
            <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-16">
-              <div>
+              <motion.div
+                 initial={{opacity: 0, y: 28}}
+                 whileInView={{opacity: 1, y: 0}}
+                 viewport={{once: true, amount: 0.45}}
+                 transition={{duration: 0.65, ease: [0.22, 1, 0.36, 1]}}
+              >
                  <h2 className="text-[10px] font-mono uppercase tracking-[0.3em] text-primary font-bold mb-4">Chuyên đề CarHub</h2>
                  <h3 className="font-display text-4xl md:text-5xl font-bold tracking-tighter leading-tight">
                     Kiến thức ô tô thực tế. <br /> Được biên tập đầy đủ.
                  </h3>
-              </div>
+              </motion.div>
               <p className="max-w-sm text-sm leading-relaxed text-on-surface-variant">
                 Chọn một bài viết bên dưới để đọc toàn bộ nội dung, kinh nghiệm và hướng dẫn chi tiết.
               </p>
@@ -321,7 +348,7 @@ export default function Home() {
               <div className="relative">
                  <div className="aspect-square rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl">
                     <img 
-                      src="/images/carhub/explore/explore-hero.jpg" 
+                      src="/images/carhub/explore/feature-garage.jpg" 
                       className="w-full h-full object-cover opacity-80" 
                       alt="Enthusiasts"
                     />
@@ -332,14 +359,20 @@ export default function Home() {
               </div>
 
               <div className="space-y-12">
-                 <div className="space-y-6">
+                 <motion.div
+                    initial={{opacity: 0, y: 28}}
+                    whileInView={{opacity: 1, y: 0}}
+                    viewport={{once: true, amount: 0.45}}
+                    transition={{duration: 0.65, ease: [0.22, 1, 0.36, 1]}}
+                    className="space-y-6"
+                 >
                     <h3 className="font-display text-4xl md:text-5xl font-bold tracking-tighter leading-tight">
                       {overview?.stats.members ?? 0} thành viên đang xây dựng cộng đồng CarHub.
                     </h3>
                     <p className="text-on-surface-variant text-lg leading-relaxed opacity-80">
                       Dữ liệu tài khoản, bài cộng đồng, gara, tin bán xe và hội thoại đều được lưu trong hệ thống để người dùng tiếp tục công việc trên mọi thiết bị.
                     </p>
-                 </div>
+                 </motion.div>
 
                  <div className="space-y-8">
                     {[
