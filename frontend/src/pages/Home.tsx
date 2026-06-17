@@ -91,6 +91,7 @@ export default function Home() {
   const [overview, setOverview] = useState<HomeOverview | null>(null);
   const [vehicles, setVehicles] = useState<HomeVehicle[]>([]);
   const [articles, setArticles] = useState<HomeArticle[]>([]);
+  const [activeExploreSection, setActiveExploreSection] = useState('explore-stats');
 
   useLayoutEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -191,6 +192,34 @@ export default function Home() {
     document.getElementById(sectionId)?.scrollIntoView({behavior: 'smooth', block: 'start'});
   };
 
+  useEffect(() => {
+    const sectionElements = exploreSections
+      .map((section) => document.getElementById(section.id))
+      .filter((section): section is HTMLElement => Boolean(section));
+
+    if (sectionElements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const centeredEntry = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+        if (centeredEntry?.target.id) {
+          setActiveExploreSection(centeredEntry.target.id);
+        }
+      },
+      {
+        root: null,
+        rootMargin: '-42% 0px -42% 0px',
+        threshold: [0, 0.2, 0.5, 0.8],
+      },
+    );
+
+    sectionElements.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div ref={pageRef} className="min-h-screen bg-background text-on-background">
       <TopNav />
@@ -207,7 +236,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-background" />
           <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-black/85 to-transparent" />
 
-          <div className="absolute left-6 top-1/2 z-10 hidden -translate-y-1/2 flex-col items-center lg:flex">
+          <div className="fixed left-6 top-1/2 z-[65] hidden -translate-y-1/2 flex-col items-center lg:flex">
             <span className="h-10 w-px bg-gradient-to-b from-transparent to-white/15" />
             {exploreSections.map((section, index) => (
               <button
@@ -219,7 +248,13 @@ export default function Home() {
                 title={section.label}
               >
                 <span className={`absolute left-1/2 top-0 h-8 w-px -translate-x-1/2 ${index === exploreSections.length - 1 ? 'hidden' : 'bg-white/10'}`} />
-                <span className="relative z-10 h-2 w-2 rounded-full bg-white/45 transition-all duration-300 group-hover:h-3 group-hover:w-3 group-hover:bg-primary group-hover:shadow-[0_0_18px_rgba(255,255,255,0.45)]" />
+                <span
+                  className={`relative z-10 rounded-full transition-all duration-300 group-hover:h-3 group-hover:w-3 group-hover:bg-primary group-hover:shadow-[0_0_18px_rgba(255,255,255,0.45)] ${
+                    activeExploreSection === section.id
+                      ? 'h-3 w-3 bg-primary shadow-[0_0_20px_rgba(255,255,255,0.55)]'
+                      : 'h-2 w-2 bg-white/45'
+                  }`}
+                />
               </button>
             ))}
             <span className="h-10 w-px bg-gradient-to-b from-white/15 to-transparent" />
